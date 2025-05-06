@@ -1,0 +1,63 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 17% 9%;
+    --background-light: 240 16% 15%;
+    --card: 240 15% 14%;
+    --card-hover: 240 15% 16%;
+    --border: 240 10% 20%;
+    --border-light: 240 10% 27%;
+    --text-primary: 220 13% 95%;
+    --text-secondary: 220 9% 65%;
+    --text-muted: 220 9% 45%;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .sidebar-icon {
+    @apply w-10 h-10 flex items-center justify-center text-xl text-text-secondary hover:text-text-primary transition-colors;
+  }
+
+  .main-heading {
+    @apply text-2xl font-bold text-text-primary;
+  }
+
+  .sub-heading {
+    @apply text-xl font-semibold text-text-primary;
+  }
+
+  .card {
+    @apply bg-card rounded-lg border border-border shadow-card;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-hover;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-white hover:bg-secondary-hover;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent hover:bg-card-hover text-text-primary;
+  }
+
+  .input {
+    @apply px-4 py-2 bg-card-hover border border-border rounded-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+} 
