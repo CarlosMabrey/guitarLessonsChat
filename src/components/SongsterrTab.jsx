@@ -1,9 +1,12 @@
 import { useState, useEffect } from 'react';
-import { FiExternalLink, FiMusic, FiInfo } from 'react-icons/fi';
+import { FiExternalLink, FiMusic, FiInfo, FiChevronDown, FiChevronUp } from 'react-icons/fi';
+import { getAlternativeTabSources } from '@/lib/multiSongApi';
 
 const SongsterrTab = ({ song }) => {
   const [tabUrl, setTabUrl] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [tabSources, setTabSources] = useState([]);
+  const [showAllSources, setShowAllSources] = useState(false);
   
   useEffect(() => {
     if (song?.songsterrId) {
@@ -15,7 +18,38 @@ const SongsterrTab = ({ song }) => {
       const safeTitle = song.title.trim().toLowerCase().replace(/\s+/g, '-').replace(/[^\w-]/g, '');
       
       // Create the Songsterr URL - use direct tab link to avoid iframe issues
-      setTabUrl(`https://www.songsterr.com/a/wsa/${safeArtist}-${safeTitle}-tab-s${song.songsterrId}`);
+      const songsterrUrl = `https://www.songsterr.com/a/wsa/${safeArtist}-${safeTitle}-tab-s${song.songsterrId}`;
+      setTabUrl(songsterrUrl);
+      
+      // Get alternative tab sources
+      const loadTabSources = async () => {
+        try {
+          const sources = await getAlternativeTabSources(
+            typeof song.artist === 'string' ? song.artist : song.artist?.name,
+            song.title
+          );
+          
+          // Update Songsterr URL in the sources
+          const updatedSources = sources.map(source => 
+            source.name === 'Songsterr' 
+              ? { ...source, url: songsterrUrl } 
+              : source
+          );
+          
+          setTabSources(updatedSources);
+        } catch (error) {
+          console.error('Error loading tab sources:', error);
+          // Default to just Songsterr
+          setTabSources([{
+            name: 'Songsterr',
+            type: 'guitar-tab',
+            url: songsterrUrl,
+            preferred: true
+          }]);
+        }
+      };
+      
+      loadTabSources();
       setIsLoading(false);
     }
   }, [song]);
@@ -37,6 +71,86 @@ const SongsterrTab = ({ song }) => {
       </div>
     );
   }
+  
+  // Render tab sources
+  const renderTabSources = () => {
+    if (!tabSources || tabSources.length === 0) {
+      return (
+        <a 
+          href={tabUrl}
+          target="_blank"
+          rel="noopener noreferrer" 
+          className="btn btn-primary flex items-center justify-center"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <span>View Tab</span>
+          <FiExternalLink className="ml-2" />
+        </a>
+      );
+    }
+    
+    // Display preferred source or first source when not showing all
+    if (!showAllSources) {
+      const preferredSource = tabSources.find(s => s.preferred) || tabSources[0];
+      
+      return (
+        <div className="space-y-3">
+          <a 
+            href={preferredSource.url}
+            target="_blank"
+            rel="noopener noreferrer" 
+            className="btn btn-primary flex items-center justify-center w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <span>View {preferredSource.name} Tab</span>
+            <FiExternalLink className="ml-2" />
+          </a>
+          
+          {tabSources.length > 1 && (
+            <button 
+              onClick={() => setShowAllSources(true)}
+              className="text-sm flex items-center justify-center w-full text-text-secondary hover:text-text-primary"
+            >
+              <span>Show {tabSources.length - 1} other tab sources</span>
+              <FiChevronDown className="ml-1" />
+            </button>
+          )}
+        </div>
+      );
+    }
+    
+    // Display all sources
+    return (
+      <div className="space-y-3">
+        <div className="space-y-2">
+          {tabSources.map((source, index) => (
+            <a 
+              key={index}
+              href={source.url}
+              target="_blank"
+              rel="noopener noreferrer" 
+              className={`flex items-center justify-between p-2 rounded hover:bg-card-hover border ${source.preferred ? 'border-primary/30 bg-primary/5' : 'border-border'}`}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <div>
+                <div className="font-medium">{source.name}</div>
+                <div className="text-xs text-text-secondary">{source.type}</div>
+              </div>
+              <FiExternalLink className="text-text-secondary" />
+            </a>
+          ))}
+        </div>
+        
+        <button 
+          onClick={() => setShowAllSources(false)}
+          className="text-sm flex items-center justify-center w-full text-text-secondary hover:text-text-primary"
+        >
+          <span>Show fewer sources</span>
+          <FiChevronUp className="ml-1" />
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="w-full my-4">
@@ -49,7 +163,7 @@ const SongsterrTab = ({ song }) => {
           <div className="bg-card-hover rounded-lg p-4">
             <div className="flex items-center text-sm text-text-secondary mb-2">
               <FiInfo className="mr-2" />
-              <span>Due to website restrictions, tabs must be viewed on Songsterr's website</span>
+              <span>Tabs are provided by external services</span>
             </div>
             
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
@@ -60,16 +174,9 @@ const SongsterrTab = ({ song }) => {
                 </p>
               </div>
               
-              <a 
-                href={tabUrl}
-                target="_blank"
-                rel="noopener noreferrer" 
-                className="btn btn-primary flex items-center justify-center"
-                onClick={(e) => e.stopPropagation()}
-              >
-                <span>View Tab</span>
-                <FiExternalLink className="ml-2" />
-              </a>
+              <div className="w-full sm:w-auto">
+                {renderTabSources()}
+              </div>
             </div>
           </div>
           

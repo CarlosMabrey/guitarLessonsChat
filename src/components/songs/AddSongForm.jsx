@@ -1,11 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FiSearch, FiLoader, FiMusic, FiCheck, FiX, FiExternalLink } from 'react-icons/fi';
+import { FiSearch, FiLoader, FiMusic, FiCheck, FiX, FiExternalLink, FiAlertCircle } from 'react-icons/fi';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { addSong, saveSongAnalysis } from '@/lib/db';
 import { analyzeSong } from '@/lib/ai/songAnalysisService';
-import { getCompleteSongData, searchSongsterr } from '@/lib/songsterrApi';
+import { searchSongsterr } from '@/lib/songsterrApi';
+import { getEnhancedSongData } from '@/lib/multiSongApi';
 
 export default function AddSongForm({ onSongAdded, onCancel }) {
   const [songInput, setSongInput] = useState('');
@@ -15,6 +16,7 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
   const [songData, setSongData] = useState(null);
   const [searchResults, setSearchResults] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('Learning'); // Learning, Comfortable, Not Started
+  const [dataConfidence, setDataConfidence] = useState(null);
   
   // Form fields for manual editing if needed
   const [formData, setFormData] = useState({
@@ -41,6 +43,11 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
         difficulty: songData.difficulty || 3,
         songsterrId: songData.songsterrId || ''
       });
+      
+      // Set confidence if available
+      if (songData.confidence) {
+        setDataConfidence(songData.confidence);
+      }
     }
   }, [songData]);
 
@@ -85,8 +92,8 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
     try {
       setStatus('analyzing');
       
-      // Get complete song data
-      const data = await getCompleteSongData(selectedSong.id);
+      // Get enhanced song data using multiple APIs for accuracy
+      const data = await getEnhancedSongData(selectedSong.id);
       
       if (!data) {
         throw new Error('Failed to get song details');
@@ -139,7 +146,8 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
       videoUrl: analysis?.recommendedVideos?.tabPlayback || analysis?.recommendedVideos?.tutorial,
       duration: 180, // Default 3 minutes
       progress: 0,
-      songsterrId: formData.songsterrId || songData?.songsterrId
+      songsterrId: formData.songsterrId || songData?.songsterrId,
+      chords: songData?.chords || analysis?.chords?.map(c => c.name) || []
     };
     
     // Save the song and analysis data to database
@@ -163,8 +171,8 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
       setStatus('analyzing');
       setError(null);
       
-      // Get song data from Songsterr
-      const data = await getCompleteSongData(songInput);
+      // Get enhanced song data from multiple sources
+      const data = await getEnhancedSongData(songInput);
       
       if (!data) {
         throw new Error('Song not found. Try a more specific search.');
@@ -197,6 +205,7 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
     setAnalysis(null);
     setSongData(null);
     setSearchResults([]);
+    setDataConfidence(null);
     setFormData({
       title: '',
       artist: '',
@@ -229,6 +238,34 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
               </div>
             </button>
           ))}
+        </div>
+      </div>
+    );
+  };
+  
+  // Render confidence indicator
+  const renderConfidenceIndicator = () => {
+    if (dataConfidence === null) return null;
+    
+    let confidenceClass = 'bg-success';
+    let confidenceText = 'High';
+    
+    if (dataConfidence < 70) {
+      confidenceClass = 'bg-warning';
+      confidenceText = 'Medium';
+    }
+    
+    if (dataConfidence < 50) {
+      confidenceClass = 'bg-danger';
+      confidenceText = 'Low';
+    }
+    
+    return (
+      <div className="flex items-center mb-4">
+        <div className="text-sm mr-2">Data confidence:</div>
+        <div className="flex items-center">
+          <div className={`w-16 h-2 rounded-full ${confidenceClass} mr-2`}></div>
+          <div className="text-sm">{confidenceText} ({dataConfidence}%)</div>
         </div>
       </div>
     );
@@ -411,8 +448,9 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
                 </div>
                 
                 {error && (
-                  <div className="p-3 rounded-md bg-danger/10 text-danger text-sm">
-                    {error}
+                  <div className="p-3 rounded-md bg-danger/10 text-danger text-sm flex items-center">
+                    <FiAlertCircle className="mr-2 flex-shrink-0" />
+                    <span>{error}</span>
                   </div>
                 )}
                 
@@ -481,40 +519,57 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
                 </button>
               </div>
               
+              {renderConfidenceIndicator()}
+              
               {renderFormFields()}
               
-              {analysis && (
-                <>
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Key Chords</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                      {analysis.chords.slice(0, 4).map((chord, index) => (
-                        <div key={index} className="p-2 border border-border rounded-md">
-                          <div className="font-medium text-center mb-1">{chord.name}</div>
-                          <div className="text-xs font-mono text-center">
-                            {chord.positions.map(pos => pos[1]).join(' ')}
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                  
-                  <div>
-                    <h3 className="text-sm font-medium mb-2">Video Resources</h3>
-                    {Object.entries(analysis.recommendedVideos).map(([type, url]) => (
-                      <a
-                        key={type}
-                        href={url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center py-1 text-sm text-primary"
-                      >
-                        {type.charAt(0).toUpperCase() + type.slice(1)} Video
-                        <FiExternalLink className="ml-1" size={14} />
-                      </a>
+              {/* Show chords from songData if available */}
+              {songData && songData.chords && songData.chords.length > 0 && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Key Chords</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {songData.chords.slice(0, 4).map((chord, index) => (
+                      <div key={index} className="p-2 border border-border rounded-md text-center">
+                        <div className="font-medium">{chord}</div>
+                      </div>
                     ))}
                   </div>
-                </>
+                </div>
+              )}
+              
+              {/* Show chords from analysis if no songData chords */}
+              {(!songData?.chords || songData.chords.length === 0) && analysis && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Key Chords</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                    {analysis.chords.slice(0, 4).map((chord, index) => (
+                      <div key={index} className="p-2 border border-border rounded-md">
+                        <div className="font-medium text-center mb-1">{chord.name}</div>
+                        <div className="text-xs font-mono text-center">
+                          {chord.positions.map(pos => pos[1]).join(' ')}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              
+              {analysis && analysis.recommendedVideos && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Video Resources</h3>
+                  {Object.entries(analysis.recommendedVideos).map(([type, url]) => (
+                    <a
+                      key={type}
+                      href={url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center py-1 text-sm text-primary"
+                    >
+                      {type.charAt(0).toUpperCase() + type.slice(1)} Video
+                      <FiExternalLink className="ml-1" size={14} />
+                    </a>
+                  ))}
+                </div>
               )}
               
               <div className="flex space-x-3">

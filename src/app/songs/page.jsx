@@ -3,13 +3,16 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAllSongs, addSong } from '@/lib/db';
-import { FiPlus, FiSearch, FiMusic, FiX } from 'react-icons/fi';
+import { FiPlus, FiSearch, FiMusic, FiX, FiZap } from 'react-icons/fi';
 import Link from 'next/link';
 import Layout from '@/components/ui/Layout';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import SongItem from '@/components/ui/SongItem';
 import Modal from '@/components/ui/Modal';
 import AddSongForm from '@/components/songs/AddSongForm';
+import QuickAddSong from '@/components/songs/QuickAddSong';
+import SongDetail from '@/components/songs/SongDetail';
+import ChordDiagram from '@/components/diagrams/ChordDiagram';
 
 export default function SongsPage() {
   const [songs, setSongs] = useState([]);
@@ -20,6 +23,8 @@ export default function SongsPage() {
   const [sortBy, setSortBy] = useState('dateAdded');
   const [sortDirection, setSortDirection] = useState('desc');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [addMode, setAddMode] = useState('quick'); // 'quick' or 'advanced'
+  const [selectedSong, setSelectedSong] = useState(null);
   
   const router = useRouter();
 
@@ -77,7 +82,8 @@ export default function SongsPage() {
     setPlayingSongId(null);
   };
   
-  const handleAddSongClick = () => {
+  const handleAddSongClick = (mode = 'quick') => {
+    setAddMode(mode);
     setShowAddModal(true);
   };
   
@@ -88,6 +94,32 @@ export default function SongsPage() {
   
   const toggleSortDirection = () => {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+  };
+  
+  // New function to display chord information
+  const renderChords = (song) => {
+    if (!song || !song.chords || song.chords.length === 0) {
+      return (
+        <div className="text-text-secondary text-sm">No chord information available</div>
+      );
+    }
+    
+    return (
+      <div className="mt-2">
+        <div className="text-sm font-medium mb-2">Chords in this song:</div>
+        <div className="flex flex-wrap gap-2">
+          {song.chords.map((chord, index) => (
+            <div key={index} className="flex flex-col items-center">
+              <ChordDiagram 
+                chord={chord} 
+                size="sm" 
+                className="cursor-pointer hover:opacity-80 transition-opacity"
+              />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
   };
   
   if (isLoading) {
@@ -147,13 +179,25 @@ export default function SongsPage() {
             </button>
           </div>
           
-          <button 
-            onClick={handleAddSongClick}
-            className="btn btn-primary flex items-center"
-          >
-            <FiPlus className="mr-2" />
-            Add Song
-          </button>
+          <div className="flex space-x-2">
+            <button 
+              onClick={() => handleAddSongClick('quick')}
+              className="btn btn-primary flex items-center"
+              title="Quick add with one click"
+            >
+              <FiZap className="mr-2" />
+              Quick Add
+            </button>
+            
+            <button
+              onClick={() => handleAddSongClick('advanced')}
+              className="btn btn-secondary flex items-center"
+              title="Advanced song addition with manual control"
+            >
+              <FiPlus className="mr-2" />
+              Advanced
+            </button>
+          </div>
         </div>
       </div>
       
@@ -163,17 +207,26 @@ export default function SongsPage() {
         </CardHeader>
         <CardContent>
           {filteredSongs.length > 0 ? (
-            <div className="space-y-2">
+            <div className="space-y-4">
               {filteredSongs.map((song) => (
-                <SongItem 
-                  key={song.id} 
-                  song={song}
-                  isPlaying={playingSongId === song.id}
-                  onPlay={handlePlaySong}
-                  onPause={handlePauseSong}
-                  showArtist
-                  showOptions
-                />
+                <div key={song.id} className="border border-border rounded-lg p-3 hover:bg-card-hover">
+                  <SongItem 
+                    song={song}
+                    isPlaying={playingSongId === song.id}
+                    onPlay={handlePlaySong}
+                    onPause={handlePauseSong}
+                    onClick={() => setSelectedSong(selectedSong?.id === song.id ? null : song)}
+                    showArtist
+                    showOptions
+                    className="mb-2"
+                  />
+                  
+                  {selectedSong?.id === song.id && (
+                    <div className="mt-3 pt-3 border-t border-border">
+                      {renderChords(song)}
+                    </div>
+                  )}
+                </div>
               ))}
             </div>
           ) : (
@@ -185,12 +238,22 @@ export default function SongsPage() {
                   <p className="text-text-secondary mb-6">
                     Start adding songs to build your practice routine
                   </p>
-                  <button 
-                    onClick={handleAddSongClick}
-                    className="btn btn-primary"
-                  >
-                    Add Your First Song
-                  </button>
+                  <div className="flex justify-center gap-3">
+                    <button 
+                      onClick={() => handleAddSongClick('quick')}
+                      className="btn btn-primary flex items-center"
+                    >
+                      <FiZap className="mr-2" />
+                      Quick Add Song
+                    </button>
+                    <button 
+                      onClick={() => handleAddSongClick('advanced')}
+                      className="btn btn-secondary flex items-center"
+                    >
+                      <FiPlus className="mr-2" />
+                      Advanced Add
+                    </button>
+                  </div>
                 </>
               ) : (
                 <>
@@ -205,15 +268,23 @@ export default function SongsPage() {
         </CardContent>
       </Card>
       
+      {/* Add Song Modal */}
       <Modal 
         isOpen={showAddModal}
         onClose={() => setShowAddModal(false)}
         size="lg"
       >
-        <AddSongForm
-          onSongAdded={handleSongAdded}
-          onCancel={() => setShowAddModal(false)}
-        />
+        {addMode === 'quick' ? (
+          <QuickAddSong 
+            onSongAdded={handleSongAdded}
+            onSwitchMode={() => setAddMode('advanced')}
+          />
+        ) : (
+          <AddSongForm 
+            onSongAdded={handleSongAdded} 
+            onSwitchMode={() => setAddMode('quick')}
+          />
+        )}
       </Modal>
     </Layout>
   );
