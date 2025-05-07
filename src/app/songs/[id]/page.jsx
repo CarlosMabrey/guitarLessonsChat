@@ -24,7 +24,10 @@ import {
   FiHeart,
   FiBookmark,
   FiShare2,
-  FiAlertCircle
+  FiAlertCircle,
+  FiAlertTriangle,
+  FiVideo,
+  FiActivity
 } from 'react-icons/fi';
 import { getSongLearningResources } from '@/lib/musicDiscoveryApi';
 
@@ -68,8 +71,8 @@ const SpotifyPlayer = ({ artist, title, spotifyId }) => {
     );
   }
 
-  // Use the passed spotifyId or a default one if not available
-  const embedId = spotifyId || '4cOdK2wGLETKBW3PvgPWqT';
+  // Use the passed spotifyId or a default one if not available (Sweet Child O' Mine)
+  const embedId = spotifyId || '7o2CTH4ctstm8TNelqjb51';
   
   return (
     <div className="bg-card rounded-lg overflow-hidden">
@@ -173,6 +176,79 @@ const VideoPlayer = ({ videoId, title, onError }) => {
   );
 };
 
+// Tab viewer component
+const TabViewer = ({ songId, artist, title }) => {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  // For Guns N' Roses - Sweet Child O' Mine
+  const songsterrId = songId || '867';
+
+  useEffect(() => {
+    // Simulate loading
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 1500);
+    return () => clearTimeout(timer);
+  }, [songId]);
+
+  if (loading) {
+    return (
+      <div className="bg-card rounded-lg p-8 flex flex-col items-center justify-center h-64">
+        <FiLoader className="animate-spin text-primary mb-4" size={32} />
+        <span className="text-text-secondary">Loading guitar tab...</span>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-card rounded-lg p-6 text-center">
+        <div className="text-warning mb-3"><FiAlertTriangle size={32} /></div>
+        <p className="text-text-secondary mb-2">{error || "Couldn't load the tab for this song."}</p>
+        <a 
+          href={`https://www.songsterr.com/a/wa/search?pattern=${encodeURIComponent(`${artist} ${title}`)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-primary flex items-center justify-center mt-3 hover:underline"
+        >
+          <span>Search on Songsterr</span>
+          <FiExternalLink className="ml-1" size={14} />
+        </a>
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-card rounded-lg overflow-hidden">
+      <div className="p-3 border-b border-border flex justify-between items-center">
+        <h3 className="text-lg font-medium flex items-center">
+          <FiMusic className="mr-2 text-primary" /> Guitar Tab
+        </h3>
+        <a 
+          href={`https://www.songsterr.com/a/wsa/${artist && title ? `${encodeURIComponent(artist.toLowerCase().replace(/\s+/g, '-'))}-${encodeURIComponent(title.toLowerCase().replace(/\s+/g, '-'))}-tab-s${songsterrId}` : 'guns-n-roses-sweet-child-o-mine-tab-s867'}`}
+          target="_blank"
+          rel="noopener noreferrer" 
+          className="text-primary text-sm flex items-center hover:underline"
+        >
+          <span>Open in browser</span>
+          <FiExternalLink className="ml-1" size={14} />
+        </a>
+      </div>
+      <div className="w-full h-96 relative">
+        <iframe 
+          src={`https://www.songsterr.com/a/wsa/embed/id=${songsterrId || '867'}`} 
+          width="100%" 
+          height="100%" 
+          frameBorder="0" 
+          allowFullScreen
+          sandbox="allow-same-origin allow-scripts allow-forms allow-presentation"
+        ></iframe>
+      </div>
+    </div>
+  );
+};
+
 export default function SongPage() {
   const params = useParams();
   const router = useRouter();
@@ -196,41 +272,47 @@ export default function SongPage() {
             return;
           }
           
+          // Add Spotify and Songsterr IDs if they don't exist
+          if (songData.title.includes("Sweet Child") && songData.artist.includes("Guns N")) {
+            songData.spotifyId = '7o2CTH4ctstm8TNelqjb51'; // Sweet Child O' Mine
+            songData.songsterrId = '867'; // Songsterr ID for Sweet Child O' Mine
+          }
+          
           setSong(songData);
           
-          // Simulate video resources
+          // Realistic video resources for Guns N' Roses - Sweet Child O' Mine
           const demoVideos = [
             {
               id: 'video1',
-              title: 'Guns N\' Roses - Guitar Tab Playthrough',
+              title: 'Sweet Child O\' Mine - Guitar Tab Playthrough',
               type: 'tab',
-              url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-              thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+              url: 'https://www.youtube.com/watch?v=1w7OgIMMRc4',
+              thumbnail: 'https://img.youtube.com/vi/1w7OgIMMRc4/mqdefault.jpg',
               source: 'YouTube'
             },
             {
               id: 'video2',
-              title: 'Guns N\' Roses - Scrolling Tab Tutorial',
-              type: 'tab',
-              url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-              thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+              title: 'Sweet Child O\' Mine - Official Guitar Lesson',
+              type: 'tutorial',
+              url: 'https://www.youtube.com/watch?v=X6BOs1Ejpvw',
+              thumbnail: 'https://img.youtube.com/vi/X6BOs1Ejpvw/mqdefault.jpg',
               source: 'YouTube'
             },
             {
               id: 'video3',
-              title: 'How to play Guns N\' Roses by Sweet Child O\' Mine - Beginner Tutorial',
+              title: 'How to play Sweet Child O\' Mine - Beginner Tutorial',
               type: 'tutorial',
-              url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-              thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+              url: 'https://www.youtube.com/watch?v=l_T45BKcvoU',
+              thumbnail: 'https://img.youtube.com/vi/l_T45BKcvoU/mqdefault.jpg',
               source: 'YouTube',
               level: 'Beginner'
             },
             {
               id: 'video4',
-              title: 'Guns N\' Roses by Sweet Child O\' Mine - Advanced Breakdown',
+              title: 'Sweet Child O\' Mine Guitar Solo Tutorial',
               type: 'tutorial',
-              url: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
-              thumbnail: 'https://img.youtube.com/vi/dQw4w9WgXcQ/mqdefault.jpg',
+              url: 'https://www.youtube.com/watch?v=OLzQX8OIKDc',
+              thumbnail: 'https://img.youtube.com/vi/OLzQX8OIKDc/mqdefault.jpg',
               source: 'YouTube',
               level: 'Advanced'
             }
@@ -437,7 +519,7 @@ export default function SongPage() {
         </div>
         <div className="rounded-lg overflow-hidden">
           <iframe
-            src="https://open.spotify.com/embed/track/4cOdK2wGLETKBW3PvgPWqT?utm_source=generator&theme=0"
+            src="https://open.spotify.com/embed/track/7o2CTH4ctstm8TNelqjb51?utm_source=generator&theme=0"
             width="100%"
             height="152"
             frameBorder="0"
@@ -616,6 +698,189 @@ export default function SongPage() {
     );
   };
 
+  // Render the tab viewer section
+  const renderTabViewer = () => {
+    return (
+      <div className="mb-6">
+        <TabViewer 
+          songId={song?.songsterrId} 
+          artist={song?.artist} 
+          title={song?.title}
+        />
+      </div>
+    );
+  };
+
+  // Render song details card
+  const renderSongDetailsCard = () => {
+    return (
+      <div className="bg-card rounded-lg overflow-hidden">
+        <div className="p-3 border-b border-border">
+          <h3 className="text-lg font-medium flex items-center">
+            <FiInfo className="mr-2 text-primary" /> Song Details
+          </h3>
+        </div>
+        <div className="p-4">
+          <div className="mb-3">
+            <h4 className="text-sm text-text-secondary">Artist</h4>
+            <p className="font-medium">{song?.artist}</p>
+          </div>
+          <div className="mb-3">
+            <h4 className="text-sm text-text-secondary">Album</h4>
+            <p className="font-medium">{song?.album || 'Appetite for Destruction'}</p>
+          </div>
+          <div className="mb-3">
+            <h4 className="text-sm text-text-secondary">Year</h4>
+            <p className="font-medium">{song?.year || '1987'}</p>
+          </div>
+          <div className="mb-3">
+            <h4 className="text-sm text-text-secondary">Genre</h4>
+            <p className="font-medium">{song?.genre || 'Rock'}</p>
+          </div>
+          <div className="mb-3">
+            <h4 className="text-sm text-text-secondary">Key</h4>
+            <p className="font-medium">{song?.key || 'D Major'}</p>
+          </div>
+          <div>
+            <h4 className="text-sm text-text-secondary">Difficulty</h4>
+            <div className="flex items-center mt-1">
+              <div className="bg-primary/20 px-2.5 py-0.5 rounded-full text-xs font-medium text-primary">
+                {song?.difficulty || 'Intermediate'}
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Render action buttons
+  const renderActionButtons = () => {
+    return (
+      <div className="bg-card rounded-lg overflow-hidden">
+        <div className="p-3 border-b border-border">
+          <h3 className="text-lg font-medium flex items-center">
+            <FiActivity className="mr-2 text-primary" /> Actions
+          </h3>
+        </div>
+        <div className="p-4 grid grid-cols-1 gap-3">
+          <button 
+            className="w-full flex items-center justify-center space-x-2 bg-primary hover:bg-primary/90 text-white py-2 px-4 rounded-md transition-colors"
+            onClick={() => console.log('Start practice')}
+          >
+            <FiPlay size={16} />
+            <span>Start Practice</span>
+          </button>
+          <button 
+            className="w-full flex items-center justify-center space-x-2 bg-card-hover hover:bg-card-hover/90 border border-border py-2 px-4 rounded-md transition-colors"
+            onClick={() => console.log('Save to favorites')}
+          >
+            <FiBookmark size={16} />
+            <span>Save to Favorites</span>
+          </button>
+          <button 
+            className="w-full flex items-center justify-center space-x-2 bg-card-hover hover:bg-card-hover/90 border border-border py-2 px-4 rounded-md transition-colors"
+            onClick={() => console.log('Share song')}
+          >
+            <FiShare2 size={16} />
+            <span>Share</span>
+          </button>
+        </div>
+      </div>
+    );
+  };
+
+  // Render song information in the video player section
+  const renderSongInfo = () => {
+    return (
+      <div className="mt-4 border-t border-border pt-4">
+        <h4 className="font-medium mb-2">About this Song</h4>
+        <p className="text-sm text-text-secondary mb-3">
+          {song?.description || 
+            `"Sweet Child O' Mine" is one of Guns N' Roses' most iconic songs, featuring Slash's memorable guitar riff and solo. 
+            The song's distinctive intro and soaring guitar work make it a favorite for guitarists looking to develop their skills 
+            with classic rock techniques.`
+          }
+        </p>
+        <div className="flex flex-wrap gap-2 mt-2">
+          <span className="bg-background px-2.5 py-1 rounded-md text-xs font-medium">Classic Rock</span>
+          <span className="bg-background px-2.5 py-1 rounded-md text-xs font-medium">Guitar Solo</span>
+          <span className="bg-background px-2.5 py-1 rounded-md text-xs font-medium">Riff-based</span>
+        </div>
+      </div>
+    );
+  };
+
+  // Render video player
+  const renderVideoPlayer = () => {
+    const videoId = selectedVideo ? getVideoIdFromUrl(selectedVideo.url) : null;
+    
+    return (
+      <div className="aspect-video relative overflow-hidden rounded-lg bg-black">
+        {!videoId ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center bg-card-hover">
+            <FiYoutube size={40} className="mb-3 text-text-secondary" />
+            <p className="text-text-secondary mb-2">Select a video tutorial</p>
+            <p className="text-sm text-text-secondary">Choose from the options below</p>
+          </div>
+        ) : (
+          <iframe
+            className="absolute inset-0 w-full h-full"
+            src={`https://www.youtube.com/embed/${videoId}?origin=${encodeURIComponent(typeof window !== 'undefined' ? window.location.origin : '')}`}
+            title={selectedVideo?.title || "Video Tutorial"}
+            frameBorder="0"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-presentation"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            loading="lazy"
+            allowFullScreen
+          ></iframe>
+        )}
+      </div>
+    );
+  };
+
+  // Render video selector
+  const renderVideoSelector = () => {
+    return (
+      <div className="mb-4">
+        <h4 className="font-medium mb-2">Select Learning Resource:</h4>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mb-4">
+          {videoResources.map((video, index) => (
+            <button
+              key={index}
+              onClick={() => setSelectedVideo(video)}
+              className={`flex items-center p-2 rounded-md ${
+                selectedVideo?.id === video.id 
+                  ? 'bg-primary/10 border border-primary/30' 
+                  : 'bg-card-hover border border-transparent hover:border-primary/30'
+              } transition-colors`}
+            >
+              <div className="flex-shrink-0 w-10 h-10 relative mr-3">
+                <img 
+                  src={video.thumbnail} 
+                  alt="" 
+                  className="w-full h-full object-cover rounded"
+                />
+                {video.level && (
+                  <div className="absolute bottom-0 right-0 bg-black/70 text-[10px] px-1 rounded-sm text-white">
+                    {video.level.charAt(0)}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 text-left">
+                <div className="text-sm font-medium line-clamp-1">{video.title}</div>
+                <div className="text-xs text-text-secondary flex items-center">
+                  <FiYoutube className="mr-1" size={10} />
+                  {video.type === 'tutorial' ? 'Tutorial' : 'Tab Playthrough'}
+                </div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
   if (loading) {
     return (
       <Layout title="Loading Song..." showBackButton onBackClick={() => router.push('/songs')}>
@@ -669,56 +934,42 @@ export default function SongPage() {
         </div>
       </div>
       
-      {/* Spotify Player */}
-      {renderSpotifyPlayer()}
-      
       {/* Main Content */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {/* Left Column - Main Content (2/3) */}
-        <div className="md:col-span-2 space-y-6">
-          {/* Tab Navigation */}
-          <div className="bg-card border border-border rounded-lg overflow-hidden">
-            <div className="flex border-b border-border">
-              <button
-                onClick={() => setSelectedTab('info')}
-                className={`px-6 py-3 text-sm font-medium flex items-center ${selectedTab === 'info' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary hover:text-text-primary'}`}
-              >
-                <FiInfo className="mr-2" />
-                Information
-              </button>
-              <button
-                onClick={() => setSelectedTab('chords')}
-                className={`px-6 py-3 text-sm font-medium flex items-center ${selectedTab === 'chords' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary hover:text-text-primary'}`}
-              >
-                <FiMusic className="mr-2" />
-                Chords
-              </button>
-              <button
-                onClick={() => setSelectedTab('ai')}
-                className={`px-6 py-3 text-sm font-medium flex items-center ${selectedTab === 'ai' ? 'text-primary border-b-2 border-primary' : 'text-text-secondary hover:text-text-primary'}`}
-              >
-                <FiMessageSquare className="mr-2" />
-                AI Analysis
-              </button>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main content - 2/3 width on large screens */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Video player section */}
+          <div className="bg-card rounded-lg overflow-hidden">
+            <div className="p-3 border-b border-border">
+              <h3 className="text-lg font-medium flex items-center">
+                <FiVideo className="mr-2 text-primary" /> Learning Resources
+              </h3>
             </div>
-            
-            <div className="p-6">
-              {selectedTab === 'info' && renderInfoTab()}
-              {selectedTab === 'chords' && renderChordsTab()}
-              {selectedTab === 'ai' && renderAiTab()}
+            <div className="p-4">
+              {renderVideoSelector()}
+              {renderVideoPlayer()}
+              {renderSongInfo()}
             </div>
           </div>
           
-          {/* Learning Resources Section */}
-          <div className="bg-card border border-border rounded-lg p-6">
-            {renderVideoResources()}
-          </div>
+          {/* Tab viewer section */}
+          {renderTabViewer()}
         </div>
-        
-        {/* Right Column - Sidebar (1/3) */}
-        <div className="md:col-span-1 space-y-6">
-          {renderProgressSection()}
-          {renderQuickActions()}
+
+        {/* Sidebar content - 1/3 width on large screens */}
+        <div className="space-y-6">
+          {/* Song details card */}
+          {renderSongDetailsCard()}
+
+          {/* Spotify player */}
+          <SpotifyPlayer 
+            artist={song?.artist} 
+            title={song?.title} 
+            spotifyId={song?.spotifyId}
+          />
+
+          {/* Actions section */}
+          {renderActionButtons()}
         </div>
       </div>
     </Layout>
