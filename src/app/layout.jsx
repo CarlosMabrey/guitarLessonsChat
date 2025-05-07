@@ -1,5 +1,6 @@
 import { Inter } from 'next/font/google'
 import '../styles/globals.css'
+import { ThemeProvider } from "../components/ui/ThemeContext";
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -10,10 +11,13 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className="dark">
+    // initialize html with default glassmorphism theme
+    <html lang="en" className="theme-glassmorphism">  
       <body className={`${inter.className} bg-background text-text-primary min-h-screen`}>
-        {children}
+        <ThemeProvider>
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
-} 
+}

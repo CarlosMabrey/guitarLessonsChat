@@ -21,14 +21,14 @@ export default function StatsCard({ title, value, icon, color = 'primary', class
       )}
       {...props}
     >
-      <div className={clsx('w-full h-1 rounded-full mb-4', colorClass)}>
+      <div className={clsx('w-full h-1 rounded-full mb-4 bg-background-light overflow-hidden')}>
         <div 
           className={clsx('h-full rounded-full', colorClass)} 
-          style={{ width: '70%' }}
+          style={{ width: '100%' }}
         />
       </div>
       
-      <div className="text-3xl font-bold">{value}</div>
+      <div className="text-4xl font-bold">{value}</div>
       <div className="text-text-secondary text-sm mt-1">{title}</div>
     </div>
   );

@@ -1,0 +1,26 @@
+Testing: https://www.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-19889
+
+Request: https://www.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-19889
+Status: 404
+Headers: {
+  "date": "Wed, 07 May 2025 09:48:32 GMT",
+  "content-type": "text/html; charset=UTF-8",
+  "transfer-encoding": "chunked",
+  "connection": "keep-alive",
+  "referrer-policy": "no-referrer-when-downgrade",
+  "content-security-policy": "frame-ancestors 'self' www.911tabs.com;",
+  "x-ug-unified-id": "0",
+  "server-timing": "backend;dur=9, rnd;dur=0",
+  "set-cookie": [
+    "localization=en; expires=Thu, 08 May 2025 09:08:32 GMT; Max-Age=84000; path=/; domain=ultimate-guitar.com; SameSite=Lax",
+    "static_cache_key_v2=_ver1746606684; expires=Fri, 15 Jun 2029 09:48:32 GMT; Max-Age=129600000; path=/; SameSite=Lax",
+    "__cf_bm=StNkLW22iKheaOUdePrD1GCs1Pqup11as08qtwu3mf8-1746611312-1.0.1.1-43TBxPSMM4fWYxats5YPcJNOP6OlUNVAM9_l.OEZxuevYGbcS0zopTRtOIBWXKufNALtI58iK8TtS_SyAw5CptgXdAvfDoPov4L2skVlPQ8; path=/; expires=Wed, 07-May-25 10:18:32 GMT; domain=.ultimate-guitar.com; HttpOnly; Secure; SameSite=None"
+  ],
+  "vary": "accept-encoding",
+  "cf-cache-status": "DYNAMIC",
+  "server": "cloudflare",
+  "cf-ray": "93bfcd5cda97e75d-DEN",
+  "alt-svc": "h3=\":443\"; ma=86400"
+}
+
+Non-successful status: 404

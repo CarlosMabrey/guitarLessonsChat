@@ -3,7 +3,7 @@ import { clsx } from 'clsx';
 export default function Card({ children, className, ...props }) {
   return (
     <div 
-      className={clsx('card p-5', className)}
+      className={clsx('bg-card border border-border/50 rounded-lg shadow-sm', className)}
       {...props}
     >
       {children}
@@ -14,7 +14,7 @@ export default function Card({ children, className, ...props }) {
 export function CardHeader({ children, className, ...props }) {
   return (
     <div 
-      className={clsx('flex items-center justify-between mb-4', className)}
+      className={clsx('flex items-center justify-between p-5 pb-4', className)}
       {...props}
     >
       {children}
@@ -25,7 +25,7 @@ export function CardHeader({ children, className, ...props }) {
 export function CardTitle({ children, className, ...props }) {
   return (
     <h3 
-      className={clsx('sub-heading', className)} 
+      className={clsx('text-lg font-medium text-text-primary', className)} 
       {...props}
     >
       {children}
@@ -36,7 +36,7 @@ export function CardTitle({ children, className, ...props }) {
 export function CardContent({ children, className, ...props }) {
   return (
     <div 
-      className={clsx('', className)}
+      className={clsx('px-5 pb-5', className)}
       {...props}
     >
       {children}
@@ -47,7 +47,7 @@ export function CardContent({ children, className, ...props }) {
 export function CardFooter({ children, className, ...props }) {
   return (
     <div 
-      className={clsx('flex items-center justify-between mt-4 pt-4 border-t border-border', className)}
+      className={clsx('flex items-center justify-between px-5 py-4 border-t border-border/50', className)}
       {...props}
     >
       {children}

@@ -13,18 +13,28 @@ import { practiceData } from '@/data/mockData'; // Keep using mock chart data fo
 export default function ProgressPage() {
   const [timeRange, setTimeRange] = useState('monthly');
   const [songs, setSongs] = useState([]);
-  const [progressStats, setProgressStats] = useState({});
+  const [progressStats, setProgressStats] = useState({
+    streakDays: 0,
+    longestStreak: 0, 
+    totalHoursPracticed: 0,
+    averageSessionLength: 0
+  });
   const [isLoading, setIsLoading] = useState(true);
   
   // Load data
   useEffect(() => {
     const loadData = () => {
-      const allSongs = getSongs();
-      const stats = getProgressStats();
-      
-      setSongs(allSongs);
-      setProgressStats(stats);
-      setIsLoading(false);
+      try {
+        const allSongs = getSongs();
+        const stats = getProgressStats();
+        
+        setSongs(allSongs);
+        setProgressStats(stats);
+      } catch (error) {
+        console.error("Error loading data:", error);
+      } finally {
+        setIsLoading(false);
+      }
     };
     
     loadData();

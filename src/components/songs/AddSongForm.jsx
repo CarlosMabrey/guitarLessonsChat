@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FiSearch, FiLoader, FiMusic, FiCheck, FiX, FiExternalLink, FiAlertCircle } from 'react-icons/fi';
+import { FiSearch, FiLoader, FiMusic, FiCheck, FiX, FiExternalLink, FiAlertCircle, FiYoutube } from 'react-icons/fi';
+import { FaSpotify } from 'react-icons/fa';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import { addSong, saveSongAnalysis } from '@/lib/db';
 import { analyzeSong } from '@/lib/ai/songAnalysisService';
 import { searchSongsterr } from '@/lib/songsterrApi';
-import { getEnhancedSongData } from '@/lib/multiSongApi';
+import { getEnhancedSongData, getSongByArtistAndTitle } from '@/lib/multiSongApi';
 
 export default function AddSongForm({ onSongAdded, onCancel }) {
   const [songInput, setSongInput] = useState('');
@@ -17,6 +18,7 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
   const [searchResults, setSearchResults] = useState([]);
   const [selectedStatus, setSelectedStatus] = useState('Learning'); // Learning, Comfortable, Not Started
   const [dataConfidence, setDataConfidence] = useState(null);
+  const [isSimpleMode, setIsSimpleMode] = useState(true); // New state for toggling between simple and advanced mode
   
   // Form fields for manual editing if needed
   const [formData, setFormData] = useState({
@@ -129,6 +131,12 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
   const handleAddSong = () => {
     if (!songData && !formData.title) return;
     
+    console.log('[AddSongForm] Adding song with data:', { 
+      formData,
+      songData,
+      songsterrId: formData.songsterrId || songData?.songsterrId
+    });
+    
     // Prepare the song object using form data
     const newSong = {
       id: `song-${Date.now()}`,
@@ -146,9 +154,13 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
       videoUrl: analysis?.recommendedVideos?.tabPlayback || analysis?.recommendedVideos?.tutorial,
       duration: 180, // Default 3 minutes
       progress: 0,
-      songsterrId: formData.songsterrId || songData?.songsterrId,
+      songsterrId: formData.songsterrId || songData?.songsterrId || '',
+      spotifyId: songData?.spotifyId || null,
+      youtubeVideos: songData?.youtubeVideos || [],
       chords: songData?.chords || analysis?.chords?.map(c => c.name) || []
     };
+    
+    console.log('[AddSongForm] Final song object with songsterrId:', newSong.songsterrId);
     
     // Save the song and analysis data to database
     if (analysis) {
@@ -198,6 +210,60 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
     }
   };
   
+  // New function for adding by artist and title directly
+  const handleAddByArtistAndTitle = async (e) => {
+    e.preventDefault();
+    
+    // Try to parse artist and title from input
+    const parts = songInput.split('-').map(part => part.trim());
+    let artist, title;
+    
+    if (parts.length >= 2) {
+      // Input appears to be in "Artist - Title" format
+      artist = parts[0];
+      title = parts.slice(1).join('-'); // Join the rest in case title has hyphens
+    } else {
+      // Ask the user to enter in the correct format
+      setError('Please enter the song in "Artist - Title" format for accurate results');
+      return;
+    }
+    
+    if (!artist || !title) {
+      setError('Please enter both artist and title');
+      return;
+    }
+    
+    try {
+      setStatus('analyzing');
+      setError(null);
+      
+      // Use our direct method to get song by artist and title
+      const data = await getSongByArtistAndTitle(artist, title);
+      
+      if (!data) {
+        throw new Error('Could not find song information. Try again with a more specific title.');
+      }
+      
+      setSongData(data);
+      
+      // Try to get AI analysis (optional)
+      try {
+        const result = await analyzeSong(`${data.artist} - ${data.title}`);
+        if (result.success) {
+          setAnalysis(result.data);
+        }
+      } catch (analyzeErr) {
+        console.error('Analysis error:', analyzeErr);
+        // Continue even if analysis fails
+      }
+      
+      setStatus('success');
+    } catch (err) {
+      setError(err.message || 'Failed to find song information');
+      setStatus('error');
+    }
+  };
+  
   const handleReset = () => {
     setSongInput('');
     setStatus('idle');
@@ -225,18 +291,19 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
     return (
       <div className="mt-4">
         <h3 className="text-sm font-medium mb-2">Search Results</h3>
-        <div className="bg-card border border-border rounded-md divide-y divide-border">
-          {searchResults.slice(0, 5).map(song => (
-            <button
+        <div className="space-y-2 max-h-60 overflow-y-auto p-1">
+          {searchResults.map(song => (
+            <div 
               key={song.id}
+              className="bg-card-hover p-3 rounded-lg cursor-pointer hover:bg-primary/10 flex items-center justify-between"
               onClick={() => handleSelectSong(song)}
-              className="w-full text-left p-3 hover:bg-card-hover transition-colors"
             >
-              <div className="font-medium">{song.title}</div>
-              <div className="text-sm text-text-secondary">
-                {typeof song.artist === 'string' ? song.artist : song.artist?.name || 'Unknown Artist'}
+              <div>
+                <div className="font-medium">{song.title}</div>
+                <div className="text-sm text-text-secondary">{song.artist?.name}</div>
               </div>
-            </button>
+              <FiChevronRight className="text-text-secondary" />
+            </div>
           ))}
         </div>
       </div>
@@ -247,350 +314,435 @@ export default function AddSongForm({ onSongAdded, onCancel }) {
   const renderConfidenceIndicator = () => {
     if (dataConfidence === null) return null;
     
-    let confidenceClass = 'bg-success';
-    let confidenceText = 'High';
+    let color = 'text-warning';
+    let message = 'Low confidence';
     
-    if (dataConfidence < 70) {
-      confidenceClass = 'bg-warning';
-      confidenceText = 'Medium';
-    }
-    
-    if (dataConfidence < 50) {
-      confidenceClass = 'bg-danger';
-      confidenceText = 'Low';
+    if (dataConfidence >= 80) {
+      color = 'text-success';
+      message = 'High confidence';
+    } else if (dataConfidence >= 50) {
+      color = 'text-primary';
+      message = 'Medium confidence';
     }
     
     return (
-      <div className="flex items-center mb-4">
-        <div className="text-sm mr-2">Data confidence:</div>
-        <div className="flex items-center">
-          <div className={`w-16 h-2 rounded-full ${confidenceClass} mr-2`}></div>
-          <div className="text-sm">{confidenceText} ({dataConfidence}%)</div>
+      <div className="flex items-center mt-2">
+        <div className={`${color} text-sm flex items-center`}>
+          <FiAlertCircle className="mr-1" />
+          <span>
+            {message} ({dataConfidence}%) - 
+            {dataConfidence < 50 && ' Please verify the information.'}
+            {dataConfidence >= 50 && dataConfidence < 80 && ' Data looks good.'}
+            {dataConfidence >= 80 && ' Excellent match!'}
+          </span>
         </div>
       </div>
     );
   };
   
-  // Render the form fields
+  // Render form fields for editing
   const renderFormFields = () => {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+      <div className="mt-4 space-y-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Title</label>
+            <input
+              type="text"
+              name="title"
+              value={formData.title}
+              onChange={handleFormChange}
+              className="w-full bg-card-hover p-2 rounded-lg text-text-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Artist</label>
+            <input
+              type="text"
+              name="artist"
+              value={formData.artist}
+              onChange={handleFormChange}
+              className="w-full bg-card-hover p-2 rounded-lg text-text-primary"
+            />
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Album</label>
+            <input
+              type="text"
+              name="album"
+              value={formData.album}
+              onChange={handleFormChange}
+              className="w-full bg-card-hover p-2 rounded-lg text-text-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Genre</label>
+            <input
+              type="text"
+              name="genre"
+              value={formData.genre}
+              onChange={handleFormChange}
+              className="w-full bg-card-hover p-2 rounded-lg text-text-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Difficulty (1-5)</label>
+            <select
+              name="difficulty"
+              value={formData.difficulty}
+              onChange={handleFormChange}
+              className="w-full bg-card-hover p-2 rounded-lg text-text-primary"
+            >
+              <option value="1">1 - Beginner</option>
+              <option value="2">2 - Easy</option>
+              <option value="3">3 - Intermediate</option>
+              <option value="4">4 - Advanced</option>
+              <option value="5">5 - Expert</option>
+            </select>
+          </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">Key</label>
+            <input
+              type="text"
+              name="keySignature"
+              value={formData.keySignature}
+              onChange={handleFormChange}
+              className="w-full bg-card-hover p-2 rounded-lg text-text-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Tempo (BPM)</label>
+            <input
+              type="number"
+              name="tempo"
+              value={formData.tempo}
+              onChange={handleFormChange}
+              className="w-full bg-card-hover p-2 rounded-lg text-text-primary"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium mb-1">Songsterr ID</label>
+            <input
+              type="text"
+              name="songsterrId"
+              value={formData.songsterrId}
+              onChange={handleFormChange}
+              className="w-full bg-card-hover p-2 rounded-lg text-text-primary"
+            />
+          </div>
+        </div>
+        
         <div>
-          <label htmlFor="title" className="block text-sm font-medium mb-1">
-            Title
-          </label>
+          <label className="block text-sm font-medium mb-1">Status</label>
+          <div className="flex space-x-2">
+            {['Not Started', 'Learning', 'Comfortable'].map(status => (
+              <button
+                key={status}
+                type="button"
+                className={`px-3 py-1 rounded-lg ${selectedStatus === status ? 'bg-primary text-white' : 'bg-card-hover text-text-secondary'}`}
+                onClick={() => setSelectedStatus(status)}
+              >
+                {status}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+  
+  // Render automatic resource detection section
+  const renderResourceDetection = () => {
+    if (!songData) return null;
+    
+    return (
+      <div className="mt-4 space-y-4">
+        <h3 className="text-lg font-medium">Automatically Detected Resources</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Songsterr Tab */}
+          <div className={`p-3 rounded-lg border ${songData.songsterrId ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <FiMusic className={songData.songsterrId ? 'text-success' : 'text-warning'} size={18} />
+                <span className="ml-2 font-medium">Songsterr Tab</span>
+              </div>
+              {songData.songsterrId ? (
+                <span className="text-success text-sm">Found</span>
+              ) : (
+                <span className="text-warning text-sm">Not found</span>
+              )}
+            </div>
+            {songData.songsterrId && (
+              <div className="mt-2 text-sm text-text-secondary">
+                ID: {songData.songsterrId}
+              </div>
+            )}
+          </div>
+          
+          {/* Spotify Track */}
+          <div className={`p-3 rounded-lg border ${songData.spotifyId ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'}`}>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <FaSpotify className={songData.spotifyId ? 'text-success' : 'text-warning'} size={18} />
+                <span className="ml-2 font-medium">Spotify Track</span>
+              </div>
+              {songData.spotifyId ? (
+                <span className="text-success text-sm">Found</span>
+              ) : (
+                <span className="text-warning text-sm">Not found</span>
+              )}
+            </div>
+            {songData.spotifyId && (
+              <div className="mt-2 text-sm text-text-secondary">
+                ID: {songData.spotifyId}
+              </div>
+            )}
+          </div>
+        </div>
+        
+        {/* YouTube Videos */}
+        <div className={`p-3 rounded-lg border ${songData.youtubeVideos?.length ? 'border-success/30 bg-success/5' : 'border-warning/30 bg-warning/5'}`}>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center">
+              <FiYoutube className={songData.youtubeVideos?.length ? 'text-success' : 'text-warning'} size={18} />
+              <span className="ml-2 font-medium">YouTube Videos</span>
+            </div>
+            {songData.youtubeVideos?.length ? (
+              <span className="text-success text-sm">Found {songData.youtubeVideos.length} videos</span>
+            ) : (
+              <span className="text-warning text-sm">No videos found</span>
+            )}
+          </div>
+          
+          {songData.youtubeVideos?.length > 0 && (
+            <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {songData.youtubeVideos.slice(0, 4).map((video, index) => (
+                <div key={index} className="flex items-center text-sm">
+                  <span className={`w-2 h-2 rounded-full mr-2 ${
+                    video.type === 'tutorial' ? 'bg-success' : 
+                    video.type === 'cover' ? 'bg-primary' :
+                    'bg-text-secondary'
+                  }`}></span>
+                  <span className="truncate">{video.title}</span>
+                </div>
+              ))}
+              {songData.youtubeVideos.length > 4 && (
+                <div className="text-sm text-text-secondary">
+                  +{songData.youtubeVideos.length - 4} more videos
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+  
+  // Render simple add mode
+  const renderSimpleMode = () => {
+    return (
+      <div>
+        <form onSubmit={handleAddByArtistAndTitle} className="relative">
           <input
-            id="title"
-            name="title"
             type="text"
-            value={formData.title}
-            onChange={handleFormChange}
-            className="input w-full"
+            placeholder="Enter song in Artist - Title format (e.g. Led Zeppelin - Stairway to Heaven)"
+            value={songInput}
+            onChange={handleInputChange}
+            className="w-full bg-card-hover p-3 pl-10 rounded-lg text-text-primary"
+            disabled={status === 'analyzing'}
           />
-        </div>
+          <FiMusic className="absolute left-3 top-3.5 text-text-secondary" />
+          
+          <div className="mt-3 flex space-x-2">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={status === 'analyzing' || !songInput.trim()}
+            >
+              {status === 'analyzing' ? (
+                <>
+                  <FiLoader className="animate-spin mr-2" />
+                  Finding song...
+                </>
+              ) : (
+                'Add Song'
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => setIsSimpleMode(false)}
+            >
+              Advanced Options
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <div className="mt-4 p-3 bg-warning/10 border border-warning/30 rounded-lg text-warning flex items-start">
+            <FiAlertCircle className="mr-2 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
         
-        <div>
-          <label htmlFor="artist" className="block text-sm font-medium mb-1">
-            Artist
-          </label>
-          <input
-            id="artist"
-            name="artist"
-            type="text"
-            value={formData.artist}
-            onChange={handleFormChange}
-            className="input w-full"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="album" className="block text-sm font-medium mb-1">
-            Album
-          </label>
-          <input
-            id="album"
-            name="album"
-            type="text"
-            value={formData.album}
-            onChange={handleFormChange}
-            className="input w-full"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="keySignature" className="block text-sm font-medium mb-1">
-            Key
-          </label>
-          <input
-            id="keySignature"
-            name="keySignature"
-            type="text"
-            value={formData.keySignature}
-            onChange={handleFormChange}
-            className="input w-full"
-            placeholder="e.g. Am"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="tempo" className="block text-sm font-medium mb-1">
-            BPM
-          </label>
-          <input
-            id="tempo"
-            name="tempo"
-            type="number"
-            value={formData.tempo}
-            onChange={handleFormChange}
-            className="input w-full"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="genre" className="block text-sm font-medium mb-1">
-            Genre
-          </label>
-          <input
-            id="genre"
-            name="genre"
-            type="text"
-            value={formData.genre}
-            onChange={handleFormChange}
-            className="input w-full"
-            placeholder="e.g. Rock, Blues"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="difficulty" className="block text-sm font-medium mb-1">
-            Difficulty (1-5)
-          </label>
-          <input
-            id="difficulty"
-            name="difficulty"
-            type="number"
-            min="1"
-            max="5"
-            value={formData.difficulty}
-            onChange={handleFormChange}
-            className="input w-full"
-          />
-        </div>
-        
-        <div>
-          <label htmlFor="status" className="block text-sm font-medium mb-1">
-            Status
-          </label>
-          <select
-            id="status"
-            value={selectedStatus}
-            onChange={(e) => setSelectedStatus(e.target.value)}
-            className="input w-full"
+        {/* Show the detected resources and form if we have song data */}
+        {songData && (
+          <>
+            {renderConfidenceIndicator()}
+            {renderResourceDetection()}
+            {renderFormFields()}
+            
+            <div className="mt-6 flex space-x-3">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleAddSong}
+              >
+                Add to Library
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleReset}
+              >
+                Start Over
+              </button>
+              {onCancel && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={onCancel}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    );
+  };
+  
+  // Render advanced mode (the original implementation)
+  const renderAdvancedMode = () => {
+    return (
+      <div>
+        <div className="flex space-x-2 mb-4">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setIsSimpleMode(true)}
           >
-            <option value="Not Started">Not Started</option>
-            <option value="Learning">Learning</option>
-            <option value="Comfortable">Comfortable</option>
-          </select>
+            Simple Mode
+          </button>
+          <span className="text-text-secondary self-center text-sm">Switch to simple mode for quicker song addition</span>
         </div>
         
-        <div className="md:col-span-2">
-          <label htmlFor="songsterrId" className="block text-sm font-medium mb-1">
-            Songsterr ID
-          </label>
+        <form onSubmit={handleSearch} className="relative">
           <input
-            id="songsterrId"
-            name="songsterrId"
             type="text"
-            value={formData.songsterrId}
-            onChange={handleFormChange}
-            className="input w-full"
-            placeholder="For interactive tab"
+            placeholder="Search for a song by name or 'Artist - Song Title'"
+            value={songInput}
+            onChange={handleInputChange}
+            className="w-full bg-card-hover p-3 pl-10 rounded-lg text-text-primary"
+            disabled={status === 'analyzing'}
           />
-          <p className="text-xs text-text-secondary mt-1">
-            The Songsterr ID is the number after "tab-s" in Songsterr URLs
-          </p>
-        </div>
+          <FiSearch className="absolute left-3 top-3.5 text-text-secondary" />
+          
+          <div className="mt-3 flex space-x-2">
+            <button
+              type="submit"
+              className="btn btn-primary"
+              disabled={status === 'analyzing' || !songInput.trim()}
+            >
+              {status === 'searching' ? (
+                <>
+                  <FiLoader className="animate-spin mr-2" />
+                  Searching...
+                </>
+              ) : (
+                'Search'
+              )}
+            </button>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={handleQuickAdd}
+              disabled={status === 'analyzing' || !songInput.trim()}
+            >
+              {status === 'analyzing' ? (
+                <>
+                  <FiLoader className="animate-spin mr-2" />
+                  Analyzing...
+                </>
+              ) : (
+                'Quick Add'
+              )}
+            </button>
+          </div>
+        </form>
+
+        {error && (
+          <div className="mt-4 p-3 bg-warning/10 border border-warning/30 rounded-lg text-warning flex items-start">
+            <FiAlertCircle className="mr-2 mt-0.5 flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+        
+        {renderSearchResults()}
+        
+        {songData && (
+          <>
+            {renderConfidenceIndicator()}
+            {renderResourceDetection()}
+            {renderFormFields()}
+            
+            <div className="mt-6 flex space-x-3">
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={handleAddSong}
+              >
+                Add to Library
+              </button>
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={handleReset}
+              >
+                Start Over
+              </button>
+              {onCancel && (
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={onCancel}
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
+          </>
+        )}
       </div>
     );
   };
   
   return (
-    <div className="w-full">
-      <Card>
-        <CardHeader>
-          <CardTitle>Add New Song</CardTitle>
-        </CardHeader>
-        <CardContent>
-          {status === 'idle' || status === 'searching' || status === 'error' ? (
-            <>
-              <form onSubmit={handleSearch} className="space-y-4">
-                <div>
-                  <label htmlFor="songInput" className="block text-sm font-medium mb-1">
-                    Song Title (or Artist - Song Title)
-                  </label>
-                  <div className="relative">
-                    <input
-                      id="songInput"
-                      type="text"
-                      value={songInput}
-                      onChange={handleInputChange}
-                      placeholder="e.g., Wonderwall or Oasis - Wonderwall"
-                      className="input w-full pl-10"
-                      disabled={status === 'searching' || status === 'analyzing'}
-                    />
-                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                      <FiMusic className="text-text-secondary" />
-                    </div>
-                  </div>
-                  <p className="text-xs text-text-secondary mt-1">
-                    Just enter a song name and we'll find all the details for you
-                  </p>
-                </div>
-                
-                {error && (
-                  <div className="p-3 rounded-md bg-danger/10 text-danger text-sm flex items-center">
-                    <FiAlertCircle className="mr-2 flex-shrink-0" />
-                    <span>{error}</span>
-                  </div>
-                )}
-                
-                <div className="flex space-x-3">
-                  <button
-                    type="submit"
-                    className="btn btn-primary flex items-center"
-                    disabled={!songInput.trim() || status === 'searching'}
-                  >
-                    {status === 'searching' ? (
-                      <>
-                        <FiLoader className="animate-spin mr-2" />
-                        Searching...
-                      </>
-                    ) : (
-                      <>
-                        <FiSearch className="mr-2" />
-                        Search Songs
-                      </>
-                    )}
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={handleQuickAdd}
-                    className="btn btn-secondary flex items-center"
-                    disabled={!songInput.trim() || status === 'searching'}
-                  >
-                    <FiCheck className="mr-2" />
-                    Quick Add
-                  </button>
-                  
-                  <button
-                    type="button"
-                    onClick={onCancel}
-                    className="btn btn-outline"
-                    disabled={status === 'searching'}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-              
-              {renderSearchResults()}
-            </>
-          ) : status === 'analyzing' ? (
-            <div className="text-center py-8">
-              <FiLoader className="animate-spin mx-auto mb-4 text-2xl" />
-              <p>Analyzing your song...</p>
-              <p className="text-sm text-text-secondary mt-2">
-                Finding chord progressions, difficulty level, and learning resources
-              </p>
-            </div>
-          ) : status === 'success' ? (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between">
-                <h3 className="text-lg font-medium">
-                  {formData.title} by {formData.artist}
-                </h3>
-                <button
-                  onClick={handleReset}
-                  className="text-text-secondary hover:text-text-primary"
-                  title="Edit another song"
-                >
-                  <FiX />
-                </button>
-              </div>
-              
-              {renderConfidenceIndicator()}
-              
-              {renderFormFields()}
-              
-              {/* Show chords from songData if available */}
-              {songData && songData.chords && songData.chords.length > 0 && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Key Chords</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {songData.chords.slice(0, 4).map((chord, index) => (
-                      <div key={index} className="p-2 border border-border rounded-md text-center">
-                        <div className="font-medium">{chord}</div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {/* Show chords from analysis if no songData chords */}
-              {(!songData?.chords || songData.chords.length === 0) && analysis && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Key Chords</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                    {analysis.chords.slice(0, 4).map((chord, index) => (
-                      <div key={index} className="p-2 border border-border rounded-md">
-                        <div className="font-medium text-center mb-1">{chord.name}</div>
-                        <div className="text-xs font-mono text-center">
-                          {chord.positions.map(pos => pos[1]).join(' ')}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-              
-              {analysis && analysis.recommendedVideos && (
-                <div>
-                  <h3 className="text-sm font-medium mb-2">Video Resources</h3>
-                  {Object.entries(analysis.recommendedVideos).map(([type, url]) => (
-                    <a
-                      key={type}
-                      href={url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center py-1 text-sm text-primary"
-                    >
-                      {type.charAt(0).toUpperCase() + type.slice(1)} Video
-                      <FiExternalLink className="ml-1" size={14} />
-                    </a>
-                  ))}
-                </div>
-              )}
-              
-              <div className="flex space-x-3">
-                <button
-                  onClick={handleAddSong}
-                  className="btn btn-primary"
-                >
-                  Add Song
-                </button>
-                
-                <button
-                  onClick={handleReset}
-                  className="btn btn-secondary"
-                >
-                  Start Over
-                </button>
-              </div>
-            </div>
-          ) : null}
-        </CardContent>
-      </Card>
-    </div>
+    <Card className="w-full max-w-4xl mx-auto">
+      <CardHeader>
+        <CardTitle>Add a Song to Your Library</CardTitle>
+      </CardHeader>
+      <CardContent>
+        {isSimpleMode ? renderSimpleMode() : renderAdvancedMode()}
+      </CardContent>
+    </Card>
   );
 } 

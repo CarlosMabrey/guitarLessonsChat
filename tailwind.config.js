@@ -1,63 +1,33 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    './src/app/**/*.{js,ts,jsx,tsx}',
-    './src/components/**/*.{js,ts,jsx,tsx}',
+    "./app/**/*.{js,ts,jsx,tsx}",
+    "./src/**/*.{js,ts,jsx,tsx}",
+    "./components/**/*.{js,ts,jsx,tsx}"
   ],
-  darkMode: 'class',
   theme: {
     extend: {
       colors: {
+        primary: '#3B82F6', // blue-500
+        secondary: '#10B981', // emerald-500
+        accent: '#8B5CF6', // violet-500
         background: {
-          DEFAULT: '#13131d',
-          light: '#1e1e2d',
-        },
-        primary: {
-          DEFAULT: '#3e63dd',
-          hover: '#5a75e6',
-        },
-        secondary: {
-          DEFAULT: '#7c3dd2',
-          hover: '#8f52db',
-        },
-        success: {
-          DEFAULT: '#4ade80',
-          hover: '#22c55e',
-        },
-        danger: {
-          DEFAULT: '#ef4444',
-          hover: '#dc2626',
-        },
-        warning: {
-          DEFAULT: '#f59e0b',
-          hover: '#d97706',
-        },
-        info: {
-          DEFAULT: '#3b82f6',
-          hover: '#2563eb',
-        },
-        card: {
-          DEFAULT: '#1c1c2b',
-          hover: '#23232f',
+          DEFAULT: '#F9FAFB', // gray-50
+          secondary: '#F3F4F6', // gray-100
         },
         text: {
-          primary: '#f3f4f6',
-          secondary: '#9ca3af',
-          muted: '#6b7280',
+          primary: '#111827', // gray-900
+          secondary: '#6B7280', // gray-500
+          muted: '#9CA3AF', // gray-400
         },
         border: {
-          DEFAULT: '#2e2e3a',
-          light: '#3e3e4a',
+          DEFAULT: '#E5E7EB', // gray-200
+          light: '#F3F4F6', // gray-100
         },
-      },
-      fontFamily: {
-        sans: ['Inter', 'sans-serif'],
-      },
-      boxShadow: {
-        card: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-      },
-      animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        card: {
+          DEFAULT: '#FFFFFF', // white
+          hover: '#F9FAFB', // gray-50
+        },
       },
     },
   },

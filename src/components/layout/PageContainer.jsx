@@ -1,7 +1,8 @@
 'use client';
 
-import React from 'react';
-import { FiHome, FiMusic, FiList, FiSettings } from 'react-icons/fi';
+import React, { useState, useEffect } from 'react';
+import { FiHome, FiMusic, FiClock, FiZap } from 'react-icons/fi';
+import { TbProgress } from 'react-icons/tb';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 
@@ -15,17 +16,20 @@ export default function PageContainer({
   const navigation = [
     { name: 'Dashboard', href: '/', icon: FiHome },
     { name: 'Songs', href: '/songs', icon: FiMusic },
-    { name: 'Practice', href: '/practice', icon: FiList },
-    { name: 'Settings', href: '/settings', icon: FiSettings },
+    { name: 'Practice', href: '/practice', icon: FiClock },
+    { name: 'Progress', href: '/progress', icon: TbProgress },
+    { name: 'Tab Test', href: '/unified-tab-test', icon: FiZap }
   ];
   
   return (
     <div className="min-h-screen bg-background-primary text-text-primary flex">
       {showNav && (
         <div className="w-16 md:w-64 bg-background-secondary border-r border-border">
-          <div className="h-16 flex items-center px-4 border-b border-border">
-            <h1 className="text-xl font-bold hidden md:block">Guitar App</h1>
-            <span className="md:hidden text-xl font-bold">🎸</span>
+          <div className="h-16 flex items-center justify-center md:justify-start px-4 border-b border-border">
+            <Link href="/" className="flex items-center">
+              <span className="text-xl font-bold">🎸</span>
+              <h1 className="text-xl font-bold hidden md:block ml-2">GuitarCoach</h1>
+            </Link>
           </div>
           
           <nav className="p-2">

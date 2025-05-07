@@ -125,7 +125,7 @@ export default function ChordProgressionPlayer({
   const showNextChord = currentBeat >= beatsPerChord - 2;
   
   return (
-    <div className={`p-4 rounded-lg bg-background-secondary ${className}`}>
+    <div className={`p-4 rounded-lg theme-card ${className}`}>
       {/* Countdown overlay */}
       {countdown !== null && (
         <div className="absolute inset-0 flex items-center justify-center bg-black/50 rounded-lg z-10">
@@ -138,9 +138,9 @@ export default function ChordProgressionPlayer({
         
         <div className="flex items-center gap-4 mb-6">
           <div className="flex gap-1 items-center">
-            <span className="text-sm text-text-secondary">BPM:</span>
+            <span className="text-sm text-muted">BPM:</span>
             <select 
-              className="bg-background-primary rounded px-2 py-1 text-sm"
+              className="bg-accent rounded px-2 py-1 text-sm"
               value={bpm}
               onChange={(e) => {
                 const newBpm = parseInt(e.target.value);
@@ -159,7 +159,7 @@ export default function ChordProgressionPlayer({
           </div>
           
           <button
-            className="px-4 py-2 rounded bg-primary text-white"
+            className="px-4 py-2 rounded bg-active text-white"
             onClick={togglePlay}
           >
             {isPlaying ? 'Stop' : 'Start'}
@@ -169,7 +169,7 @@ export default function ChordProgressionPlayer({
         <div className="flex flex-wrap gap-8 justify-center">
           {/* Current chord display */}
           <div className="flex flex-col items-center">
-            <div className="text-sm text-text-secondary mb-2">Current</div>
+            <div className="text-sm text-muted mb-2">Current</div>
             <div className="relative">
               <ChordDiagram 
                 chord={progression[currentChordIndex]} 
@@ -181,7 +181,7 @@ export default function ChordProgressionPlayer({
                 {Array.from({ length: beatsPerChord }).map((_, i) => (
                   <div 
                     key={i} 
-                    className={`w-2 h-2 rounded-full ${i === currentBeat ? 'bg-primary' : 'bg-text-secondary opacity-30'}`}
+                    className={`w-2 h-2 rounded-full ${i === currentBeat ? 'bg-active' : 'text-muted opacity-30'}`}
                   />
                 ))}
               </div>
@@ -190,7 +190,7 @@ export default function ChordProgressionPlayer({
           
           {/* Next chord preview */}
           <div className={`flex flex-col items-center transition-opacity duration-300 ${showNextChord ? 'opacity-100' : 'opacity-30'}`}>
-            <div className="text-sm text-text-secondary mb-2">Coming Next</div>
+            <div className="text-sm text-muted mb-2">Coming Next</div>
             <ChordDiagram 
               chord={progression[nextChordIndex]} 
               size="md"
@@ -205,7 +205,7 @@ export default function ChordProgressionPlayer({
             {progression.map((chord, index) => (
               <div 
                 key={index}
-                className={`border ${index === currentChordIndex ? 'border-primary' : 'border-border'} rounded p-1`}
+                className={`border ${index === currentChordIndex ? 'border-active' : 'border-card-border'} rounded p-1`}
               >
                 <ChordDiagram 
                   chord={chord} 

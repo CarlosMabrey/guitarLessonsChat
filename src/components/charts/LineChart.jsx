@@ -64,7 +64,7 @@ export default function LineChart({ data, options, height = 180 }) {
       },
       y: {
         grid: {
-          color: 'rgba(46, 46, 58, 0.5)',
+          color: 'rgba(46, 46, 58, 0.3)',
           drawBorder: false,
         },
         ticks: {
@@ -73,7 +73,9 @@ export default function LineChart({ data, options, height = 180 }) {
             size: 10,
           },
           padding: 8,
-          stepSize: 5,
+          stepSize: 20,
+          min: 180,
+          max: 420,
         },
         border: {
           display: false,
@@ -82,11 +84,24 @@ export default function LineChart({ data, options, height = 180 }) {
     },
     elements: {
       line: {
-        tension: 0.4,
+        tension: 0.3,
+        borderWidth: 3,
+        borderColor: 'rgba(96, 165, 250, 1)',
+        fill: true,
+        backgroundColor: (context) => {
+          const ctx = context.chart.ctx;
+          const gradient = ctx.createLinearGradient(0, 0, 0, height);
+          gradient.addColorStop(0, 'rgba(96, 165, 250, 0.2)');
+          gradient.addColorStop(1, 'rgba(96, 165, 250, 0)');
+          return gradient;
+        },
       },
       point: {
         radius: 0,
         hoverRadius: 6,
+        backgroundColor: 'rgba(96, 165, 250, 1)',
+        borderColor: '#fff',
+        borderWidth: 2,
       },
     },
   };

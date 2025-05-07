@@ -5,6 +5,7 @@
 
 import { searchSongsterr, getSongsterrDetails, extractSongInfo } from './songsterrApi';
 import { searchUberchord, getUberchordSongDetails, getSongKeyAndBPM } from './uberchordApi';
+import { fetchAllSongLinks, fetchSpotifyId, fetchYoutubeVideos } from './songLinkService';
 
 /**
  * Get complete song data from multiple sources with cross-referencing
@@ -85,6 +86,36 @@ export async function getEnhancedSongData(query) {
       // Continue with base song info
     }
     
+    // Automatically fetch additional resources (Spotify, YouTube) in parallel
+    try {
+      const additionalLinks = await fetchAllSongLinks(baseSongInfo.artist, baseSongInfo.title);
+      
+      // Add these links to the song info
+      if (additionalLinks) {
+        // Only add songsterrId if we don't already have one
+        if (!baseSongInfo.songsterrId && additionalLinks.songsterrId) {
+          baseSongInfo.songsterrId = additionalLinks.songsterrId;
+        }
+        
+        // Add Spotify ID
+        baseSongInfo.spotifyId = additionalLinks.spotifyId;
+        
+        // Add YouTube videos
+        baseSongInfo.youtubeVideos = additionalLinks.youtubeVideos;
+        
+        // Set the main video URL (for compatibility with existing code)
+        if (additionalLinks.youtubeVideos && additionalLinks.youtubeVideos.length > 0) {
+          // Prefer tutorial videos
+          const tutorial = additionalLinks.youtubeVideos.find(v => v.type === 'tutorial');
+          const cover = additionalLinks.youtubeVideos.find(v => v.type === 'cover');
+          baseSongInfo.videoUrl = tutorial?.id || cover?.id || additionalLinks.youtubeVideos[0]?.id;
+        }
+      }
+    } catch (linkError) {
+      console.error('Error fetching additional links:', linkError);
+      // Continue with base song info
+    }
+    
     // Verify Songsterr ID by checking against artist and title
     baseSongInfo.songsterrId = songsterrId;
     baseSongInfo.confidence = calculateConfidence(baseSongInfo);
@@ -115,8 +146,59 @@ function calculateConfidence(songData) {
   if (songData.album && songData.album !== 'Unknown Album') score += 5;
   if (songData.chords && songData.chords.length > 0) score += 10;
   
+  // Additional points for having multimedia links
+  if (songData.spotifyId) score += 5;
+  if (songData.youtubeVideos && songData.youtubeVideos.length > 0) score += 5;
+  
   // Cap at 100
   return Math.min(score, 100);
+}
+
+/**
+ * Get complete song information using artist and title directly
+ * Useful for quick addition when you already know the artist and title
+ * @param {string} artist - The artist name
+ * @param {string} title - The song title
+ * @returns {Promise<Object>} - Complete song information
+ */
+export async function getSongByArtistAndTitle(artist, title) {
+  try {
+    if (!artist || !title) {
+      return null;
+    }
+    
+    // First, try the enhanced song data approach using a combined query
+    const query = `${artist} ${title}`;
+    const enhancedData = await getEnhancedSongData(query);
+    
+    if (enhancedData) {
+      return enhancedData;
+    }
+    
+    // If that fails, try a direct approach using our link service
+    const links = await fetchAllSongLinks(artist, title);
+    
+    // Create a basic song with the information we have
+    const basicSong = {
+      title,
+      artist,
+      album: 'Unknown Album',
+      genre: 'Rock',
+      difficulty: 3,
+      tempo: 120,
+      keySignature: 'C',
+      songsterrId: links?.songsterrId || null,
+      spotifyId: links?.spotifyId || null,
+      youtubeVideos: links?.youtubeVideos || [],
+      videoUrl: links?.youtubeVideos?.[0]?.id || null,
+      confidence: 60 // Medium confidence since we at least have artist and title
+    };
+    
+    return basicSong;
+  } catch (error) {
+    console.error('Error in getSongByArtistAndTitle:', error);
+    return null;
+  }
 }
 
 /**

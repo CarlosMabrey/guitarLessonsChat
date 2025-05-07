@@ -3,7 +3,20 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FiMenu, FiX, FiHome, FiMusic, FiClock, FiTrendingUp, FiSettings, FiHelpCircle, FiUser } from 'react-icons/fi';
+import { 
+  FiMenu, 
+  FiX, 
+  FiHome, 
+  FiMusic, 
+  FiClock, 
+  FiTrendingUp, 
+  FiSettings, 
+  FiHelpCircle, 
+  FiUser,
+  FiCode,
+  FiZap
+} from 'react-icons/fi';
+import ThemeSwitcher from './ThemeSwitcher';
 
 export default function Layout({ title, version, children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -23,6 +36,7 @@ export default function Layout({ title, version, children }) {
     { icon: <FiMusic size={20} />, label: 'Songs', href: '/songs' },
     { icon: <FiClock size={20} />, label: 'Practice', href: '/practice' },
     { icon: <FiTrendingUp size={20} />, label: 'Progress', href: '/progress' },
+    { icon: <FiZap size={20} />, label: 'Tab Test', href: '/unified-tab-test' },
     // Temporarily hidden navigation items
     // { icon: <FiUser size={20} />, label: 'Profile', href: '/profile' },
     // { icon: <FiSettings size={20} />, label: 'Settings', href: '/settings' },
@@ -99,9 +113,9 @@ export default function Layout({ title, version, children }) {
             <h1 className="text-xl font-semibold">{title}</h1>
           </div>
           
-          {/* Optional header content on the right */}
+          {/* Header content on the right */}
           <div className="flex items-center">
-            {/* Temporarily hidden user menu */}
+            <ThemeSwitcher />
           </div>
         </header>
         

@@ -157,10 +157,10 @@ export default function SongItem({
       
       <div className="flex-1 min-w-0" onClick={handleNavigate}>
         <div className="flex items-center">
-          {/* Status icon */}
-          <div className={`flex-shrink-0 mr-2 p-1.5 rounded-full ${statusInfo.bgColor}`}>
-            <div className={statusInfo.color}>
-              {statusInfo.icon}
+          {/* Document icon */}
+          <div className="flex-shrink-0 mr-2">
+            <div className="text-primary">
+              <FiBook size={18} />
             </div>
           </div>
           
@@ -199,7 +199,7 @@ export default function SongItem({
       <div className="ml-3 flex-shrink-0 flex items-center space-x-2">
         <button
           onClick={isPlaying ? handlePause : handlePlay}
-          className="p-2 rounded-full bg-primary text-white"
+          className={`p-2 rounded-full ${isPlaying ? 'bg-background-light text-primary' : 'bg-primary text-white'}`}
         >
           {isPlaying ? <FiPause size={16} /> : <FiPlay size={16} />}
         </button>

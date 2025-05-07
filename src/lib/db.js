@@ -83,7 +83,9 @@ export const addSong = (song) => {
       dateAdded: song.dateAdded || new Date().toISOString(),
       status: song.status || 'Not Started',
       progress: 0,
-      songsterrId: song.songsterrId || null
+      songsterrId: song.songsterrId || null,
+      spotifyId: song.spotifyId || null,
+      youtubeVideos: song.youtubeVideos || []
     };
     
     songs.push(newSong);
@@ -324,13 +326,16 @@ export const getChords = (songId) => {
 
 // Progress statistics for dashboard
 export const getProgressStats = () => {
+  // Return default values for SSR during build
   if (typeof window === 'undefined') {
     return {
       songsAdded: 0,
       songsInProgress: 0,
       songsMastered: 0,
       totalHoursPracticed: 0,
-      streakDays: 0
+      streakDays: 0,
+      longestStreak: 0,
+      averageSessionLength: 0
     };
   }
   
@@ -347,18 +352,26 @@ export const getProgressStats = () => {
     const totalMinutesPracticed = sessions.reduce((total, session) => {
       return total + (session.duration / 60);
     }, 0);
-    const totalHoursPracticed = (totalMinutesPracticed / 60).toFixed(1);
+    const totalHoursPracticed = parseFloat((totalMinutesPracticed / 60).toFixed(1));
+    
+    // Calculate average session length
+    const averageSessionLength = sessions.length > 0 
+      ? Math.round(totalMinutesPracticed / sessions.length) 
+      : 0;
     
     // Calculate streak (placeholder logic - would need more sophisticated implementation)
     // For now, returning a random value between 1-14 for demo purposes
     const streakDays = Math.floor(Math.random() * 14) + 1;
+    const longestStreak = Math.max(streakDays, Math.floor(Math.random() * 30) + 1);
     
     return {
       songsAdded,
       songsInProgress,
       songsMastered,
       totalHoursPracticed,
-      streakDays
+      streakDays,
+      longestStreak,
+      averageSessionLength
     };
   } catch (error) {
     console.error('Error calculating progress stats:', error);
@@ -367,7 +380,9 @@ export const getProgressStats = () => {
       songsInProgress: 0,
       songsMastered: 0,
       totalHoursPracticed: 0,
-      streakDays: 0
+      streakDays: 0,
+      longestStreak: 0,
+      averageSessionLength: 0
     };
   }
 };

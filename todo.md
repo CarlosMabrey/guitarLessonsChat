@@ -4,12 +4,13 @@
 * Chord Diagram Enhancements - Add chord sound playback, alternative fingerings, and finger transition animations
 * Smart Positioning - Ensure preview cards are always fully visible within viewport
 * Audio Pitch Control - Add speed/pitch adjustment for practice sessions (inspired by Chordify)
-* Loop Feature - Enable looping of difficult sections during practice
+* Loop Feature - Enable looping of difficult sections during practice (inspired by https://www.looper.tube/)
 * Chromatic Tuner - Include built-in instrument tuner functionality
 * Chord Sheets Export - Add PDF export of chord sheets and diagrams
 * Create mobile-responsive practice mode
 * Add video player with custom controls for practice sessions
 * Implement metronome functionality
+* Enhance ChordProgressionPlayer with visual feedback during countdown
 
 ## Mobile & Accessibility
 * Mobile Experience - Adapt hover preview functionality for touch devices with tap/hold actions
@@ -22,6 +23,8 @@
 * Chord Progress Tracking - Allow marking specific chords as "mastered" for detailed progress
 * Adding a customized learning path feature
 * Create song search/recommendation feature
+* Improve Chord Library
+* Add more advanced chords and different reccommendations for how to play them
 
 ## AI Features
 * Implementing the AI chat feature for song breakdowns
@@ -37,6 +40,12 @@
 
 ## Performance Optimization
 * Performance Optimization - Implement virtualization for song lists and lazy-loading for chord diagrams
+
+## Technical Debt & Refactoring
+* Refactor remaining components to use theme-responsive classes
+* Create consistent component structure between pages
+* Review and update class naming conventions
+* Add proper type definitions for components
 
 ## Social Features
 * Add social sharing features
@@ -54,3 +63,9 @@
 * Web search capabilities via SERP API
 * Mock data fallbacks for development
 * Tab viewer via Songsterr integration
+* Fix Songsterr tab viewer to show the correct tab for each song, not just Stairway to Heaven
+* Make learning resources embed real, playable YouTube videos for each song
+* Fixed the Recent Songs card layout on dashboard to match design
+* Fixed theme switching functionality between practice page and dashboard
+* Ensured consistency in layout components across pages
+* Standardized theme-responsive CSS classes for UI components 

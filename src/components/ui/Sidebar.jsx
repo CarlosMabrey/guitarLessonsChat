@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FiHome, FiMusic, FiPlay, FiBarChart2, FiSettings, FiHelpCircle, FiUser } from 'react-icons/fi';
 import { clsx } from 'clsx';
+import ThemeSwitcher from './ThemeSwitcher';
 
 const navItems = [
   { icon: FiHome, label: 'Dashboard', href: '/dashboard' },
@@ -18,7 +19,7 @@ export default function Sidebar() {
 
   return (
     <aside className="fixed left-0 top-0 h-screen w-16 py-6 flex flex-col items-center bg-background-light border-r border-border z-10">
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="w-10 h-10 flex items-center justify-center bg-primary rounded-md text-white font-bold text-xl">
           G
         </div>
@@ -49,6 +50,11 @@ export default function Sidebar() {
           );
         })}
       </nav>
+      
+      {/* Theme Switcher at bottom of sidebar */}
+      <div className="mt-auto mb-6">
+        <ThemeSwitcher compact={true} />
+      </div>
     </aside>
   );
-} 
+}

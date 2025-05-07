@@ -46,11 +46,11 @@
   }
 
   .btn-primary {
-    @apply bg-primary text-white hover:bg-primary-hover;
+    @apply bg-primary text-white hover:bg-blue-600;
   }
 
   .btn-secondary {
-    @apply bg-secondary text-white hover:bg-secondary-hover;
+    @apply bg-secondary text-white hover:bg-emerald-600;
   }
 
   .btn-ghost {
@@ -60,4 +60,47 @@
   .input {
     @apply px-4 py-2 bg-card-hover border border-border rounded-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
   }
-} 
+
+  .theme-neomodern {
+    --bg: #0f172a;
+    --sidebar: #1e293b;
+    --accent: #334155;
+    --active: #2563eb;
+    --text-muted: #9ca3af;
+    --text-primary: #f3f4f6;
+  }
+
+  .theme-glass {
+    --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 60%, #0f172a 100%);
+    --sidebar: rgba(30, 41, 59, 0.7);
+    --accent: rgba(255,255,255,0.10);
+    --active: rgba(255,255,255,0.30);
+    --text-muted: #e5e7eb;
+    --text-primary: #fff;
+  }
+
+  .theme-dark {
+    --bg: #121212;
+    --sidebar: #1e1e1e;
+    --accent: #333333;
+    --active: #bb86fc;
+    --text-muted: #a0a0a0;
+    --text-primary: #ffffff;
+  }
+
+  .bg-app {
+    background: var(--bg);
+  }
+  .bg-sidebar {
+    background: var(--sidebar);
+  }
+  .bg-accent {
+    background: var(--accent);
+  }
+  .text-muted {
+    color: var(--text-muted);
+  }
+  .text-primary {
+    color: var(--text-primary);
+  }
+}

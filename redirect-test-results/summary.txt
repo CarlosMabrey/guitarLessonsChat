@@ -1,0 +1,32 @@
+[
+  {
+    "originalUrl": "https://tabs.ultimate-guitar.com/v/van_morrison/brown_eyed_girl_tab.htm",
+    "success": true,
+    "finalUrl": "https://tabs.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-97120",
+    "hasTabNotation": true
+  },
+  {
+    "originalUrl": "https://tabs.ultimate-guitar.com/v/van_morrison/brown_eyed_girl_ver2_tab.htm",
+    "success": true,
+    "finalUrl": "https://tabs.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-179799",
+    "hasTabNotation": true
+  },
+  {
+    "originalUrl": "https://tabs.ultimate-guitar.com/v/van_morrison/brown_eyed_girl_ver3_tab.htm",
+    "success": true,
+    "finalUrl": "https://tabs.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-547505",
+    "hasTabNotation": true
+  },
+  {
+    "originalUrl": "https://www.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-19889",
+    "success": false,
+    "finalUrl": "https://www.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-19889",
+    "hasTabNotation": false
+  },
+  {
+    "originalUrl": "https://www.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-chords-8572",
+    "success": false,
+    "finalUrl": "https://www.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-chords-8572",
+    "hasTabNotation": false
+  }
+]

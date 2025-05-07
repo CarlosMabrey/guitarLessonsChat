@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import ChordProgressionPlayer from '@/components/practice/ChordProgressionPlayer';
-import PageContainer from '@/components/layout/PageContainer';
+import Layout from '@/components/ui/Layout';
 
 const COMMON_PROGRESSIONS = [
   {
@@ -78,11 +78,11 @@ export default function PracticePage() {
   }
   
   return (
-    <PageContainer title="Chord Progression Practice">
+    <Layout title="Practice Chord Progressions" version="0.2.0">
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
           <h1 className="text-2xl font-bold mb-4">Practice Chord Progressions</h1>
-          <p className="text-text-secondary">
+          <p className="text-muted">
             Improve your chord transitions by practicing common progressions. Select a pre-made progression
             or create your own custom sequence.
           </p>
@@ -90,18 +90,18 @@ export default function PracticePage() {
         
         <div className="flex flex-col md:flex-row gap-8 mb-8">
           <div className="md:w-1/3">
-            <div className="bg-background-secondary p-4 rounded-lg">
+            <div className="theme-card p-4 rounded-lg">
               <h2 className="text-lg font-medium mb-4">Choose a Progression</h2>
               
               <div className="flex items-center gap-4 mb-4">
                 <button 
-                  className={`px-3 py-1 rounded ${!isCustom ? 'bg-primary text-white' : 'bg-background-primary'}`}
+                  className={`px-3 py-1 rounded ${!isCustom ? 'bg-active text-white' : 'bg-accent'}`}
                   onClick={() => setIsCustom(false)}
                 >
                   Common
                 </button>
                 <button 
-                  className={`px-3 py-1 rounded ${isCustom ? 'bg-primary text-white' : 'bg-background-primary'}`}
+                  className={`px-3 py-1 rounded ${isCustom ? 'bg-active text-white' : 'bg-accent'}`}
                   onClick={() => setIsCustom(true)}
                 >
                   Custom
@@ -113,16 +113,16 @@ export default function PracticePage() {
                   {COMMON_PROGRESSIONS.map((prog, index) => (
                     <div 
                       key={index}
-                      className={`p-3 rounded cursor-pointer ${selectedProgression.name === prog.name ? 'bg-primary/10 border border-primary' : 'bg-background-primary hover:bg-background-primary/80'}`}
+                      className={`p-3 rounded cursor-pointer ${selectedProgression.name === prog.name ? 'bg-active/10 border border-active' : 'bg-accent hover:bg-accent'}`}
                       onClick={() => setSelectedProgression(prog)}
                     >
                       <div className="font-medium">{prog.name}</div>
-                      <div className="text-sm text-text-secondary">{prog.description}</div>
+                      <div className="text-sm text-muted">{prog.description}</div>
                       <div className="flex items-center gap-1 mt-1">
                         <span className={`text-xs px-2 py-0.5 rounded ${prog.difficulty === 'Beginner' ? 'bg-green-100 text-green-800' : prog.difficulty === 'Intermediate' ? 'bg-yellow-100 text-yellow-800' : 'bg-red-100 text-red-800'}`}>
                           {prog.difficulty}
                         </span>
-                        <span className="text-xs text-text-secondary ml-2">{prog.chords.join(' - ')}</span>
+                        <span className="text-xs text-muted ml-2">{prog.chords.join(' - ')}</span>
                       </div>
                     </div>
                   ))}
@@ -135,12 +135,12 @@ export default function PracticePage() {
                       value={customChord}
                       onChange={(e) => setCustomChord(e.target.value)}
                       placeholder="Add chord (e.g., Am, G7)"
-                      className="flex-1 px-3 py-2 rounded bg-background-primary"
+                      className="flex-1 px-3 py-2 rounded bg-accent"
                     />
                     <button
                       onClick={addToCustomProgression}
                       disabled={!customChord}
-                      className="px-3 py-2 rounded bg-primary text-white disabled:bg-primary/50"
+                      className="px-3 py-2 rounded bg-active text-white disabled:bg-active/50"
                     >
                       Add
                     </button>
@@ -149,7 +149,7 @@ export default function PracticePage() {
                   {customProgression.length > 0 ? (
                     <div className="space-y-2">
                       {customProgression.map((chord, index) => (
-                        <div key={index} className="flex items-center justify-between bg-background-primary p-2 rounded">
+                        <div key={index} className="flex items-center justify-between bg-accent p-2 rounded">
                           <span>{chord}</span>
                           <button
                             onClick={() => removeFromCustomProgression(index)}
@@ -161,7 +161,7 @@ export default function PracticePage() {
                       ))}
                     </div>
                   ) : (
-                    <div className="text-center py-8 text-text-secondary">
+                    <div className="text-center py-8 text-muted">
                       Add chords to create your custom progression
                     </div>
                   )}
@@ -169,7 +169,7 @@ export default function PracticePage() {
               )}
             </div>
             
-            <div className="mt-4 bg-background-secondary p-4 rounded-lg">
+            <div className="mt-4 theme-card p-4 rounded-lg">
               <h3 className="font-medium mb-2">Your Stats</h3>
               <div className="flex items-center justify-between">
                 <span>Progressions completed:</span>
@@ -187,9 +187,9 @@ export default function PracticePage() {
           </div>
         </div>
         
-        <div className="bg-background-secondary p-4 rounded-lg">
+        <div className="theme-card p-4 rounded-lg">
           <h2 className="text-lg font-medium mb-4">Practice Tips</h2>
-          <ul className="list-disc list-inside space-y-2 text-text-secondary">
+          <ul className="list-disc list-inside space-y-2 text-muted">
             <li>Focus on clean transitions between chords</li>
             <li>Start slow and gradually increase the tempo</li>
             <li>Try to minimize finger movement between chord changes</li>
@@ -199,6 +199,6 @@ export default function PracticePage() {
           </ul>
         </div>
       </div>
-    </PageContainer>
+    </Layout>
   );
-} 
+}
