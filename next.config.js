@@ -4,7 +4,7 @@ const nextConfig = {
   webpack: (config) => {
     config.watchOptions = {
       ...config.watchOptions,
-      ignored: ['**/node_modules', '**/COPIES']
+      ignored: ['**/node_modules', '**/COPIES', '**/_old/**']
     }
     return config
   },
@@ -27,7 +27,6 @@ const nextConfig = {
         source: '/',
         destination: '/dashboard',
         permanent: false,
-
       },
       // {
       //   source: '/practice',
@@ -42,9 +41,9 @@ const nextConfig = {
     ]
   },
   // Enable App Router for specific paths
-//   experimental: {
-//     appDir: true,
-//   }
+  // experimental: {
+  //   appDir: true,
+  // }
 };
 
 module.exports = nextConfig;
