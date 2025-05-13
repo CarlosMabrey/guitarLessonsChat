@@ -27,6 +27,7 @@ const nextConfig = {
         source: '/',
         destination: '/dashboard',
         permanent: false,
+
       },
       // {
       //   source: '/practice',
@@ -41,9 +42,9 @@ const nextConfig = {
     ]
   },
   // Enable App Router for specific paths
-  // experimental: {
-  //   appDir: true,
-  // }
+//   experimental: {
+//     appDir: true,
+//   }
 };
 
 module.exports = nextConfig;

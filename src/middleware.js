@@ -18,7 +18,9 @@ export function middleware(request) {
     '/songs',
     '/practice',
     '/progress',
-    '/test'
+    '/test',
+    '/theory',
+    '/theory/tonnetz'
   ];
 
   // If this is a route we want to prioritize and it doesn't already include /app
