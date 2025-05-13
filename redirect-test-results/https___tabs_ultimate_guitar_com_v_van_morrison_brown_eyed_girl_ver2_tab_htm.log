@@ -1,0 +1,65 @@
+Testing: https://tabs.ultimate-guitar.com/v/van_morrison/brown_eyed_girl_ver2_tab.htm
+
+Request: https://tabs.ultimate-guitar.com/v/van_morrison/brown_eyed_girl_ver2_tab.htm
+Status: 301
+Headers: {
+  "date": "Wed, 07 May 2025 09:48:29 GMT",
+  "content-type": "text/html; charset=UTF-8",
+  "transfer-encoding": "chunked",
+  "connection": "keep-alive",
+  "referrer-policy": "no-referrer-when-downgrade",
+  "content-security-policy": "frame-ancestors 'self' www.911tabs.com;",
+  "vary": "User-Agent",
+  "location": "https://tabs.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-179799",
+  "x-controller": "ug\\modules\\tab\\controllers\\ViewController\\index",
+  "x-ug-unified-id": "1746611309327615697",
+  "server-timing": "backend;dur=35, rnd;dur=0",
+  "set-cookie": [
+    "localization=en; expires=Thu, 08 May 2025 09:08:29 GMT; Max-Age=84000; path=/; domain=ultimate-guitar.com; SameSite=Lax",
+    "_ug_unified_id=1.1746611309.327615697; expires=Fri, 07 May 2027 09:48:29 GMT; Max-Age=63072000; path=/; domain=.ultimate-guitar.com; secure; SameSite=None",
+    "ug_ab_experiment=4488.2_4701.1_5241.2_6020.1_6029.2; expires=Tue, 28 Apr 2026 09:48:29 GMT; Max-Age=30758400; path=/; domain=.ultimate-guitar.com; HttpOnly; SameSite=Lax",
+    "static_cache_key_v2=_ver1746606684; expires=Fri, 15 Jun 2029 09:48:29 GMT; Max-Age=129600000; path=/; SameSite=Lax",
+    "__cf_bm=f7r_MfVBpcpfvOvV0TTB0nvGa9ZTBO20QkKzAPyK_hg-1746611309-1.0.1.1-qKltaVJjNgdFx10FVuclULCR1QBgw0hs9CPUmNxNKedj9bh5aWo8putGX32eKH2m_o.2SlCmuNqJ0vg515u3y_hBmAMizAh9PnOqY.vaDNE; path=/; expires=Wed, 07-May-25 10:18:29 GMT; domain=.ultimate-guitar.com; HttpOnly; Secure; SameSite=None"
+  ],
+  "cf-cache-status": "DYNAMIC",
+  "server": "cloudflare",
+  "cf-ray": "93bfcd4ac9eee66a-DEN",
+  "alt-svc": "h3=\":443\"; ma=86400"
+}
+
+Redirected to: https://tabs.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-179799
+
+Request: https://tabs.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-179799
+Status: 200
+Headers: {
+  "date": "Wed, 07 May 2025 09:48:29 GMT",
+  "content-type": "text/html; charset=UTF-8",
+  "transfer-encoding": "chunked",
+  "connection": "keep-alive",
+  "referrer-policy": "no-referrer-when-downgrade",
+  "content-security-policy": "frame-ancestors 'self' www.911tabs.com;",
+  "vary": "User-Agent, accept-encoding",
+  "link": "<https://tabs.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-179799>; rel=\"alternate\"; hreflang=\"en\", <https://pt.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-179799>; rel=\"alternate\"; hreflang=\"pt-BR\", <https://es.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-179799>; rel=\"alternate\"; hreflang=\"es\"",
+  "cache-control": "no-store, no-cache, must-revalidate",
+  "x-ug-unified-id": "1746611309503448747",
+  "server-timing": "backend;dur=98, rnd;dur=0",
+  "set-cookie": [
+    "localization=en; expires=Thu, 08 May 2025 09:08:29 GMT; Max-Age=84000; path=/; domain=ultimate-guitar.com; SameSite=Lax",
+    "_ug_unified_id=1.1746611309.503448747; expires=Fri, 07 May 2027 09:48:29 GMT; Max-Age=63072000; path=/; domain=.ultimate-guitar.com; secure; SameSite=None",
+    "ug_ab_experiment=4488.1_4701.2_5241.2_6020.1_6029.2; expires=Tue, 28 Apr 2026 09:48:29 GMT; Max-Age=30758400; path=/; domain=.ultimate-guitar.com; HttpOnly; SameSite=Lax",
+    "_csrf=AsjQqXukR-rV48hruVzwCMmA1jnYPSXt; path=/; HttpOnly; SameSite=Lax",
+    "_ug_session_id=1.1746611305.1746611309.1; expires=Fri, 07 May 2027 09:48:29 GMT; Max-Age=63072000; path=/; domain=.ultimate-guitar.com; secure; SameSite=None",
+    "static_cache_key_v2=_ver1746606690; expires=Fri, 15 Jun 2029 09:48:29 GMT; Max-Age=129600000; path=/; SameSite=Lax",
+    "__cf_bm=JQAUAEtFHmsgrnWhnFopEaG0fdak4oNZlIHH2.d1bG0-1746611309-1.0.1.1-DS_V0Lka8yR1TzHoNIytpeScJdv7Vzdd4l5qOz9KsgAAPmWFr.HjTxhj3ZH9EKVWkhvW2osI67on0nTwaVswyIP0rMahXSpTkIJWg_DGn0A; path=/; expires=Wed, 07-May-25 10:18:29 GMT; domain=.ultimate-guitar.com; HttpOnly; Secure; SameSite=None"
+  ],
+  "cf-cache-status": "DYNAMIC",
+  "server": "cloudflare",
+  "cf-ray": "93bfcd4bead6e66a-DEN",
+  "alt-svc": "h3=\":443\"; ma=86400"
+}
+
+Success! Final URL: https://tabs.ultimate-guitar.com/tab/van-morrison/brown-eyed-girl-tabs-179799
+
+Content size: 81981 bytes
+Contains tab notation: true
+Tab content extracted and saved!

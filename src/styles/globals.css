@@ -1,0 +1,144 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 240 17% 9%;
+    --background-light: 240 16% 15%;
+    --card: 240 15% 14%;
+    --card-hover: 240 15% 16%;
+    --border: 240 10% 20%;
+    --border-light: 240 10% 27%;
+    --text-primary: 220 13% 95%;
+    --text-secondary: 220 9% 65%;
+    --text-muted: 220 9% 45%;
+    --foreground-rgb: 255, 255, 255;
+    --background-rgb: 30, 30, 30;
+  }
+
+  html {
+    @apply scroll-smooth;
+  }
+
+  body {
+    @apply antialiased;
+    color: rgb(var(--foreground-rgb));
+    background: rgb(var(--background-rgb));
+  }
+}
+
+@layer components {
+  .sidebar-icon {
+    @apply w-10 h-10 flex items-center justify-center text-xl text-text-secondary hover:text-text-primary transition-colors;
+  }
+
+  .main-heading {
+    @apply text-2xl font-bold text-text-primary;
+  }
+
+  .sub-heading {
+    @apply text-xl font-semibold text-text-primary;
+  }
+
+  .card {
+    @apply bg-card rounded-lg border border-border shadow-card;
+  }
+
+  .btn {
+    @apply px-4 py-2 rounded-md font-medium transition-colors;
+  }
+
+  .btn-primary {
+    @apply bg-primary text-white hover:bg-primary-hover;
+  }
+
+  .btn-secondary {
+    @apply bg-secondary text-white hover:bg-secondary-hover;
+  }
+
+  .btn-ghost {
+    @apply bg-transparent hover:bg-card-hover text-text-primary;
+  }
+
+  .input {
+    @apply px-4 py-2 bg-card-hover border border-border rounded-md text-text-primary focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent;
+  }
+
+  /* Glassmorphism Theme */
+  .theme-glassmorphism {
+    --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --sidebar: rgba(255, 255, 255, 0.05);
+    --accent: rgba(255, 255, 255, 0.05);
+    --active: rgba(146, 197, 253, 0.6);
+    --text-muted: #a0aec0;
+    --text-primary: #ffffff;
+    --card-bg: rgba(255, 255, 255, 0.1);
+    --card-border: rgba(255, 255, 255, 0.2);
+    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+  }
+
+  /* Light Minimal Theme */
+  .theme-light-minimal {
+    --bg: #f9fafb;
+    --sidebar: #ffffff;
+    --accent: #e5e7eb;
+    --active: #93c5fd;
+    --text-muted: #6b7280;
+    --text-primary: #111827;
+    --card-bg: #ffffff;
+    --card-border: #e5e7eb;
+    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  }
+
+  /* RetroWave Theme */
+  .theme-retrowave {
+    --bg: linear-gradient(135deg, #0f0c29 0%, #24243e 50%, #302b63 100%);
+    --sidebar: rgba(15, 12, 41, 0.95);
+    --accent: rgba(142, 45, 226, 0.5);
+    --active: #ff6ec4;
+    --text-muted: #a29cd9;
+    --text-primary: #e0f7fa;
+    --card-bg: rgba(6, 6, 15, 0.85);
+    --card-border: rgba(255, 110, 196, 0.4);
+    --card-shadow: 0 4px 20px rgba(142, 45, 226, 0.3);
+  }
+
+  .bg-app {
+    background: var(--bg);
+  }
+  .bg-sidebar {
+    background: var(--sidebar);
+  }
+  .bg-accent {
+    background: var(--accent);
+  }
+  .text-muted {
+    color: var(--text-muted);
+  }
+  .text-primary {
+    color: var(--text-primary);
+  }
+
+  /* Card styles based on theme */
+  .theme-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    box-shadow: var(--card-shadow);
+    @apply rounded-xl;
+  }
+
+  /* Special effects for glassmorphism theme */
+  .theme-glassmorphism .theme-card,
+  .theme-glassmorphism .bg-sidebar,
+  .theme-glassmorphism .bg-accent {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+  }
+
+  /* Glow effects for retrowave theme */
+  .theme-retrowave .active-item {
+    box-shadow: 0 0 10px rgba(255, 110, 196, 0.5);
+    text-shadow: 0 0 5px rgba(255, 110, 196, 0.7);
+  }
+}

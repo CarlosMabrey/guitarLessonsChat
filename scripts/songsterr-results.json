@@ -1,0 +1,98 @@
+[
+  {
+    "songId": "song1",
+    "artist": "Guns N Roses",
+    "title": "Sweet Child O Mine",
+    "songsterrId": "23",
+    "idType": "numeric",
+    "url": "/a/wsa/guns-n-roses-sweet-child-o-mine-tab-s23"
+  },
+  {
+    "songId": "song2",
+    "artist": "Led Zeppelin",
+    "title": "Stairway to Heaven",
+    "songsterrId": "27",
+    "idType": "numeric",
+    "url": "/a/wsa/led-zeppelin-stairway-to-heaven-tab-s27"
+  },
+  {
+    "songId": "song3",
+    "artist": "Metallica",
+    "title": "Enter Sandman",
+    "songsterrId": "19",
+    "idType": "numeric",
+    "url": "/a/wsa/metallica-enter-sandman-tab-s19"
+  },
+  {
+    "songId": "song4",
+    "artist": "AC/DC",
+    "title": "Back in Black",
+    "songsterrId": "1024",
+    "idType": "numeric",
+    "url": "/a/wsa/ac-dc-back-in-black-tab-s1024"
+  },
+  {
+    "songId": "song5",
+    "artist": "Eagles",
+    "title": "Hotel California",
+    "songsterrId": "741930",
+    "idType": "numeric",
+    "url": "/a/wsa/eagles-hotel-california-tab-s741930"
+  },
+  {
+    "songId": "song6",
+    "artist": "Pink Floyd",
+    "title": "Comfortably Numb",
+    "songsterrId": "271",
+    "idType": "numeric",
+    "url": "/a/wsa/pink-floyd-comfortably-numb-tab-s271"
+  },
+  {
+    "songId": "song7",
+    "artist": "Radiohead",
+    "title": "Creep",
+    "songsterrId": "97",
+    "idType": "numeric",
+    "url": "/a/wsa/radiohead-creep-tab-s97"
+  },
+  {
+    "songId": "song8",
+    "artist": "The Animals",
+    "title": "House of the Rising Sun",
+    "songsterrId": "449957",
+    "idType": "numeric",
+    "url": "/a/wsa/zinchuk-victor-animals-house-of-the-rising-sun-tab-s449957"
+  },
+  {
+    "songId": "song9",
+    "artist": "Loathe",
+    "title": "Screaming",
+    "songsterrId": "484434",
+    "idType": "numeric",
+    "url": "/a/wsa/loathe-screaming-tab-s484434"
+  },
+  {
+    "songId": "song10",
+    "artist": "Ozzy Osbourne",
+    "title": "Crazy Train",
+    "songsterrId": "61178",
+    "idType": "numeric",
+    "url": "/a/wsa/ozzy-osbourne-crazy-train-tab-s61178"
+  },
+  {
+    "songId": "song11",
+    "artist": "Nirvana",
+    "title": "Smells Like Teen Spirit",
+    "songsterrId": "269",
+    "idType": "numeric",
+    "url": "/a/wsa/nirvana-smells-like-teen-spirit-tab-s269"
+  },
+  {
+    "songId": "song12",
+    "artist": "Oasis",
+    "title": "Wonderwall",
+    "songsterrId": "2",
+    "idType": "numeric",
+    "url": "/a/wsa/oasis-wonderwall-tab-s2"
+  }
+]
