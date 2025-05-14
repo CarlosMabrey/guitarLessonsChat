@@ -137,21 +137,6 @@ export default function ProgressPage() {
             ))}
           </div>
         </div>
-        
-        <div className="p-6 bg-card-hover rounded-lg shadow-card max-w-2xl">
-          <h2 className="text-xl font-bold mb-3 text-primary">Quick Links</h2>
-          <ul className="space-y-2">
-            <li>
-              <Link href="/dashboard" className="text-primary hover:underline">Dashboard</Link>
-            </li>
-            <li>
-              <Link href="/songs" className="text-primary hover:underline">Songs</Link>
-            </li>
-            <li>
-              <Link href="/practice" className="text-primary hover:underline">Practice</Link>
-            </li>
-          </ul>
-        </div>
       </div>
     </Layout>
   );

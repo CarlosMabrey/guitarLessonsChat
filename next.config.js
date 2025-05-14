@@ -1,13 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true, // maybe change
-  webpack: (config) => {
-    config.watchOptions = {
-      ...config.watchOptions,
-      ignored: ['**/node_modules', '**/COPIES', '**/_old/**']
-    }
-    return config
-  },
   // Add these options for more verbose logging
   logging: {
     fetches: {

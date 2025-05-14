@@ -22,6 +22,9 @@
     "three": "^0.176.0",
     "three-stdlib": "^2.36.0",
     "tonal": "^6.4.1",
+    "tonal-chord": "^2.2.2",
+    "tonal-distance": "^2.2.2",
+    "tonal-note": "^2.2.2",
     "tone": "^15.1.22",
     "vexflow": "^5.0.0"
   },

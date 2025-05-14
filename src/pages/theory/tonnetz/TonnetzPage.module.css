@@ -1,0 +1,377 @@
+/* General Page Layout */
+.tonnetzPageContainer {
+  display: flex;
+  height: calc(100vh - 80px); /* Adjust 80px based on your Layout component's header height */
+  background-color: #111827; /* Tailwind gray-900 */
+  color: #e5e7eb; /* Tailwind gray-200 */
+}
+
+.mainContent {
+  flex-grow: 1;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto; /* Allow scrolling for main content if it overflows */
+  max-height: 100%;
+}
+
+.pageHeader {
+  margin-bottom: 20px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #374151; /* Tailwind gray-700 */
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  color: #9ca3af; /* Tailwind gray-400 */
+  text-decoration: none;
+  margin-bottom: 10px;
+}
+.backLink:hover {
+  color: #d1d5db; /* Tailwind gray-300 */
+}
+
+.mainHeading {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #f3f4f6; /* Tailwind gray-100 */
+  margin-bottom: 5px;
+}
+
+.subHeading {
+  font-size: 1rem;
+  color: #9ca3af; /* Tailwind gray-400 */
+}
+
+/* Start Button Area */
+.startContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex-grow: 1;
+  text-align: center;
+}
+
+.startButton {
+  background-color: #3b82f6; /* Tailwind blue-500 */
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+.startButton:hover {
+  background-color: #2563eb; /* Tailwind blue-600 */
+}
+
+/* Controls Bar */
+.controlsBar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 15px;
+  padding: 10px;
+  background-color: #1f2937; /* Tailwind gray-800 */
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
+
+.controlGroup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.controlLabel {
+  font-size: 0.9rem;
+  color: #9ca3af; /* Tailwind gray-400 */
+}
+
+.controlSelect, .controlButton, .controlRange {
+  background-color: #374151; /* Tailwind gray-700 */
+  color: #e5e7eb; /* Tailwind gray-200 */
+  border: 1px solid #4b5563; /* Tailwind gray-600 */
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 0.9rem;
+}
+
+.controlSelect:focus, .controlButton:focus, .controlRange:focus {
+  outline: none;
+  border-color: #3b82f6; /* Tailwind blue-500 */
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.controlButton {
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  transition: background-color 0.2s ease-in-out;
+}
+.controlButton:hover:not(:disabled) {
+  background-color: #4b5563; /* Tailwind gray-600 */
+}
+.controlButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.activeButton {
+    background-color: #10b981; /* Tailwind emerald-500 */
+    color: white;
+}
+.activeButton:hover {
+    background-color: #059669; /* Tailwind emerald-600 */
+}
+
+
+/* Tonnetz Visualization Area */
+.tonnetzVisualizationArea {
+  flex-grow: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #0a0920; /* Dark background for canvas area */
+  border-radius: 8px;
+  min-height: 400px; /* Ensure it has some height */
+  position: relative; /* For overlays */
+  overflow: hidden; /* Prevent any overflow */
+}
+
+.canvasContainer3d {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  /* Prevent blurry text in Three.js */
+  image-rendering: optimizeSpeed;
+  image-rendering: -webkit-optimize-contrast;
+}
+
+.tonnetzCanvas3d {
+  display: block; /* Remove extra space below canvas */
+  width: 100%;
+  height: 100%;
+  border-radius: 8px;
+}
+
+.canvasOverlayText {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  color: rgba(255, 255, 255, 0.7); /* More visible text */
+  font-size: 0.8rem;
+  background-color: rgba(17, 24, 39, 0.7); /* Tailwind gray-900 with opacity */
+  padding: 4px 8px;
+  border-radius: 4px;
+  z-index: 10;
+  font-weight: 500; /* Slightly bolder for better readability */
+  user-select: none; /* Prevent selection */
+}
+
+.canvasContainer2d {
+  width: 100%;
+  height: 100%;
+  min-height: 400px; /* Ensure canvas has substantial drawing area */
+  display: flex; /* For centering canvas if it's smaller */
+  justify-content: center;
+  align-items: center;
+  padding: 10px;
+}
+
+.tonnetzCanvas2d {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  border-radius: 8px;
+  /* width and height are set via style prop in component for responsiveness */
+}
+
+.tooltip2d {
+    background-color: #1f2937; /* Tailwind gray-800 */
+    color: #e5e7eb; /* Tailwind gray-200 */
+    padding: 5px 10px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    pointer-events: none; /* So it doesn't interfere with mouse events on canvas */
+    border: 1px solid #4b5563; /* Tailwind gray-600 */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+    z-index: 100;
+}
+
+
+/* Info and Actions Bar */
+.infoAndActions {
+  margin-top: 20px;
+  padding: 15px;
+  background-color: #1f2937; /* Tailwind gray-800 */
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 15px;
+}
+
+.infoBox {
+  flex-basis: calc(60% - 10px);
+  min-width: 250px;
+}
+
+.infoTitle {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #d1d5db; /* Tailwind gray-300 */
+  margin-bottom: 8px;
+}
+
+.infoBox p {
+  font-size: 0.9rem;
+  color: #9ca3af; /* Tailwind gray-400 */
+  margin-bottom: 4px;
+}
+.infoBox p strong {
+    color: #b0b7c3; /* Slightly lighter gray */
+}
+
+.actionButtons {
+  flex-basis: calc(40% - 10px);
+  min-width: 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+.actionButton {
+  background-color: #374151; /* Tailwind gray-700 */
+  color: white;
+  padding: 8px 15px;
+  border-radius: 6px;
+  border: 1px solid #4b5563; /* Tailwind gray-600 */
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+  font-size: 0.9rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: auto; /* Fit content */
+}
+.actionButton:hover:not(:disabled) {
+  background-color: #4b5563; /* Tailwind gray-600 */
+}
+.actionButton:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dangerButton {
+  background-color: #ef4444; /* Tailwind red-500 */
+}
+.dangerButton:hover:not(:disabled) {
+  background-color: #dc2626; /* Tailwind red-600 */
+}
+
+
+/* Sidebar */
+.sidebar {
+  width: 280px;
+  min-width: 240px;
+  background-color: #1f2937; /* Tailwind gray-800 */
+  padding: 20px;
+  overflow-y: auto;
+  height: 100%;
+  border-right: 1px solid #374151; /* Tailwind gray-700 */
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sidebarSection {
+    margin-bottom: 15px;
+}
+
+.sidebarLabel {
+    display: block;
+    font-size: 0.9rem;
+    color: #9ca3af; /* Tailwind gray-400 */
+    margin-bottom: 6px;
+}
+
+.sidebarSelect {
+    width: 100%;
+    background-color: #374151; /* Tailwind gray-700 */
+    color: #e5e7eb; /* Tailwind gray-200 */
+    border: 1px solid #4b5563; /* Tailwind gray-600 */
+    border-radius: 6px;
+    padding: 8px 10px;
+    font-size: 0.9rem;
+}
+.sidebarSelect:focus {
+    outline: none;
+    border-color: #3b82f6; /* Tailwind blue-500 */
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.sidebarTitle {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #d1d5db; /* Tailwind gray-300 */
+  margin-bottom: 10px;
+  padding-bottom: 5px;
+  border-bottom: 1px solid #4b5563; /* Tailwind gray-600 */
+}
+
+.sidebarList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.sidebarItem {
+  margin-bottom: 8px;
+}
+
+.sidebarButton {
+  width: 100%;
+  padding: 10px;
+  background-color: #374151; /* Tailwind gray-700 */
+  color: #e5e7eb; /* Tailwind gray-200 */
+  border: none;
+  border-radius: 6px;
+  text-align: left;
+  cursor: pointer;
+  font-size: 0.95rem;
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+}
+
+.sidebarButton:hover {
+  background-color: #4b5563; /* Tailwind gray-600 */
+  color: white;
+}
+
+/* Highlighting for nodes if needed directly via CSS (though primarily handled by JS) */
+.highlightedNode {
+  /* This class would be added by react-tonnetz if it were used.
+     For custom rendering, JS directly sets colors/materials.
+     However, you could use it for other indicators if needed.
+  */
+  /* Example: outline: 2px solid yellow; */
+}
+
+/* Info Popup (if you decide to add one for sidebar items on hover/click) */
+.infoPopup {
+    position: absolute; /* Or fixed, depending on desired behavior */
+    /* Add positioning, background, padding, border, etc. */
+    background-color: #2d3748; /* Tailwind gray-700 */
+    color: #e5e7eb;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #4b5563;
+    z-index: 1000;
+    /* Example positioning: top right of sidebar item, or mouse follower */
+    /* This is a placeholder, actual styling depends on implementation */
+} 

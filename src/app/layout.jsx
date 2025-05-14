@@ -12,7 +12,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     // initialize html with default glassmorphism theme
-    <html lang="en" className="theme-glassmorphism">  
+    <html lang="en" className="theme-glassmorphism-ultramodern">  
       <body className={`${inter.className} bg-background text-text-primary min-h-screen`}>
         <ThemeProvider>
           {children}

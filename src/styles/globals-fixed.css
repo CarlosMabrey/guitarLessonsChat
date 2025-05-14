@@ -4,17 +4,27 @@
 
 @layer base {
   :root {
-    --background: 240 17% 9%;
-    --background-light: 240 16% 15%;
-    --card: 240 15% 14%;
-    --card-hover: 240 15% 16%;
-    --border: 240 10% 20%;
-    --border-light: 240 10% 27%;
-    --text-primary: 220 13% 95%;
-    --text-secondary: 220 9% 65%;
-    --text-muted: 220 9% 45%;
-    --foreground-rgb: 255, 255, 255;
-    --background-rgb: 30, 30, 30;
+    --background: hsl(240, 17%, 9%);
+    --background-light: hsl(240, 16%, 15%);
+    --card: hsl(240, 15%, 14%);
+    --card-hover: hsl(240, 15%, 16%);
+    --border: hsl(240, 10%, 20%);
+    --border-light: hsl(240, 10%, 27%);
+    --text-primary: hsl(220, 13%, 95%);
+    --text-secondary: hsl(220, 9%, 65%);
+    --text-muted: hsl(220, 9%, 45%);
+    --primary: hsl(214, 96%, 56%);
+    --primary-hover: hsl(212, 74%, 43%);
+    --accent: hsl(240, 10%, 20%);
+    --active: hsl(211, 80%, 69%);
+    --success: hsl(118, 48%, 64%);
+    --success-hover: hsl(136, 68%, 44%);
+    --danger: hsl(1, 73%, 59%);
+    --danger-hover: hsl(1, 68%, 50%);
+    --warning: hsl(42, 90%, 61%);
+    --warning-hover: hsl(33, 74%, 53%);
+    --info: hsl(214, 96%, 56%);
+    --info-hover: hsl(212, 74%, 43%);
   }
 
   html {
@@ -23,8 +33,12 @@
 
   body {
     @apply antialiased;
-    color: rgb(var(--foreground-rgb));
-    background: rgb(var(--background-rgb));
+    color: hsl(var(--text-primary));
+    background: var(--background);
+  }
+  /* Smooth theme transitions */
+  * {
+    transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
   }
 }
 
@@ -67,48 +81,138 @@
 
   /* Glassmorphism Theme */
   .theme-glassmorphism {
-    --bg: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-    --sidebar: rgba(255, 255, 255, 0.05);
+    --background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    --background-light: rgba(255, 255, 255, 0.1);
+    --card: rgba(255, 255, 255, 0.1);
+    --card-hover: rgba(255, 255, 255, 0.15);
+    --border: rgba(255, 255, 255, 0.2);
+    --border-light: rgba(255, 255, 255, 0.25);
+    --text-primary: #ffffff;
+    --text-secondary: #cbd5e1;
+    --text-muted: #a0aec0;
     --accent: rgba(255, 255, 255, 0.05);
     --active: rgba(146, 197, 253, 0.6);
-    --text-muted: #a0aec0;
-    --text-primary: #ffffff;
-    --card-bg: rgba(255, 255, 255, 0.1);
-    --card-border: rgba(255, 255, 255, 0.2);
-    --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    --success: var(--success);
+    --warning: var(--warning);
+    --danger: var(--danger);
+    --info: var(--info);
   }
 
   /* Light Minimal Theme */
   .theme-light-minimal {
-    --bg: #f9fafb;
-    --sidebar: #ffffff;
+    --background: #f9fafb;
+    --background-light: #ffffff;
+    --card: #ffffff;
+    --card-hover: #f3f4f6;
+    --border: #e5e7eb;
+    --border-light: #e5e7eb;
+    --text-primary: #111827;
+    --text-secondary: #4b5563;
+    --text-muted: #6b7280;
     --accent: #e5e7eb;
     --active: #93c5fd;
-    --text-muted: #6b7280;
-    --text-primary: #111827;
-    --card-bg: #ffffff;
-    --card-border: #e5e7eb;
-    --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
 
   /* RetroWave Theme */
   .theme-retrowave {
-    --bg: linear-gradient(135deg, #0f0c29 0%, #24243e 50%, #302b63 100%);
-    --sidebar: rgba(15, 12, 41, 0.95);
+    --background: linear-gradient(135deg, #0f0c29 0%, #24243e 50%, #302b63 100%);
+    --background-light: rgba(15, 12, 41, 0.95);
+    --card: rgba(6, 6, 15, 0.85);
+    --card-hover: rgba(6, 6, 15, 0.95);
+    --border: rgba(255, 110, 196, 0.4);
+    --border-light: rgba(255, 110, 196, 0.6);
+    --text-primary: #e0f7fa;
+    --text-secondary: #a29cd9;
+    --text-muted: #a29cd9;
     --accent: rgba(142, 45, 226, 0.5);
     --active: #ff6ec4;
-    --text-muted: #a29cd9;
-    --text-primary: #e0f7fa;
-    --card-bg: rgba(6, 6, 15, 0.85);
-    --card-border: rgba(255, 110, 196, 0.4);
-    --card-shadow: 0 4px 20px rgba(142, 45, 226, 0.3);
+  }
+
+  /* UltraModern Glassmorphism Theme */
+  .theme-glassmorphism-ultramodern {
+    /* Deep navy gradient background like in the image */
+    --background: linear-gradient(135deg, #0f1e3c 0%, #162b57 100%);
+    
+    /* Translucent sidebar with blurred backdrop */
+    --background-light: rgba(30, 58, 99, 0.75);
+    
+    /* Translucent blue card background that shows through clearly */
+    --card: rgba(33, 53, 90, 0.55);
+    --card-hover: rgba(38, 58, 97, 0.65);
+    
+    /* Subtle borders for depth */
+    --border: rgba(132, 171, 255, 0.2);
+    --border-light: rgba(132, 171, 255, 0.15);
+    
+    /* Text colors optimized for contrast */
+    --text-primary: #ffffff;
+    --text-secondary: #e0e7ff;
+    --text-muted: #9eb1dd;
+    
+    /* Interactive elements with bright accent colors */
+    --primary: #60a5fa;
+    --primary-hover: #3b82f6;
+    --accent: rgba(96, 165, 250, 0.2);
+    --active: #93c5fd;
+    
+    /* Strong shadow for depth */
+    --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    
+    /* Required system colors */
+    --secondary: #6c8cbf;
+    --secondary-hover: #5a7ab0;
+    --success: #34d399;
+    --success-hover: #10b981;
+    --danger: #f87171;
+    --danger-hover: #ef4444;
+    --warning: #fbbf24;
+    --warning-hover: #f59e0b;
+    --info: #60a5fa;
+    --info-hover: #3b82f6;
+  }
+
+  /* Special effects specifically for the ultramodern theme */
+  .theme-glassmorphism-ultramodern .theme-card,
+  .theme-glassmorphism-ultramodern .bg-sidebar,
+  .theme-glassmorphism-ultramodern .bg-accent {
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+  }
+
+  /* Enhanced card styling for ultramodern theme */
+  .theme-glassmorphism-ultramodern .backdrop-blur-md {
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .theme-glassmorphism-ultramodern .bg-cyan-500\/20 {
+    background: rgba(6, 182, 212, 0.2);
+    box-shadow: 0 0 15px rgba(6, 182, 212, 0.3);
+  }
+
+  .theme-glassmorphism-ultramodern .text-cyan-400 {
+    color: #22d3ee;
+    text-shadow: 0 0 10px rgba(34, 211, 238, 0.4);
+  }
+
+  .theme-glassmorphism-ultramodern .bg-indigo-500\/20 {
+    background: rgba(99, 102, 241, 0.2);
+    box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+  }
+
+  /* Button styling specific to ultramodern theme */
+  .theme-glassmorphism-ultramodern .btn-primary {
+    background: linear-gradient(135deg, #4f85e6 0%, #3b82f6 100%);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.5);
   }
 
   .bg-app {
-    background: var(--bg);
+    background: var(--background);
   }
   .bg-sidebar {
-    background: var(--sidebar);
+    background: var(--background-light);
   }
   .bg-accent {
     background: var(--accent);
@@ -122,10 +226,10 @@
 
   /* Card styles based on theme */
   .theme-card {
-    background: var(--card-bg);
-    border: 1px solid var(--card-border);
-    box-shadow: var(--card-shadow);
-    @apply rounded-xl;
+    background: var(--card);
+    border: 1px solid var(--border);
+    box-shadow: var(--card) 0 4px 6px -1px rgba(0,0,0,0.1); /* keep generic shadow */
+    border-radius: 0.75rem;
   }
 
   /* Special effects for glassmorphism theme */
@@ -141,4 +245,4 @@
     box-shadow: 0 0 10px rgba(255, 110, 196, 0.5);
     text-shadow: 0 0 5px rgba(255, 110, 196, 0.7);
   }
-} 
+}

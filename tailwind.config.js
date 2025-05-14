@@ -9,41 +9,29 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        background: 'hsl(var(--background))',
-        'background-light': 'hsl(var(--background-light))',
-        card: 'hsl(var(--card))',
-        'card-hover': 'hsl(var(--card-hover))',
-        border: 'hsl(var(--border))',
-        'border-light': 'hsl(var(--border-light))',
-        'text-primary': 'hsl(var(--text-primary))',
-        'text-secondary': 'hsl(var(--text-secondary))',
-        'text-muted': 'hsl(var(--text-muted))',
-        primary: '#3b82f6',
-        'primary-hover': '#2563eb',
-        secondary: '#6b7280',
-        'secondary-hover': '#4b5563',
-        active: {
-          DEFAULT: 'var(--active)',
-        },
-        accent: {
-          DEFAULT: 'var(--accent)',
-        },
-        success: {
-          DEFAULT: '#4ade80',
-          hover: '#22c55e',
-        },
-        danger: {
-          DEFAULT: '#ef4444',
-          hover: '#dc2626',
-        },
-        warning: {
-          DEFAULT: '#f59e0b',
-          hover: '#d97706',
-        },
-        info: {
-          DEFAULT: '#3b82f6',
-          hover: '#2563eb',
-        },
+        secondary: 'var(--secondary)',
+        'secondary-hover': 'var(--secondary-hover)',
+        background: 'var(--background)',
+        'background-light': 'var(--background-light)',
+        card: 'var(--card)',
+        'card-hover': 'var(--card-hover)',
+        border: 'var(--border)',
+        'border-light': 'var(--border-light)',
+        'text-primary': 'var(--text-primary)',
+        'text-secondary': 'var(--text-secondary)',
+        'text-muted': 'var(--text-muted)',
+        primary: 'var(--primary)',
+        'primary-hover': 'var(--primary-hover)',
+        accent: 'var(--accent)',
+        active: 'var(--active)',
+        success: 'var(--success)',
+        'success-hover': 'var(--success-hover)',
+        danger: 'var(--danger)',
+        'danger-hover': 'var(--danger-hover)',
+        warning: 'var(--warning)',
+        'warning-hover': 'var(--warning-hover)',
+        info: 'var(--info)',
+        'info-hover': 'var(--info-hover)',
         retrowave: {
           purple: '#8e2de2',
           pink: '#ff6ec4',
@@ -72,6 +60,9 @@ module.exports = {
           '0%': { boxShadow: '0 0 5px rgba(255, 110, 199, 0.5)' },
           '100%': { boxShadow: '0 0 20px rgba(255, 110, 199, 0.8)' },
         }
+      },
+      backdropBlur: {
+        md: '8px',
       },
       backdropFilter: {
         'none': 'none',
@@ -102,4 +93,4 @@ module.exports = {
       addUtilities(newUtilities)
     }
   ],
-} 
+}

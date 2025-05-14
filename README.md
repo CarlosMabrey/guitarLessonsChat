@@ -33,15 +33,55 @@ mindmap
       Learning Path
 ```
 
-## 🚀 Key Features
+## 🎸 Guitar Fretboard Visualizer
 
-- 🎸 **Song Library Management**: Organize songs with progress tracking and difficulty ratings
-- 🤖 **AI Song Analysis**: Automatic breakdown of songs with chords, scales, and practice recommendations
-- 📝 **Interactive Tabs**: Embedded guitar tablature from Songsterr with playalong features
-- 🎯 **Chord Progression Practice**: Interactive tool to master chord transitions with metronome
-- 📊 **Progress Tracking**: Visual tracking of practice time and song mastery
-- 🎬 **Video Playback**: Custom controls for slowing down, looping sections, and synchronized tabs
-- 💬 **Learning Chat**: AI-assisted conversations about specific songs and techniques
+A powerful, interactive fretboard tool with:
+- Tabbed workflow (Fretboard, Voicings, Analysis, Patterns, Progressions)
+- Dynamic chord voicings for all roots and types
+- Interactive fretboard with note/interval highlighting and sound playback
+- Mini floating legend with toggleable visibility
+- Prominent chord diagrams and alternative fingerings
+- Scale patterns and chord progressions views
+- Responsive, accessible UI with mobile support
+- Modular, maintainable code structure
+
+### Code Structure
+```
+├── components/
+│   ├── fretboard/
+│   │   ├── FretboardPage.jsx
+│   │   ├── NoteCell.jsx
+│   │   ├── VoicingDisplay.jsx
+│   │   ├── ChordPositions.jsx
+│   │   ├── ScalePatterns.jsx
+│   │   ├── ChordProgressions.jsx
+│   │   ├── LegendBox.jsx
+│   │   └── TonnetzVisualizer.jsx (planned)
+```
+
+## 🕸️ Tonnetz Chord Visualizer (Planned)
+- Interactive Tonnetz navigation
+- Chord/scale relationships visualized on a Tonnetz grid
+- Advanced analysis and ear training features
+
+## 🚀 Key Features (Updated)
+- Tabbed workflow for contextual views
+- Dynamic chord voicings and alternative fingerings
+- Interactive, accessible fretboard
+- Mini floating legend
+- Scale patterns and chord progressions
+- Tonnetz visualizer (planned)
+- Improved accessibility and mobile support (planned)
+- Modular, maintainable code
+
+## 👩‍💻 Development Status (Updated)
+- Fretboard visualizer refactored and improved
+- Voicings, analysis, patterns, and progressions tabs implemented
+- Code structure modularized for maintainability
+- Tonnetz visualizer and advanced analysis planned
+- Test coverage and refactoring in progress
+
+See [todo.md](./todo.md) for detailed roadmap and recent changes.
 
 ## 📝 Documentation
 
@@ -121,10 +161,6 @@ yarn dev
 │   └── styles/             # Global styles
 └── scripts/                # Utility scripts
 ```
-
-## 👩‍💻 Development Status
-
-This project is currently in MVP phase. See [Development Roadmap](./ROADMAP.md) for details on completed features and future plans.
 
 ## 🙏 Credits
 

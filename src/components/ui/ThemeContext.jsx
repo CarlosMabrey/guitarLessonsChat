@@ -25,7 +25,8 @@ export function ThemeProvider({ children }) {
       document.documentElement.classList.remove(
         "theme-glassmorphism", 
         "theme-light-minimal", 
-        "theme-retrowave"
+        "theme-retrowave",
+        "theme-glassmorphism-ultramodern"
       );
       document.documentElement.classList.add(`theme-${theme}`);
       localStorage.setItem("theme", theme);

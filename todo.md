@@ -33,10 +33,15 @@
 - [ ] Add video player with custom controls for practice sessions
 - [ ] Implement metronome functionality
 - [ ] Enhance ChordProgressionPlayer with visual feedback during countdown
+- [ ] Improve Chord Library
+- [ ] Add more advanced chords and different recommendations for how to play them
+- [ ] UI improvements for the fretboard visualizer (tabbed workflow, mini legend, etc.)
 
 ### Mobile & Accessibility
 - [ ] Mobile Experience - Adapt hover preview functionality for touch devices with tap/hold actions
 - [ ] Develop offline mode capabilities
+- [ ] Accessibility improvements
+- [ ] Mobile gesture support
 
 ### Core Functionality
 - [ ] Enhancing the practice tracking functionality
@@ -71,3 +76,18 @@
 
 ### Social Features
 - [ ] Add social sharing features
+
+### Recently Implemented
+- Today's changes
+
+### New Features
+- Tonnetz Chord Visualizer
+- Interactive Tonnetz navigation
+- More advanced scale/chord analysis
+- Test coverage for fretboard and tonnetz components
+- Refactor fretboard logic for maintainability
+- Add user-customizable color schemes
+- Export diagrams as SVG/PNG
+
+### Improved Code Structure
+- Improved code structure and component modularity

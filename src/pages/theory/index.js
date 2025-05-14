@@ -11,6 +11,63 @@ export default function TheoryPage() {
       icon: FiGrid,
       href: '/theory/tonnetz'
     },
+    {
+      id: 'circle-of-fifths',
+      title: 'Circle of Fifths',
+      description: 'Interactive visualization of the circle of fifths',
+      icon: FiMusic,
+      href: '/theory/circle-of-fifths'
+    },
+    {
+      id: 'fretboard',
+      title: 'Fretboard Visualizer',
+      description: 'Visualize musical scales and chords on a fretboard.',
+      icon: FiMusic,
+      href: '/theory/fretboard'
+    },
+
+    {
+      id: 'piano-visualizer',
+      title: 'Piano Visualizer',
+      description: 'Visualize musical scales and chords on a piano keyboard.',
+      icon: FiMusic,
+      href: '/theory/piano'
+    },
+    {
+      id: 'scales',
+      title: 'Scale Explorer',
+      description: 'Explore musical scales with note breakdowns, audio demos, and related chords.',
+      icon: FiMusic,
+      href: '/theory/scales'
+    },
+    {
+      id: 'ear-training',
+      title: 'Ear Training Tool',
+      description: 'Practice identifying intervals, chords, and scales by ear with interactive quizzes.',
+      icon: FiMusic,
+      href: '/theory/ear-training'
+    },
+    {
+      id: 'cheatsheet',
+      title: 'Music Theory Cheatsheet',
+      description: 'Quick reference for chords, scales, intervals, modes, and progressions.',
+      icon: FiBook,
+      href: '/theory/cheatsheet'
+    },
+    {
+      id: 'chord-progressions',
+      title: 'Chord Progressions',
+      description: 'Create and explore chord progressions with interactive tools.',
+      icon: FiBook,
+      href: '/theory/progressions'
+    },
+    {
+      id: 'chord-function-graph',
+      title: 'Chord Function Graph',
+      description: 'Visualize harmonic functions (tonic, dominant, subdominant) within a key using interactive graphs.',
+      icon: FiBook,
+      href: '/theory/functions'
+    }
     // Additional theory tools can be added here in the future
   ];
 

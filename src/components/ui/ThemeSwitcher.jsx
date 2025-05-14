@@ -51,6 +51,14 @@ export default function ThemeSwitcher({ compact = false }) {
         >
           <FiZap size={18} />
         </button>
+
+        <button
+          className={getButtonClasses("glassmorphism-ultramodern")}
+          onClick={() => setTheme("glassmorphism-ultramodern")}
+          title="UltraModern Glassmorphism Theme"
+        >
+          <FiDroplet size={18} />
+        </button>
       </div>
     );
   }
@@ -80,6 +88,14 @@ export default function ThemeSwitcher({ compact = false }) {
         title="RetroWave Theme"
       >
         <FiZap className="text-sm" />
+      </button>
+
+      <button
+        className={getButtonClasses("glassmorphism-ultramodern")}
+        onClick={() => setTheme("glassmorphism-ultramodern")}
+        title="UltraModern Glassmorphism Theme"
+      >
+        <FiDroplet className="text-sm" />
       </button>
     </div>
   );

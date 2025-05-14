@@ -20,7 +20,8 @@ export function middleware(request) {
     '/progress',
     '/test',
     '/theory',
-    '/theory/tonnetz'
+    '/theory/tonnetz',
+    '/theory/circle-of-fifths'
   ];
 
   // If this is a route we want to prioritize and it doesn't already include /app

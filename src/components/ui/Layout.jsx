@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { 
@@ -18,6 +18,7 @@ import {
   FiGrid
 } from 'react-icons/fi';
 import ThemeSwitcher from './ThemeSwitcher';
+import Sidebar from './Sidebar';
 
 export default function Layout({ title, version, children }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
@@ -55,68 +56,34 @@ export default function Layout({ title, version, children }) {
         />
       )}
       
-      {/* Sidebar */}
-      <div 
-        className={`fixed inset-y-0 left-0 w-64 bg-sidebar border-r border-card-border shadow-lg z-30 transform transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:z-0 ${
-          isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
-        }`}
-      >
-        <div className="flex items-center justify-between h-16 px-4 border-b border-card-border">
-          <Link href="/dashboard" className="flex items-center">
-            <FiMusic size={24} className="text-active mr-2" />
-            <span className="text-xl font-bold">GuitarCoach</span>
-          </Link>
-          <button 
-            onClick={closeSidebar}
-            className="p-2 rounded-full hover:bg-accent lg:hidden"
-          >
-            <FiX size={24} />
-          </button>
-        </div>
-        
-        <nav className="p-4">
-          <ul className="space-y-2">
-            {navItems.map((item) => (
-              <li key={item.href}>
-                <Link
-                  href={item.href}
-                  className={`flex items-center px-4 py-2 rounded-lg transition-colors ${
-                    pathname === item.href 
-                      ? 'bg-active text-white' 
-                      : 'hover:bg-accent'
-                  }`}
-                  onClick={closeSidebar}
-                >
-                  <span className="mr-3">{item.icon}</span>
-                  <span>{item.label}</span>
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        
-        {version && (
-          <div className="absolute bottom-4 left-4 text-xs text-text-muted">
-            Version {version}
-          </div>
-        )}
+      {/* Desktop sidebar - always visible */}
+      <div className="hidden lg:block relative z-10">
+        <Sidebar />
       </div>
       
+      {/* Mobile sidebar - conditionally visible */}
+      {isSidebarOpen && (
+        <div className="fixed inset-y-0 left-0 z-30 lg:hidden">
+          <Sidebar />
+        </div>
+      )}
+      
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <header className="h-16 flex items-center justify-between px-4 border-b border-card-border theme-card">
+      <div className="flex-1 flex flex-col overflow-hidden lg:pl-20">
+        <header className="h-16 flex items-center justify-between px-4 border-b border-border shadow-sm bg-background-light">
           <div className="flex items-center">
             <button 
               onClick={toggleSidebar}
-              className="p-2 rounded-full hover:bg-accent mr-2 lg:hidden"
+              className="p-2 rounded-md hover:bg-card mr-2 lg:hidden"
+              aria-label="Toggle sidebar"
             >
-              <FiMenu size={24} />
+              <FiMenu size={20} />
             </button>
             <h1 className="text-xl font-semibold">{title}</h1>
           </div>
           
           {/* Header content on the right */}
-          <div className="flex items-center">
+          <div className="flex items-center space-x-4">
             <ThemeSwitcher />
           </div>
         </header>

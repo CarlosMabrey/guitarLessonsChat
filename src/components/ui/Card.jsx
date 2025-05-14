@@ -2,8 +2,11 @@ import { clsx } from 'clsx';
 
 export default function Card({ children, className, ...props }) {
   return (
-    <div 
-      className={clsx('bg-card border border-border/50 rounded-lg shadow-sm', className)}
+    <div
+      className={clsx(
+        'bg-card hover:bg-card-hover border border-border rounded-lg shadow-card transition-all duration-300',
+        className
+      )}
       {...props}
     >
       {children}
@@ -47,10 +50,10 @@ export function CardContent({ children, className, ...props }) {
 export function CardFooter({ children, className, ...props }) {
   return (
     <div 
-      className={clsx('flex items-center justify-between px-5 py-4 border-t border-border/50', className)}
+      className={clsx('flex items-center justify-between px-5 py-4 border-t border-border', className)}
       {...props}
     >
       {children}
     </div>
   );
-} 
+}

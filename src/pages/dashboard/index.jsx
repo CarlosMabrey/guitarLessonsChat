@@ -29,66 +29,54 @@ export default function DashboardPage() {
   
   return (
     <Layout title="Dashboard">
-      <div className="container py-6">
-        <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+      <div className="container py-8 max-w-5xl mx-auto px-4">
+        <h1 className="text-3xl font-bold mb-8">Dashboard</h1>
         
-        <div className="p-6 bg-success/10 text-success rounded-md mb-6 max-w-2xl w-full">
-          <p className="font-bold">Welcome to Guitar Lessons Chat!</p>
-          <p>Your personal guitar practice assistant.</p>
+        {/* Welcome card with glassmorphism styling */}
+        <div className="p-6 backdrop-blur-md bg-card border border-border rounded-xl mb-8 max-w-3xl">
+          <p className="text-xl font-medium text-green-400">Welcome to Guitar Lessons Chat!</p>
+          <p className="text-text-secondary">Your personal guitar practice assistant.</p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl w-full mb-6">
-          <div className="p-6 bg-card rounded-lg shadow-card">
-            <FiActivity className="text-primary text-2xl mb-2" />
-            <h2 className="text-xl font-bold mb-2 text-primary">Practice Progress</h2>
-            <p className="text-secondary mb-4">Track your daily practice sessions</p>
-            <div className="h-2 bg-card-hover rounded-full">
-              <div className="h-full bg-primary rounded-full" style={{ width: '65%' }}></div>
+        {/* Main cards in a grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+          {/* Practice Progress Card */}
+          <div className="p-6 backdrop-blur-md bg-card border border-border rounded-xl transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-cyan-500/20 rounded-full flex items-center justify-center mr-4">
+                <FiActivity className="text-cyan-400 text-2xl" />
+              </div>
+              <h2 className="text-xl font-bold text-text-primary">Practice Progress</h2>
             </div>
-            <div className="mt-4">
-              <Link 
-                href="/progress" 
-                className="btn btn-primary inline-block"
-              >
-                View Progress
-              </Link>
-            </div>
+            <p className="text-text-secondary mb-6">Track your daily practice sessions</p>
+            
+            <Link 
+              href="/progress" 
+              className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-md font-medium transition-colors inline-block"
+            >
+              View Progress
+            </Link>
           </div>
           
-          <div className="p-6 bg-card rounded-lg shadow-card">
-            <FiMusic className="text-primary text-2xl mb-2" />
-            <h2 className="text-xl font-bold mb-2 text-primary">Songs Library</h2>
-            <p className="text-secondary mb-4">You have 12 songs in your collection</p>
+          {/* Songs Library Card */}
+          <div className="p-6 backdrop-blur-md bg-card border border-border rounded-xl transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mr-4">
+                <FiMusic className="text-indigo-400 text-2xl" />
+              </div>
+              <h2 className="text-xl font-bold text-text-primary">Songs Library</h2>
+            </div>
+            <p className="text-text-secondary mb-6">Pick a song to learn or grow your collection</p>
+            
             <Link 
               href="/songs" 
-              className="btn btn-primary inline-block"
+              className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-md font-medium transition-colors inline-block"
             >
               View Songs
             </Link>
           </div>
         </div>
-        
-        <div className="p-6 bg-card-hover rounded-lg shadow-card max-w-2xl w-full">
-          <h2 className="text-xl font-bold mb-3 text-primary">Quick Links</h2>
-          <ul className="space-y-2">
-            <li>
-              <Link href="/songs" className="text-primary hover:underline flex items-center">
-                <FiMusic className="mr-2" /> Songs
-              </Link>
-            </li>
-            <li>
-              <Link href="/practice" className="text-primary hover:underline flex items-center">
-                <FiBookOpen className="mr-2" /> Practice
-              </Link>
-            </li>
-            <li>
-              <Link href="/progress" className="text-primary hover:underline flex items-center">
-                <FiActivity className="mr-2" /> Progress
-              </Link>
-            </li>
-          </ul>
-        </div>
       </div>
     </Layout>
   );
-} 
+}
