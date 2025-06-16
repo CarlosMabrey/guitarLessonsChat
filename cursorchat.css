@@ -1,0 +1,36 @@
+
+/* AI Chat + Composer + Header Blur Only */
+.pane-header,
+/* .monaco-scrollable-element, */
+.composer-bar,
+/* .split-view-view.visible, */
+/* .side-panel-view, */
+/* .side-bar-view, */
+.chat-view,
+.pane-body.aichat-pane,
+/* .editor-instance, */
+.editor-group-container {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+  border-radius: 6px !important;
+  /* border: 1px solid rgba(255, 255, 255, 0.1) !important; */
+}
+
+
+/* Sidebar selector */
+/* .activitybar, 
+.composite-bar, 
+#workbench\\.parts\\.sidebar > div > div > div:nth-child(1) {
+  background: transparent !important;
+  backdrop-filter: blur(10px) !important;
+} */
+
+
+
+/* Optional: Only if this shows in your panel */
+/* .pane-header-extension {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+} */

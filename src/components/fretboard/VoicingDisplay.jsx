@@ -26,18 +26,18 @@ const VoicingDisplay = ({
   
   // Get notes from the voicing
   const getVoicingNotes = () => {
-    // Get the chord notes in the right order
-    const chordNotes = Tonal.Chord.getChord(chordType, chordRoot).notes;
     const result = [];
     
-    // For each string position
-    currentVoicing.frets.forEach((fret, stringIndex) => {
+    // Guitar strings in standard tuning from low E (6th string) to high E (1st string)
+    const openStringNotes = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
+    
+    // Process each string (from low to high as they appear in the UI)
+    currentVoicing.frets.forEach((fret, stringIdx) => {
       // Skip if string not played
       if (fret === 'x') return;
       
-      // Get open string note based on string index (high E to low E)
-      const openStringNotes = ['E4', 'B3', 'G3', 'D3', 'A2', 'E2'];
-      const openNote = openStringNotes[stringIndex];
+      // Get open string note based on string index (from low E to high E)
+      const openNote = openStringNotes[stringIdx];
       
       // If open string
       if (fret === 0) {
