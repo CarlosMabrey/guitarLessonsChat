@@ -1,7 +1,8 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ChordDiagram from '../diagrams/ChordDiagram';
+import { chordVoicings, normalizeChordName } from '@/lib/musicTheory';
 
 export default function ChordProgressionPlayer({ 
   progression = ['G', 'Em', 'C', 'D'], 
@@ -172,7 +173,7 @@ export default function ChordProgressionPlayer({
             <div className="text-sm text-muted mb-2">Current</div>
             <div className="relative">
               <ChordDiagram 
-                chord={progression[currentChordIndex]} 
+                chord={normalizeChordName(progression[currentChordIndex])} 
                 size="lg"
               />
               
@@ -192,7 +193,7 @@ export default function ChordProgressionPlayer({
           <div className={`flex flex-col items-center transition-opacity duration-300 ${showNextChord ? 'opacity-100' : 'opacity-30'}`}>
             <div className="text-sm text-muted mb-2">Coming Next</div>
             <ChordDiagram 
-              chord={progression[nextChordIndex]} 
+              chord={normalizeChordName(progression[nextChordIndex])} 
               size="md"
             />
           </div>
@@ -208,7 +209,7 @@ export default function ChordProgressionPlayer({
                 className={`border ${index === currentChordIndex ? 'border-active' : 'border-card-border'} rounded p-1`}
               >
                 <ChordDiagram 
-                  chord={chord} 
+                  chord={normalizeChordName(chord)} 
                   size="sm"
                   showName={true}
                 />

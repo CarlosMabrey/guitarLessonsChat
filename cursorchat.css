@@ -1,36 +1,95 @@
+/* -------------------------------
+   AI Chat + Editor Blur Styling
+--------------------------------*/
 
-/* AI Chat + Composer + Header Blur Only */
 .pane-header,
-/* .monaco-scrollable-element, */
 .composer-bar,
-/* .split-view-view.visible, */
-/* .side-panel-view, */
-/* .side-bar-view, */
 .chat-view,
 .pane-body.aichat-pane,
-/* .editor-instance, */
 .editor-group-container {
   background-color: rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
   border-radius: 6px !important;
-  /* border: 1px solid rgba(255, 255, 255, 0.1) !important; */
 }
 
+/* More transparent version for chat content container */
+.conversations {
+  background-color: rgba(25, 28, 34, 0.25) !important;
+}
 
-/* Sidebar selector */
-/* .activitybar, 
-.composite-bar, 
-#workbench\\.parts\\.sidebar > div > div > div:nth-child(1) {
-  background: transparent !important;
-  backdrop-filter: blur(10px) !important;
-} */
+/* Transparent scrollable containers */
+.scrollable-element,
+.pane-expanded,
+.pane-expanded > div {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(6px) !important;
+}
 
+/* Transparent background for chat WebView */
+.webview.transparent .monaco-workbench,
+.webview.transparent body {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(6px) !important;
+}
 
+/* Optional: Deeper tint on chat composer */
+.composer-bar {
+  background-color: rgba(20, 38, 68, 0.08) !important;
+}
 
-/* Optional: Only if this shows in your panel */
-/* .pane-header-extension {
+/* -------------------------------
+   Title Bar + Tabs
+--------------------------------*/
+
+.monaco-workbench .part.titlebar,
+.monaco-workbench .part.content {
   background-color: rgba(255, 255, 255, 0.08) !important;
   backdrop-filter: blur(10px) !important;
   -webkit-backdrop-filter: blur(10px) !important;
-} */
+  border-radius: 6px !important;
+}
+
+.monaco-workbench .tabs-container {
+  background-color: rgba(0, 0, 0, 0.05) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+/* -------------------------------
+   Sidebar + Activity Bar
+--------------------------------*/
+
+/* Blur background for activity bar & sidebar sections */
+.activitybar,
+.composite-bar,
+#workbench\\.parts\\.sidebar > div > div > div:nth-child(1),
+.composite-title,
+.vscode-sidebar-background {
+  background-color: rgba(20, 38, 68, 0.12) !important;
+  backdrop-filter: blur(10px) !important;
+}
+
+/* Sidebar icons (new style sidebar layout) */
+div[class*="sidebar2-item-icon-anysphere"] {
+  background-color: rgba(20, 20, 30, 0.12) !important;
+  backdrop-filter: blur(6px) !important;
+  border-radius: 6px !important;
+}
+
+/* Parent flex container of sidebar icon bar */
+div[style*="display: flex"][style*="justify-content: center"][style*="height: 35px"] {
+  background-color: rgba(10, 10, 15, 0.1) !important;
+  backdrop-filter: blur(6px) !important;
+}
+
+/* -------------------------------
+   Optional Extensions (commented)
+--------------------------------*/
+
+/*
+.pane-header-extension {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+  backdrop-filter: blur(10px) !important;
+  -webkit-backdrop-filter: blur(10px) !important;
+}
+*/

@@ -228,15 +228,14 @@ export function addPracticeSession(session) {
  * Get chords for a song
  */
 export function getChords(songId) {
-  if (!isBrowser) return chords[songId] || [];
-  
+  if (!isBrowser) return [];
   try {
     const data = localStorage.getItem(STORAGE_KEYS.CHORDS);
-    const allChords = data ? JSON.parse(data) : chords;
+    const allChords = data ? JSON.parse(data) : {};
     return allChords[songId] || [];
   } catch (error) {
     console.error('Error getting chords:', error);
-    return chords[songId] || [];
+    return [];
   }
 }
 
@@ -244,15 +243,14 @@ export function getChords(songId) {
  * Get scales for a song
  */
 export function getScales(songId) {
-  if (!isBrowser) return scales[songId] || [];
-  
+  if (!isBrowser) return [];
   try {
     const data = localStorage.getItem(STORAGE_KEYS.SCALES);
-    const allScales = data ? JSON.parse(data) : scales;
+    const allScales = data ? JSON.parse(data) : {};
     return allScales[songId] || [];
   } catch (error) {
     console.error('Error getting scales:', error);
-    return scales[songId] || [];
+    return [];
   }
 }
 
@@ -326,20 +324,14 @@ export function clearChatHistory(songId) {
 /**
  * Save chord data for a song
  */
-export function saveChords(songId, chordData) {
+export function saveChords(songId, chordNames) {
   if (!isBrowser) return;
-  
   try {
     const data = localStorage.getItem(STORAGE_KEYS.CHORDS);
     const allChords = data ? JSON.parse(data) : {};
-    
-    // Update chords for the specific song
-    allChords[songId] = chordData;
-    
-    // Save to local storage
+    allChords[songId] = chordNames;
     localStorage.setItem(STORAGE_KEYS.CHORDS, JSON.stringify(allChords));
-    
-    return chordData;
+    return chordNames;
   } catch (error) {
     console.error('Error saving chord data:', error);
   }
@@ -348,20 +340,14 @@ export function saveChords(songId, chordData) {
 /**
  * Save scale data for a song
  */
-export function saveScales(songId, scaleData) {
+export function saveScales(songId, scaleNames) {
   if (!isBrowser) return;
-  
   try {
     const data = localStorage.getItem(STORAGE_KEYS.SCALES);
     const allScales = data ? JSON.parse(data) : {};
-    
-    // Update scales for the specific song
-    allScales[songId] = scaleData;
-    
-    // Save to local storage
+    allScales[songId] = scaleNames;
     localStorage.setItem(STORAGE_KEYS.SCALES, JSON.stringify(allScales));
-    
-    return scaleData;
+    return scaleNames;
   } catch (error) {
     console.error('Error saving scale data:', error);
   }
@@ -372,25 +358,17 @@ export function saveScales(songId, scaleData) {
  */
 export function saveSongAnalysis(songData, analysisData) {
   if (!isBrowser) return;
-  
   try {
-    // Add the song
     const newSong = addSong(songData);
-    
     if (newSong && analysisData) {
       const songId = songData.id;
-      
-      // Save chords
       if (analysisData.chords && analysisData.chords.length > 0) {
         saveChords(songId, analysisData.chords);
       }
-      
-      // Save scales
       if (analysisData.scales && analysisData.scales.length > 0) {
         saveScales(songId, analysisData.scales);
       }
     }
-    
     return songData;
   } catch (error) {
     console.error('Error saving song analysis:', error);

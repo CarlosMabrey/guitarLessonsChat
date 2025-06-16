@@ -101,7 +101,6 @@ export const saveSongAnalysis = (song, analysis) => {
   if (typeof window === 'undefined') return false;
   
   try {
-    // First, add the song to the library
     const success = addSong(song);
     
     if (!success) {
@@ -109,22 +108,15 @@ export const saveSongAnalysis = (song, analysis) => {
       return false;
     }
     
-    // Then save the analysis data
     const allAnalysis = localStorage.getItem(KEYS.SONG_ANALYSIS);
     const analysisData = allAnalysis ? JSON.parse(allAnalysis) : {};
     
-    // Add the song analysis
     analysisData[song.id] = analysis;
     
-    // Also add chords to the chord library
     if (analysis.chords && analysis.chords.length > 0) {
-      const allChords = localStorage.getItem(KEYS.CHORD_DATA);
-      const chordData = allChords ? JSON.parse(allChords) : {};
-      chordData[song.id] = analysis.chords;
-      localStorage.setItem(KEYS.CHORD_DATA, JSON.stringify(chordData));
+      saveChords(song.id, analysis.chords);
     }
     
-    // Save analysis back to localStorage
     localStorage.setItem(KEYS.SONG_ANALYSIS, JSON.stringify(analysisData));
     return true;
   } catch (error) {
@@ -287,40 +279,26 @@ export const getChords = (songId) => {
     const allChords = localStorage.getItem(KEYS.CHORD_DATA);
     const chordData = allChords ? JSON.parse(allChords) : {};
     
-    // Return chords for this song, or default to common chords if none exist
-    return chordData[songId] || [
-      { 
-        name: 'G', 
-        positions: [3, 2, 0, 0, 0, 3],
-        fingerings: [2, 1, 0, 0, 0, 3],
-        baseFret: 1,
-        barres: []
-      },
-      { 
-        name: 'C', 
-        positions: [-1, 3, 2, 0, 1, 0],
-        fingerings: [0, 3, 2, 0, 1, 0],
-        baseFret: 1,
-        barres: []
-      },
-      { 
-        name: 'D', 
-        positions: [-1, -1, 0, 2, 3, 2],
-        fingerings: [0, 0, 0, 1, 3, 2],
-        baseFret: 1,
-        barres: []
-      },
-      { 
-        name: 'Em', 
-        positions: [0, 2, 2, 0, 0, 0],
-        fingerings: [0, 2, 3, 0, 0, 0],
-        baseFret: 1,
-        barres: []
-      }
-    ];
+    // Return chords for this song, or empty array if none exist
+    return chordData[songId] || [];
   } catch (error) {
     console.error('Error retrieving chord data:', error);
     return [];
+  }
+};
+
+export const saveChords = (songId, chordNames) => {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    const allChords = localStorage.getItem(KEYS.CHORD_DATA);
+    const chordData = allChords ? JSON.parse(allChords) : {};
+    chordData[songId] = chordNames;
+    localStorage.setItem(KEYS.CHORD_DATA, JSON.stringify(chordData));
+    return true;
+  } catch (error) {
+    console.error('Error saving chord data:', error);
+    return false;
   }
 };
 

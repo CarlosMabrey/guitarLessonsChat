@@ -27,6 +27,8 @@ export const songs = [
     tempo: 82,
     timeSignature: '4/4',
     dateAdded: '2023-08-12',
+    chords: ['Am', 'G', 'D', 'F', 'C'],
+    scales: ['A Minor Pentatonic', 'A Natural Minor (Aeolian)'],
   },
   {
     id: 'song-2',
@@ -44,6 +46,8 @@ export const songs = [
     tempo: 134,
     timeSignature: '4/4',
     dateAdded: '2023-07-28',
+    chords: ['B', 'E', 'A', 'D', 'F#'],
+    scales: ['B Major', 'B Minor Pentatonic'],
   },
   {
     id: 'song-3',
@@ -61,6 +65,8 @@ export const songs = [
     tempo: 128,
     timeSignature: '4/4',
     dateAdded: '2023-09-05',
+    chords: ['E', 'A', 'B', 'C#m', 'G#m'],
+    scales: ['E Major', 'E Minor Pentatonic'],
   },
   {
     id: 'song-4',
@@ -78,6 +84,8 @@ export const songs = [
     tempo: 66,
     timeSignature: '4/4',
     dateAdded: '2023-06-18',
+    chords: ['G', 'C', 'D', 'A', 'Em'],
+    scales: ['G Major', 'G Major Pentatonic'],
   },
   {
     id: 'song-5',
@@ -95,79 +103,10 @@ export const songs = [
     tempo: 69,
     timeSignature: '6/8',
     dateAdded: '2023-10-01',
+    chords: ['Em', 'D', 'C', 'G', 'B7'],
+    scales: ['E Minor', 'E Minor Pentatonic'],
   },
 ];
-
-// Mock chord data
-export const chords = {
-  'song-1': [
-    { 
-      name: 'Am', 
-      positions: [0, 0, 2, 2, 1, 0],
-      fingerings: [0, 0, 2, 3, 1, 0],
-      baseFret: 1,
-      barres: []
-    },
-    { 
-      name: 'G', 
-      positions: [3, 2, 0, 0, 0, 3],
-      fingerings: [2, 1, 0, 0, 0, 3],
-      baseFret: 1,
-      barres: []
-    },
-    { 
-      name: 'D', 
-      positions: [-1, -1, 0, 2, 3, 2],
-      fingerings: [0, 0, 0, 1, 3, 2],
-      baseFret: 1,
-      barres: []
-    },
-    { 
-      name: 'F', 
-      positions: [1, 3, 3, 2, 1, 1],
-      fingerings: [1, 4, 3, 2, 1, 1],
-      baseFret: 1,
-      barres: [{ fret: 1, fromString: 1, toString: 6 }]
-    },
-    { 
-      name: 'C', 
-      positions: [-1, 3, 2, 0, 1, 0],
-      fingerings: [0, 3, 2, 0, 1, 0],
-      baseFret: 1,
-      barres: []
-    }
-  ]
-};
-
-// Mock scale data
-export const scales = {
-  'song-1': [
-    {
-      name: 'A Minor Pentatonic',
-      positions: [
-        [0, 3, 5], // 6th string (low E)
-        [0, 3, 5], // 5th string (A)
-        [0, 2, 5], // 4th string (D)
-        [0, 2, 5], // 3rd string (G)
-        [0, 3, 5], // 2nd string (B)
-        [0, 3, 5]  // 1st string (high E)
-      ],
-      baseFret: 5
-    },
-    {
-      name: 'A Natural Minor (Aeolian)',
-      positions: [
-        [0, 2, 3, 5, 7, 8, 10], // 6th string (low E)
-        [0, 2, 3, 5, 7, 8, 10], // 5th string (A)
-        [0, 2, 3, 5, 7, 9, 10], // 4th string (D)
-        [0, 2, 4, 5, 7, 9, 10], // 3rd string (G)
-        [0, 1, 3, 5, 7, 8, 10], // 2nd string (B)
-        [0, 2, 3, 5, 7, 8, 10]  // 1st string (high E)
-      ],
-      baseFret: 5
-    }
-  ]
-};
 
 // Mock practice data for charts
 export const practiceData = {
@@ -200,7 +139,7 @@ export const practiceData = {
     datasets: [
       {
         label: 'Practice Minutes',
-        data: [1200, 900, 1500, 1100, 1800, 1350],
+        data: [1200, 1350, 900, 1600, 1100, 1450],
         borderColor: '#3e63dd',
         backgroundColor: 'rgba(62, 99, 221, 0.2)',
         fill: true,
