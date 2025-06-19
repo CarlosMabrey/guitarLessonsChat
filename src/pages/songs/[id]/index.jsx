@@ -18,7 +18,7 @@ import { getSongById } from '@/lib/db';
 import Layout from '@/components/ui/Layout';
 import SongTabViewer from '@/components/songs/SongTabViewer';
 import SongVideoResources from '@/components/songs/SongVideoResources';
-import ChordDiagram from '@/components/diagrams/ChordDiagram';
+import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
 
 export default function SongDetailsPage() {
   const router = useRouter();
@@ -95,7 +95,7 @@ export default function SongDetailsPage() {
                   </div>
                   <div className="flex flex-wrap gap-4">
                     {song.chords.map((chord, idx) => (
-                      <ChordDiagram key={chord + idx} chord={chord} size="sm" showName={false} />
+                      <VoicingDisplay key={chord + idx} chordName={chord} size="sm" showName={false} />
                     ))}
                   </div>
                 </div>

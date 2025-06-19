@@ -7,7 +7,7 @@ import { FiSearch, FiZap, FiPlus, FiMusic } from 'react-icons/fi';
 import { getAllSongs } from '@/lib/db';
 import Layout from '@/components/ui/Layout';
 import SongItem from '@/components/songs/SongItem';
-import ChordDiagram from '@/components/songs/ChordDiagram';
+import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Modal from '@/components/ui/Modal';
 import QuickAddSong from '@/components/songs/QuickAddSong';
@@ -109,7 +109,7 @@ export default function SongsPage() {
         <div className="flex flex-wrap gap-2">
           {song.chords.map((chord, index) => (
             <div key={index} className="flex flex-col items-center">
-              <ChordDiagram 
+              <VoicingDisplay 
                 chord={chord} 
                 size="sm" 
                 className="cursor-pointer hover:opacity-80 transition-opacity"

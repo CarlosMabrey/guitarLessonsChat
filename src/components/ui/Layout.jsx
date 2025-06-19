@@ -10,27 +10,33 @@ import {
   FiMusic, 
   FiClock, 
   FiTrendingUp, 
-  FiSettings, 
-  FiHelpCircle, 
-  FiUser,
-  FiCode,
-  FiZap,
-  FiGrid
+  FiGrid,
+  FiZap
 } from 'react-icons/fi';
-import ThemeSwitcher from './ThemeSwitcher';
+import { clsx } from 'clsx';
 import Sidebar from './Sidebar';
 
 export default function Layout({ title, version, children }) {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const pathname = usePathname();
   
-  const toggleSidebar = () => {
-    setIsSidebarOpen(!isSidebarOpen);
+  const toggleMobileSidebar = () => {
+    setIsMobileSidebarOpen(prev => !prev);
   };
   
-  const closeSidebar = () => {
-    setIsSidebarOpen(false);
+  const closeMobileSidebar = () => {
+    setIsMobileSidebarOpen(false);
   };
+
+  const handleSidebarToggle = (isCollapsed) => {
+    setIsSidebarCollapsed(isCollapsed);
+  }; 
+  
+  // Close mobile sidebar when route changes
+  useEffect(() => {
+    closeMobileSidebar();
+  }, [pathname]);
   
   // Navigation items
   const navItems = [
@@ -47,48 +53,61 @@ export default function Layout({ title, version, children }) {
   ];
   
   return (
-    <div className="flex h-screen bg-app text-text-primary">
+    <div className="flex h-screen bg-app text-text-primary overflow-hidden">
       {/* Mobile backdrop */}
-      {isSidebarOpen && (
+      {isMobileSidebarOpen && (
         <div 
           className="fixed inset-0 bg-black/50 z-20 lg:hidden transition-opacity duration-300 ease-in-out"
-          onClick={closeSidebar}
+          onClick={closeMobileSidebar}
+          aria-hidden="true"
         />
       )}
       
-      {/* Desktop sidebar - always visible */}
-      <div className="hidden lg:block relative z-10">
-        <Sidebar />
+      {/* Desktop Sidebar */}
+      <div className="hidden lg:flex flex-shrink-0 h-full">
+        <Sidebar 
+          onToggle={handleSidebarToggle} 
+          isMobile={false}
+        />
       </div>
       
-      {/* Mobile sidebar - conditionally visible */}
-      {isSidebarOpen && (
-        <div className="fixed inset-y-0 left-0 z-30 lg:hidden">
-          <Sidebar />
-        </div>
-      )}
+      {/* Mobile Sidebar */}
+      <div className={clsx(
+        'fixed lg:hidden z-30 h-full transition-transform duration-300 ease-in-out',
+        {
+          'translate-x-0': isMobileSidebarOpen,
+          '-translate-x-full': !isMobileSidebarOpen
+        }
+      )}>
+        <Sidebar 
+          onToggle={handleSidebarToggle} 
+          isMobile={true}
+        />
+      </div>
       
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden lg:pl-20">
-        <header className="h-16 flex items-center justify-between px-4 border-b border-border shadow-sm bg-background-light">
+      <div className={clsx(
+        'flex-1 flex flex-col overflow-hidden transition-all duration-300 ease-in-out',
+        'h-screen',
+        {
+          'lg:pl-20': isSidebarCollapsed,
+          'lg:pl-64': !isSidebarCollapsed
+        }
+      )}>
+        <header className="h-16 flex items-center justify-between px-4 border-b border-border/50 shadow-sm bg-background-light/80 dark:bg-card/80 backdrop-blur-sm sticky top-0 z-10">
           <div className="flex items-center">
             <button 
-              onClick={toggleSidebar}
-              className="p-2 rounded-md hover:bg-card mr-2 lg:hidden"
+              onClick={toggleMobileSidebar}
+              className="p-2 rounded-md hover:bg-card-hover mr-2 lg:hidden transition-colors"
               aria-label="Toggle sidebar"
             >
-              <FiMenu size={20} />
+              {isMobileSidebarOpen ? <FiX size={20} /> : <FiMenu size={20} />}
             </button>
-            <h1 className="text-xl font-semibold">{title}</h1>
-          </div>
-          
-          {/* Header content on the right */}
-          <div className="flex items-center space-x-4">
-            <ThemeSwitcher />
+            <h1 className="text-xl font-semibold text-text-primary">{title}</h1>
           </div>
         </header>
         
-        <main className="flex-1 overflow-auto p-4 md:p-6 bg-app">
+        <main className="flex-1 overflow-auto p-4 md:p-6 bg-background dark:bg-app">
           {children}
         </main>
       </div>

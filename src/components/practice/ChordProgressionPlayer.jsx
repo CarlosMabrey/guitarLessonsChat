@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import ChordDiagram from '../diagrams/ChordDiagram';
+import VoicingDisplay from '../fretboard/VoicingDisplay';
 import { chordVoicings, normalizeChordName } from '@/lib/musicTheory';
 
 export default function ChordProgressionPlayer({ 
@@ -172,7 +172,7 @@ export default function ChordProgressionPlayer({
           <div className="flex flex-col items-center">
             <div className="text-sm text-muted mb-2">Current</div>
             <div className="relative">
-              <ChordDiagram 
+              <VoicingDisplay 
                 chord={normalizeChordName(progression[currentChordIndex])} 
                 size="lg"
               />
@@ -192,7 +192,7 @@ export default function ChordProgressionPlayer({
           {/* Next chord preview */}
           <div className={`flex flex-col items-center transition-opacity duration-300 ${showNextChord ? 'opacity-100' : 'opacity-30'}`}>
             <div className="text-sm text-muted mb-2">Coming Next</div>
-            <ChordDiagram 
+            <VoicingDisplay 
               chord={normalizeChordName(progression[nextChordIndex])} 
               size="md"
             />
@@ -208,7 +208,7 @@ export default function ChordProgressionPlayer({
                 key={index}
                 className={`border ${index === currentChordIndex ? 'border-active' : 'border-card-border'} rounded p-1`}
               >
-                <ChordDiagram 
+                <VoicingDisplay 
                   chord={normalizeChordName(chord)} 
                   size="sm"
                   showName={true}

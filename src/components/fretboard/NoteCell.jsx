@@ -13,6 +13,8 @@ export default function NoteCell({
   voicingPosition,
   showVoicings,
   isScalePatternNote,
+  cellSize = 40, // Default size if not provided
+  className = '',
   onClick 
 }) {
   // Extract pitch class for simpler display
@@ -28,9 +30,21 @@ export default function NoteCell({
     content = <span>{note}</span>;
   }
   
-  // Determine styling based on status
-  let cellClass = "relative px-3 py-3 text-center";
-  let noteClass = "flex items-center justify-center w-10 h-10 mx-auto rounded-full transition-all duration-200";
+  // Calculate dynamic sizes
+  const noteSize = cellSize ? Math.max(24, Math.min(60, cellSize * 0.8)) : 40;
+  const fontSize = Math.max(10, Math.min(16, noteSize * 0.4));
+  
+  // Base classes
+  let cellClass = "relative p-1 text-center";
+  let noteClass = "flex items-center justify-center mx-auto rounded-full transition-all duration-200";
+  
+  // Apply dynamic sizing
+  const noteStyle = {
+    width: `${noteSize}px`,
+    height: `${noteSize}px`,
+    minWidth: `${noteSize}px`,
+    fontSize: `${fontSize}px`,
+  };
   
   // Apply appropriate styling based on the note's status
   if (voicingPosition) {
@@ -51,15 +65,26 @@ export default function NoteCell({
     noteClass += " bg-gray-800/30 text-gray-300/70 border border-gray-700/30 hover:bg-gray-700/50 hover:text-white hover:scale-105";
   }
   
-  // For notes that should be hidden based on relevance filter
-  if (!isRelevant) {
+  // Apply relevance styling
+  if (isRelevant === false) {
     noteClass += " opacity-20 scale-75 hover:opacity-100 hover:scale-90";
+  } else {
+    // Add hover effect for interactive elements
+    if (onClick) {
+      noteClass += " cursor-pointer hover:shadow-lg hover:z-10 hover:scale-105";
+    }
   }
   
+  // Combine the base cell class with any additional classes passed in
+  const combinedCellClass = `${cellClass} ${className}`.trim();
+  
   return (
-    <td className={cellClass}>
+    <td className={combinedCellClass}>
       {/* String Line */}
-      <div className="absolute inset-0 flex items-center pointer-events-none">
+      <div className="absolute inset-0 flex items-center pointer-events-none" style={{
+        top: '50%',
+        transform: 'translateY(-50%)',
+      }}>
         <div className="w-full h-px bg-white/10"></div>
       </div>
       
@@ -80,6 +105,7 @@ export default function NoteCell({
       {/* Note button */}
       <button
         className={noteClass}
+        style={noteStyle}
         onClick={() => onClick(note)}
         aria-label={`${note} on string ${stringIndex + 1}, fret ${fret}`}
       >

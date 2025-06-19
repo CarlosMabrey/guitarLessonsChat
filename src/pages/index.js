@@ -6,12 +6,8 @@ export default function Home() {
   const router = useRouter();
 
   useEffect(() => {
-    // Use a short timeout to ensure the router is ready
-    const redirectTimer = setTimeout(() => {
-      router.push('/dashboard');
-    }, 100);
-    
-    return () => clearTimeout(redirectTimer);
+    // Redirect to dashboard immediately
+    router.replace('/dashboard');
   }, [router]);
 
   return (

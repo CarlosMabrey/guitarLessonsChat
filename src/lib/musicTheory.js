@@ -50,149 +50,248 @@ export const scaleTypes = [
 
 // Chord voicing patterns for common open and barre chords
 const chordPatterns = {
+  // Major
   'C-M': [
     { name: 'Open', frets: ['x', 3, 2, 0, 1, 0], fingers: ['x', 3, 2, 0, 1, 0] },
-    { name: 'Barre', frets: [3, 3, 5, 5, 5, 3], fingers: [1, 1, 3, 4, 2, 1] },
-  ],
-  'A-M': [
-    { name: 'Open', frets: ['x', 0, 2, 2, 2, 0], fingers: ['x', 0, 2, 3, 4, 0] },
-    { name: 'Barre', frets: [5, 7, 7, 6, 5, 5], fingers: [1, 3, 4, 2, 1, 1] },
+    { name: 'Barre (A shape)', frets: ['x', 3, 5, 5, 5, 3], fingers: ['x', 1, 3, 4, 2, 1] },
+    { name: 'Barre (E shape)', frets: [8, 10, 10, 9, 8, 8], fingers: [1, 3, 4, 2, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 5, 5, 5, 'x'], fingers: ['x', 'x', 1, 2, 3, 'x'] },
+    { name: '1st Inversion', frets: ['x', 3, 5, 5, 5, 'x'], fingers: ['x', 1, 3, 4, 2, 'x'] },
   ],
   'G-M': [
     { name: 'Open', frets: [3, 2, 0, 0, 0, 3], fingers: [2, 1, 0, 0, 0, 3] },
-    { name: 'Barre', frets: [3, 5, 5, 4, 3, 3], fingers: [1, 3, 4, 2, 1, 1] },
+    { name: 'Open Variant', frets: [3, 2, 0, 0, 3, 3], fingers: [2, 1, 0, 0, 3, 4] },
+    { name: 'Barre (E shape)', frets: [3, 5, 5, 4, 3, 3], fingers: [1, 3, 4, 2, 1, 1] },
+  ],
+  'A-M': [
+    { name: 'Open', frets: ['x', 0, 2, 2, 2, 0], fingers: ['x', 0, 1, 2, 3, 0] },
+    { name: 'Barre (E shape)', frets: [5, 7, 7, 6, 5, 5], fingers: [1, 3, 4, 2, 1, 1] },
+    { name: 'Open Variant', frets: ['x', 0, 7, 6, 5, 5], fingers: ['x', 0, 4, 3, 1, 2] },
   ],
   'E-M': [
     { name: 'Open', frets: [0, 2, 2, 1, 0, 0], fingers: [0, 2, 3, 1, 0, 0] },
-    { name: 'Barre', frets: [7, 7, 9, 9, 9, 7], fingers: [1, 1, 3, 4, 2, 1] },
+    { name: 'Barre (E shape)', frets: [0, 7, 9, 9, 9, 7], fingers: [0, 1, 3, 4, 2, 1] },
   ],
   'D-M': [
     { name: 'Open', frets: ['x', 'x', 0, 2, 3, 2], fingers: ['x', 'x', 0, 1, 3, 2] },
-    { name: 'Barre', frets: [10, 12, 12, 11, 10, 10], fingers: [1, 3, 4, 2, 1, 1] },
+    { name: 'Open Variant', frets: ['x', 'x', 12, 11, 10, 10], fingers: ['x', 'x', 4, 3, 1, 2] },
+    { name: 'Barre (A shape)', frets: ['x', 5, 7, 7, 7, 5], fingers: ['x', 1, 3, 4, 2, 1] },
   ],
   'F-M': [
-    { name: 'Barre', frets: [1, 3, 3, 2, 1, 1], fingers: [1, 3, 4, 2, 1, 1] },
+    { name: 'Barre (E shape)', frets: [1, 3, 3, 2, 1, 1], fingers: [1, 3, 4, 2, 1, 1] },
+    { name: 'Barre (A shape)', frets: ['x', 8, 10, 10, 10, 8], fingers: ['x', 1, 3, 4, 2, 1] },
+  ],
+  'B-M': [
+    { name: 'Barre (A shape)', frets: ['x', 2, 4, 4, 4, 2], fingers: ['x', 1, 3, 4, 2, 1] },
+    { name: 'Barre (E shape)', frets: [7, 9, 9, 8, 7, 7], fingers: [1, 3, 4, 2, 1, 1] },
+  ],
+  // Minor
+  'C-m': [
+    { name: 'Barre (A shape)', frets: ['x', 3, 5, 5, 4, 3], fingers: ['x', 1, 3, 4, 2, 1] },
+    { name: 'Barre (E shape)', frets: [8, 10, 10, 8, 8, 8], fingers: [1, 3, 4, 1, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 5, 5, 4, 'x'], fingers: ['x', 'x', 2, 3, 1, 'x'] },
+    { name: '1st Inversion', frets: ['x', 3, 5, 5, 4, 'x'], fingers: ['x', 1, 3, 4, 2, 'x'] },
+  ],
+  'G-m': [
+    { name: 'Barre (E shape)', frets: [3, 5, 5, 3, 3, 3], fingers: [1, 3, 4, 1, 1, 1] },
+    { name: 'Barre (A shape)', frets: ['x', 10, 12, 12, 11, 10], fingers: ['x', 1, 3, 4, 2, 1] },
   ],
   'A-m': [
     { name: 'Open', frets: ['x', 0, 2, 2, 1, 0], fingers: ['x', 0, 2, 3, 1, 0] },
-    { name: 'Barre', frets: [5, 7, 7, 5, 5, 5], fingers: [1, 3, 4, 1, 1, 1] },
+    { name: 'Barre (E shape)', frets: [5, 7, 7, 5, 5, 5], fingers: [1, 3, 4, 1, 1, 1] },
   ],
   'E-m': [
     { name: 'Open', frets: [0, 2, 2, 0, 0, 0], fingers: [0, 2, 3, 0, 0, 0] },
-    { name: 'Barre', frets: [7, 7, 9, 7, 8, 7], fingers: [1, 1, 3, 1, 2, 1] },
+    { name: 'Barre (E shape)', frets: [7, 7, 9, 7, 8, 7], fingers: [1, 1, 3, 1, 2, 1] },
   ],
   'D-m': [
     { name: 'Open', frets: ['x', 'x', 0, 2, 3, 1], fingers: ['x', 'x', 0, 2, 3, 1] },
-    { name: 'Barre', frets: [10, 12, 12, 10, 10, 10], fingers: [1, 3, 4, 1, 1, 1] },
-  ],
-  'C-m': [
-    { name: 'Barre', frets: ['x', 3, 5, 5, 4, 3], fingers: ['x', 1, 3, 4, 2, 1] },
-  ],
-  'G-m': [
-    { name: 'Barre', frets: [3, 5, 5, 3, 3, 3], fingers: [1, 3, 4, 1, 1, 1] },
+    { name: 'Barre (A shape)', frets: ['x', 5, 7, 7, 6, 5], fingers: ['x', 1, 3, 4, 2, 1] },
+    { name: 'Barre (E shape)', frets: [10, 12, 12, 10, 10, 10], fingers: [1, 3, 4, 1, 1, 1] },
   ],
   'F-m': [
-    { name: 'Barre', frets: [1, 3, 3, 1, 1, 1], fingers: [1, 3, 4, 1, 1, 1] },
+    { name: 'Barre (E shape)', frets: [1, 3, 3, 1, 1, 1], fingers: [1, 3, 4, 1, 1, 1] },
+    { name: 'Barre (A shape)', frets: ['x', 8, 10, 10, 9, 8], fingers: ['x', 1, 3, 4, 2, 1] },
   ],
-  // Add more as needed...
+  'B-m': [
+    { name: 'Barre (A shape)', frets: ['x', 2, 4, 4, 3, 2], fingers: ['x', 1, 3, 4, 2, 1] },
+    { name: 'Barre (E shape)', frets: [7, 9, 9, 7, 7, 7], fingers: [1, 3, 4, 1, 1, 1] },
+  ],
+  // Dominant 7th
+  'C-7': [
+    { name: 'Open', frets: ['x', 3, 2, 3, 1, 0], fingers: ['x', 3, 2, 4, 1, 0] },
+    { name: 'Barre (A shape)', frets: ['x', 3, 5, 3, 5, 3], fingers: ['x', 1, 3, 1, 4, 1] },
+    { name: 'Barre (E shape)', frets: [8, 10, 8, 9, 8, 8], fingers: [1, 3, 1, 2, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 8, 9, 8, 'x'], fingers: ['x', 'x', 1, 3, 2, 'x'] },
+  ],
+  'G-7': [
+    { name: 'Open', frets: [3, 2, 0, 0, 0, 1], fingers: [3, 2, 0, 0, 0, 1] },
+    { name: 'Barre (E shape)', frets: [3, 5, 3, 4, 3, 3], fingers: [1, 3, 1, 2, 1, 1] },
+  ],
+  'A-7': [
+    { name: 'Open', frets: ['x', 0, 2, 0, 2, 0], fingers: ['x', 0, 2, 0, 1, 0] },
+    { name: 'Barre (E shape)', frets: [5, 7, 5, 6, 5, 5], fingers: [1, 3, 1, 2, 1, 1] },
+  ],
+  'E-7': [
+    { name: 'Open', frets: [0, 2, 0, 1, 0, 0], fingers: [0, 2, 0, 1, 0, 0] },
+    { name: 'Barre (E shape)', frets: [7, 7, 9, 7, 8, 7], fingers: [1, 1, 3, 1, 2, 1] },
+  ],
+  'D-7': [
+    { name: 'Open', frets: ['x', 'x', 0, 2, 1, 2], fingers: ['x', 'x', 0, 2, 1, 3] },
+    { name: 'Barre (A shape)', frets: ['x', 5, 7, 5, 7, 5], fingers: ['x', 1, 3, 1, 4, 1] },
+  ],
+  'F-7': [
+    { name: 'Barre (E shape)', frets: [1, 3, 1, 2, 1, 1], fingers: [1, 3, 1, 2, 1, 1] },
+  ],
+  'B-7': [
+    { name: 'Barre (A shape)', frets: ['x', 2, 4, 2, 4, 2], fingers: ['x', 1, 3, 1, 4, 1] },
+  ],
+  // Major 7th
+  'C-maj7': [
+    { name: 'Open', frets: ['x', 3, 2, 0, 0, 0], fingers: ['x', 3, 2, 0, 0, 0] },
+    { name: 'Barre (A shape)', frets: ['x', 3, 5, 4, 5, 3], fingers: ['x', 1, 3, 2, 4, 1] },
+    { name: 'Barre (E shape)', frets: [8, 10, 9, 9, 8, 8], fingers: [1, 3, 2, 4, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 9, 9, 8, 'x'], fingers: ['x', 'x', 2, 3, 1, 'x'] },
+  ],
+  // Minor 7th
+  'C-m7': [
+    { name: 'Barre (A shape)', frets: ['x', 3, 1, 3, 1, 3], fingers: ['x', 2, 1, 3, 1, 4] },
+    { name: 'Barre (E shape)', frets: [8, 10, 8, 8, 8, 8], fingers: [1, 3, 1, 1, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 8, 8, 8, 'x'], fingers: ['x', 'x', 1, 1, 1, 'x'] },
+  ],
+  // Diminished
+  'C-dim': [
+    { name: 'Open', frets: ['x', 3, 1, 2, 1, 'x'], fingers: ['x', 3, 1, 2, 1, 'x'] },
+    { name: 'Barre', frets: [8, 9, 7, 8, 7, 7], fingers: [2, 3, 1, 4, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 8, 9, 8, 'x'], fingers: ['x', 'x', 1, 3, 2, 'x'] },
+  ],
+  // Augmented
+  'C-aug': [
+    { name: 'Open', frets: ['x', 3, 2, 1, 1, 0], fingers: ['x', 3, 2, 1, 1, 0] },
+    { name: 'Barre', frets: [8, 7, 6, 5, 5, 4], fingers: [4, 3, 2, 1, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 5, 5, 5, 'x'], fingers: ['x', 'x', 1, 2, 3, 'x'] },
+  ],
+  // Sus2
+  'C-sus2': [
+    { name: 'Open', frets: ['x', 3, 0, 0, 1, 3], fingers: ['x', 3, 0, 0, 1, 4] },
+    { name: 'Barre', frets: [8, 10, 10, 10, 8, 8], fingers: [1, 3, 4, 2, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 7, 5, 5, 'x'], fingers: ['x', 'x', 3, 1, 2, 'x'] },
+  ],
+  // Sus4
+  'C-sus4': [
+    { name: 'Open', frets: ['x', 3, 3, 0, 1, 1], fingers: ['x', 3, 4, 0, 1, 1] },
+    { name: 'Barre', frets: [8, 11, 10, 10, 8, 8], fingers: [1, 4, 3, 2, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 10, 10, 8, 'x'], fingers: ['x', 'x', 3, 4, 1, 'x'] },
+  ],
+  // Add9
+  'C-add9': [
+    { name: 'Open', frets: ['x', 3, 2, 0, 3, 0], fingers: ['x', 3, 2, 0, 4, 0] },
+    { name: 'Barre', frets: [8, 10, 7, 9, 8, 8], fingers: [1, 3, 1, 4, 2, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 7, 5, 5, 'x'], fingers: ['x', 'x', 3, 1, 2, 'x'] },
+  ],
+  // 6th
+  'C-6': [
+    { name: 'Open', frets: ['x', 3, 2, 2, 1, 0], fingers: ['x', 3, 2, 1, 1, 0] },
+    { name: 'Barre', frets: [8, 10, 10, 9, 10, 8], fingers: [1, 3, 4, 2, 4, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 5, 5, 5, 'x'], fingers: ['x', 'x', 1, 2, 3, 'x'] },
+  ],
+  // Minor 6th
+  'C-m6': [
+    { name: 'Barre', frets: ['x', 3, 1, 2, 1, 3], fingers: ['x', 2, 1, 3, 1, 4] },
+    { name: 'Barre (E shape)', frets: [8, 10, 7, 8, 8, 8], fingers: [1, 3, 1, 2, 1, 1] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 8, 7, 8, 'x'], fingers: ['x', 'x', 2, 1, 3, 'x'] },
+  ],
+  // 9th
+  'C-9': [
+    { name: 'Barre', frets: [8, 10, 8, 9, 8, 10], fingers: [1, 3, 1, 2, 1, 4] },
+    { name: 'Barre (A shape)', frets: ['x', 3, 5, 3, 5, 5], fingers: ['x', 1, 3, 1, 4, 4] },
+    { name: 'Triad (strings 2-4)', frets: ['x', 'x', 8, 7, 8, 'x'], fingers: ['x', 'x', 2, 1, 3, 'x'] },
+  ],
+  'D-9': [
+    { name: 'Open', frets: ['x', 'x', 0, 2, 1, 0], fingers: ['x', 'x', 0, 2, 1, 0] },
+    { name: 'Barre (A shape)', frets: ['x', 5, 7, 5, 6, 5], fingers: ['x', 1, 3, 1, 2, 1] },
+  ],
+  'E-9': [
+    { name: 'Open', frets: [0, 2, 0, 1, 0, 2], fingers: [0, 2, 0, 1, 0, 3] },
+    { name: 'Barre (E shape)', frets: [7, 9, 7, 8, 7, 9], fingers: [1, 3, 1, 2, 1, 4] },
+  ],
+  'G-9': [
+    { name: 'Open', frets: [3, 2, 0, 2, 0, 1], fingers: [3, 2, 0, 4, 0, 1] },
+    { name: 'Barre (E shape)', frets: [3, 5, 3, 4, 3, 5], fingers: [1, 3, 1, 2, 1, 4] },
+  ],
 };
 
-// Generate all chord voicings for all roots and types
 function generateChordVoicings() {
   const voicings = {};
-  const roots = allNotes;
-  const types = ['M', 'm']; // Extend as needed
-  for (const root of roots) {
+  const types = ['M','m','7','maj7','m7','dim','aug','sus2','sus4','add9','6','m6','9'];
+
+  for (const root of allNotes) {
     for (const type of types) {
       const key = `${root}-${type}`;
-      // Use patterns for CAGED system and common open/barre shapes
       if (chordPatterns[key]) {
         voicings[key] = chordPatterns[key];
       } else {
-        // For other chords, try to shift open/barre shapes up the neck
-        // (This is a simplification; real implementation may be more complex)
-        if (type === 'M' && chordPatterns['C-M']) {
-          // Shift C major shape up
-          const cShape = chordPatterns['C-M'][0];
-          const rootIndex = allNotes.indexOf(root);
-          const cIndex = allNotes.indexOf('C');
-          const shift = (rootIndex - cIndex + 12) % 12;
-          const shifted = {
-            name: 'Movable (C shape)',
-            frets: cShape.frets.map(f => (typeof f === 'number' ? f + shift : f)),
-            fingers: cShape.fingers,
-          };
-          voicings[key] = [shifted];
-        } else if (type === 'm' && chordPatterns['A-m']) {
-          // Shift Am shape up
-          const aShape = chordPatterns['A-m'][0];
-          const rootIndex = allNotes.indexOf(root);
-          const aIndex = allNotes.indexOf('A');
-          const shift = (rootIndex - aIndex + 12) % 12;
-          const shifted = {
-            name: 'Movable (Am shape)',
-            frets: aShape.frets.map(f => (typeof f === 'number' ? f + shift : f)),
-            fingers: aShape.fingers,
-          };
-          voicings[key] = [shifted];
+        // Determine base shape (choose most suitable from C, A, E roots)
+        // Generalizing to use a more appropriate base shape for movable chords
+        let refShape = null;
+        let baseRoot = '';
+        if (type === 'M' || type === '7' || type === '9') {
+          // Prioritize E shape, then A shape for major/dominant chords
+          if (chordPatterns['E-M'] && chordPatterns['E-M'][0]) {
+            refShape = chordPatterns['E-M'][0];
+            baseRoot = 'E';
+          } else if (chordPatterns['A-M'] && chordPatterns['A-M'][0]) {
+            refShape = chordPatterns['A-M'][0];
+            baseRoot = 'A';
+          }
+        } else if (type === 'm' || type === 'm7' || type === 'm6') {
+          // Prioritize E minor shape, then A minor shape for minor chords
+          if (chordPatterns['E-m'] && chordPatterns['E-m'][0]) {
+            refShape = chordPatterns['E-m'][0];
+            baseRoot = 'E';
+          } else if (chordPatterns['A-m'] && chordPatterns['A-m'][0]) {
+            refShape = chordPatterns['A-m'][0];
+            baseRoot = 'A';
+          }
+        }
+        // Fallback for other chord types if no specific pattern found
+        if (!refShape) {
+          const shapeKey = (type.startsWith('m') || type === 'sus2' || type === 'add9') 
+                            ? 'A-m' : 'C-M';
+          refShape = chordPatterns[shapeKey]?.[0];
+          baseRoot = shapeKey.split('-')[0];
+        }
+
+        if (refShape && baseRoot) {
+          const shift = (allNotes.indexOf(root) - allNotes.indexOf(baseRoot) + 12) % 12;
+          voicings[key] = [{
+            name: `Movable ${type} (${baseRoot} shape)`,
+            frets: refShape.frets.map(f => typeof f === 'number' ? f + shift : f),
+            fingers: refShape.fingers,
+          }];
         }
       }
     }
   }
-  // Manual overrides for special cases (e.g., F, B, etc.)
-  voicings['F-M'] = chordPatterns['F-M'];
-  voicings['F-m'] = chordPatterns['F-m'];
-  voicings['B-M'] = [
-    { name: 'Barre', frets: ['x', 2, 4, 4, 4, 2], fingers: ['x', 1, 3, 4, 2, 1] },
-  ];
-  voicings['B-m'] = [
-    { name: 'Barre', frets: ['x', 2, 4, 4, 3, 2], fingers: ['x', 1, 3, 4, 2, 1] },
-  ];
+
+  // Manual overrides for tricky roots
+  // These should ideally be integrated into chordPatterns directly or handled by a more robust generation logic
+  // Leaving for now as they were explicitly present.
+  if (chordPatterns['F-M']) voicings['F-M'] = chordPatterns['F-M'];
+  if (chordPatterns['F-m']) voicings['F-m'] = chordPatterns['F-m'];
+  if (chordPatterns['B-M']) voicings['B-M'] = chordPatterns['B-M'];
+  if (chordPatterns['B-m']) voicings['B-m'] = chordPatterns['B-m'];
+
   return voicings;
 }
 
 // 6. Chord voicings (generated)
 export const chordVoicings = generateChordVoicings();
 
-// 7. Voicing adaptation to tuning
-export function adaptVoicingsToTuning(voicings, origTuning, targetTuning) {
-  if (!voicings || voicings.length === 0) return [];
-  if (origTuning === targetTuning) return voicings;
-  const origTuningArray = tunings[origTuning];
-  const targetTuningArray = tunings[targetTuning];
-  return voicings.map(voicing => {
-    const newVoicing = { ...voicing };
-    newVoicing.name = `${newVoicing.name} (adapted)`;
-    const newFrets = [...voicing.frets];
-    for (let i = 0; i < 6; i++) {
-      const fret = voicing.frets[i];
-      if (fret === 'x') continue;
-      if (fret === 0 || fret === '0') {
-        newFrets[i] = 0;
-        continue;
-      }
-      const origNote = getFretNote(origTuningArray[5 - i], parseInt(fret, 10));
-      const targetOpenNote = targetTuningArray[5 - i];
-      const targetNoteIndex = allNotes.indexOf(origNote);
-      const targetOpenIndex = allNotes.indexOf(targetOpenNote);
-      let newFret = (targetNoteIndex - targetOpenIndex + 12) % 12;
-      if (newFret > 12 && parseInt(fret, 10) <= 12) {
-        newFret = newFret - 12;
-      } else if (newFret === 0 && parseInt(fret, 10) > 0) {
-        newFret = 12;
-      }
-      newFrets[i] = newFret.toString();
-    }
-    return {
-      ...newVoicing,
-      frets: newFrets,
-      fingers: voicing.fingers ? [...voicing.fingers] : newFrets.map(_ => '')
-    };
-  });
-}
+// Note: adaptVoicingsToTuning has been moved to tuningUtils.js to avoid circular dependencies
 
 // Helper to get the note at a specific fret
-function getFretNote(openNote, fret) {
+export function getFretNote(openNote, fret) {
   const index = allNotes.indexOf(openNote);
   return allNotes[(index + fret) % 12];
 }

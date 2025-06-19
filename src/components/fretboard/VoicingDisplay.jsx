@@ -1,16 +1,35 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import * as Tonal from 'tonal';
 import { useTheme } from '@/components/ui/ThemeContext';
+
+// Utility: Calculate dynamic fret range for a voicing
+function getFretRange(frets) {
+  const used = frets
+    .map(f => (f !== 'x' && f !== 0 && f !== '0') ? parseInt(f, 10) : null)
+    .filter(f => f !== null);
+  if (used.length === 0) return { start: 1, end: 5 };
+  const min = Math.min(...used);
+  const max = Math.max(...used);
+  // Always show at least 4 frets
+  const start = min > 1 ? min : 1;
+  const end = Math.max(max, start + 3);
+  return { start, end };
+}
 
 const VoicingDisplay = ({ 
   selectedVoicings, 
   currentVoicingIndex, 
   chordRoot, 
   chordType, 
+  chordName,
+  voicingObject,
   onNext, 
   onPrevious,
   playChord,
   isFullView = false,
+  size = 'md',
+  showName = true,
+  ...props
 }) => {
   const { theme } = useTheme();
   
@@ -22,8 +41,26 @@ const VoicingDisplay = ({
     return null;
   }
 
-  const currentVoicing = selectedVoicings[currentVoicingIndex];
-  
+  // Determine voicing to display
+  let voicing;
+  if (voicingObject) {
+    voicing = voicingObject;
+  } else if (selectedVoicings && selectedVoicings.length > 0) {
+    voicing = selectedVoicings[currentVoicingIndex] || selectedVoicings[0];
+  } else {
+    voicing = null;
+  }
+  if (!voicing) return null;
+
+  // Dynamic fret range
+  const { start: startFret, end: endFret } = getFretRange(voicing.frets);
+  const fretCount = endFret - startFret + 1;
+  const stringCount = voicing.frets.length;
+
+  // Sizing
+  const stringSpacing = 180 / (stringCount - 1);
+  const fretSpacing = (200 - 40) / fretCount;
+
   // Get notes from the voicing
   const getVoicingNotes = () => {
     const result = [];
@@ -32,7 +69,7 @@ const VoicingDisplay = ({
     const openStringNotes = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
     
     // Process each string (from low to high as they appear in the UI)
-    currentVoicing.frets.forEach((fret, stringIdx) => {
+    voicing.frets.forEach((fret, stringIdx) => {
       // Skip if string not played
       if (fret === 'x') return;
       
@@ -78,201 +115,156 @@ const VoicingDisplay = ({
       } rounded-lg overflow-hidden shadow-lg transition-all duration-300`;
 
   return (
-    <div className={containerClass}>
-      <div className={`flex justify-between items-center px-4 py-2 border-b ${isGlassmorphism ? 'border-gray-700/40' : (darkMode ? 'border-gray-700' : 'border-gray-300')}`}>
-        <h3 className={`text-md font-semibold ${isGlassmorphism ? 'text-primary' : (darkMode ? 'text-yellow-300' : 'text-yellow-600')}`}>
-          {chordRoot}{chordType} - {currentVoicing.name}
-        </h3>
-
+    <div className={`${containerClass} p-3 w-fit mx-auto flex flex-col items-center`}>
+      <div className="flex items-center justify-between w-full mb-2">
+        <div className="text-white font-semibold text-xl">
+          {chordRoot}{chordType} {voicing.name && <span className="text-gray-300 font-normal">- {voicing.name}</span>}
+        </div>
         <div className="flex items-center space-x-2">
-          <button
-            onClick={onPrevious}
-            disabled={selectedVoicings.length <= 1}
-            className={`p-1.5 rounded-full transition-colors duration-200 ${
-              selectedVoicings.length > 1 
-                ? `${isGlassmorphism 
-                    ? 'bg-blue-600/80 hover:bg-blue-700/90 shadow-glow-xs shadow-blue-500/30' 
-                    : 'bg-blue-600 hover:bg-blue-700'} text-white` 
-                : `${isGlassmorphism 
-                    ? 'bg-gray-700/50 text-gray-500/70' 
-                    : `${darkMode ? 'bg-gray-700 text-gray-500' : 'bg-gray-300 text-gray-400'}`} cursor-not-allowed`
-            }`}
-            aria-label="Previous voicing"
+          {selectedVoicings && selectedVoicings.length > 1 && (
+            <button
+              onClick={onPrevious}
+              className="p-1.5 rounded-full bg-blue-600/80 hover:bg-blue-600/90 text-white transition-colors duration-200"
+              aria-label="Previous voicing"
+            >
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+            </button>
+          )}
+          <button 
+            onClick={handlePlayVoicing}
+            className="px-3 py-1.5 rounded-full bg-blue-600/80 hover:bg-blue-600/90 text-white font-medium transition-all duration-200 shadow-lg flex items-center space-x-1"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-            </svg>
+            <span>
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+              </svg>
+            </span>
+            <span>Play</span>
           </button>
-          <span className={`text-xs ${isGlassmorphism ? 'text-gray-300' : (darkMode ? 'text-gray-400' : 'text-gray-500')}`}>{currentVoicingIndex + 1}/{selectedVoicings.length}</span>
-          <button
-            onClick={onNext}
-            disabled={selectedVoicings.length <= 1}
-            className={`p-1.5 rounded-full transition-colors duration-200 ${
-              selectedVoicings.length > 1 
-                ? `${isGlassmorphism 
-                    ? 'bg-blue-600/80 hover:bg-blue-700/90 shadow-glow-xs shadow-blue-500/30' 
-                    : 'bg-blue-600 hover:bg-blue-700'} text-white` 
-                : `${isGlassmorphism 
-                    ? 'bg-gray-700/50 text-gray-500/70' 
-                    : `${darkMode ? 'bg-gray-700 text-gray-500' : 'bg-gray-300 text-gray-400'}`} cursor-not-allowed`
-            }`}
-            aria-label="Next voicing"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
+          {selectedVoicings && selectedVoicings.length > 1 && (
+            <button
+              onClick={onNext}
+              className="p-1.5 rounded-full bg-blue-600/80 hover:bg-blue-600/90 text-white transition-colors duration-200"
+              aria-label="Next voicing"
+            >
+              <svg width="20" height="20" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clipRule="evenodd" />
+              </svg>
+            </button>
+          )}
         </div>
       </div>
-
-      <div className={`flex ${isFullView ? 'flex-col md:flex-row' : 'items-center'} p-3`}>
-        {/* Chord diagram */}
-        <div className={`${isGlassmorphism 
-          ? 'bg-gray-900/60 backdrop-blur-sm border border-gray-700/50 shadow-lg' 
-          : `${darkMode ? 'bg-gray-900/70' : 'bg-white'}`} 
-          p-3 rounded-md ${isFullView ? 'mb-4 md:mb-0 md:mr-6' : 'mr-4'} mx-auto transition-all duration-300`}>
-          <div className={`relative ${diagramSize}`}>
-            {/* Strings */}
-            <div className="flex justify-between h-full">
-              {[0, 1, 2, 3, 4, 5].map((stringIdx) => (
-                <div key={stringIdx} className={`w-0.5 ${isGlassmorphism ? 'bg-gray-500/80' : (darkMode ? 'bg-gray-500' : 'bg-gray-400')} h-full`}></div>
-              ))}
-            </div>
-            
-            {/* Frets (horizontal lines) */}
-            {[0, 1, 2, 3, 4].map((fretIdx) => (
-              <div 
-                key={fretIdx} 
-                className={`absolute left-0 right-0 h-0.5 ${isGlassmorphism ? 'bg-gray-500/80' : (darkMode ? 'bg-gray-500' : 'bg-gray-400')}`}
-                style={{ top: `${fretIdx * 25}%` }}
+      {/* Chord diagram grid */}
+      <div className="relative mt-4" style={{ width: 180, height: 200 }}>
+        {/* Nut or fret number */}
+        {startFret === 1 ? (
+          <div className="absolute left-0 right-0 top-0 h-2 bg-gray-200 rounded-sm" style={{ zIndex: 2 }} />
+        ) : (
+          <div className="absolute right-[-28px] top-6 text-xs text-gray-400">{startFret}fr</div>
+        )}
+        {/* Grid lines */}
+        {/* Strings */}
+        {Array.from({ length: stringCount }).map((_, i) => (
+          <div
+            key={`string-${i}`}
+            className="absolute top-2"
+            style={{
+              left: `${i * stringSpacing}px`,
+              width: '2px',
+              height: 180,
+              background: '#3b4252',
+              borderRadius: '1px',
+              zIndex: 1,
+            }}
+          />
+        ))}
+        {/* Frets */}
+        {Array.from({ length: fretCount + 1 }).map((_, i) => (
+          <div
+            key={`fret-${i}`}
+            className="absolute left-0 right-0"
+            style={{
+              top: `${i * fretSpacing + 2}px`,
+              height: '2px',
+              background: '#3b4252',
+              borderRadius: '1px',
+              zIndex: 1,
+            }}
+          />
+        ))}
+        {/* Muted and finger dots */}
+        {voicing.frets.map((fret, i) => {
+          // Muted string
+          if (fret === 'x') {
+            return (
+              <div
+                key={`mute-${i}`}
+                className="absolute"
+                style={{
+                  left: `${i * stringSpacing - 10}px`,
+                  top: '-18px',
+                  zIndex: 3,
+                }}
               >
-                {/* Fret markers for orientation */}
-                {fretIdx > 0 && fretIdx % 3 === 0 && (
-                  <div className={`absolute -right-3 top-1/2 transform -translate-y-1/2 text-xs ${isGlassmorphism ? 'text-gray-400/90' : (darkMode ? 'text-gray-400' : 'text-gray-500')}`}>
-                    {fretIdx}
-                  </div>
-                )}
+                <span className="text-red-500 text-lg font-bold">x</span>
               </div>
-            ))}
-            
-            {/* Finger positions */}
-            {currentVoicing.frets.map((fret, stringIdx) => {
-              const finger = currentVoicing.fingers?.[stringIdx] || '';
-              
-              // Skip if string is not played (x)
-              if (fret === 'x') {
-                return (
-                  <div 
-                    key={stringIdx}
-                    className="absolute text-red-500 font-bold text-sm"
-                    style={{ 
-                      left: `${stringIdx * 20}%`, 
-                      top: '-20px',
-                      transform: 'translateX(-50%)'
-                    }}
-                  >
-                    ×
-                  </div>
-                );
-              }
-              
-              // Handle open string (0)
-              if (fret === 0) {
-                return (
-                  <div 
-                    key={stringIdx}
-                    className="absolute text-green-500 font-bold text-sm"
-                    style={{ 
-                      left: `${stringIdx * 20}%`, 
-                      top: '-20px',
-                      transform: 'translateX(-50%)'
-                    }}
-                  >
-                    ○
-                  </div>
-                );
-              }
-              
-              // Calculate position - handle higher frets by clamping to visible diagram
-              const fretNum = parseInt(fret, 10);
-              const displayPosition = Math.min(fretNum, 4) - 0.5;
-              
-              // Handle regular fretted notes
+            );
+          }
+          // Only show finger dots for fretted notes
+          if (typeof fret === 'number' && fret > 0) {
+            const fretNum = parseInt(fret, 10);
+            // Only show if in visible range
+            if (fretNum >= startFret && fretNum < startFret + fretCount) {
+              const y = (fretNum - startFret + 0.5) * fretSpacing + 2;
               return (
-                <div 
-                  key={stringIdx}
-                  className={`absolute ${isFullView ? 'w-9 h-9' : 'w-5 h-5'} ${isGlassmorphism 
-                    ? 'bg-purple-600/80 shadow-glow-xs shadow-purple-500/30'
-                    : 'bg-purple-600'} rounded-full flex items-center justify-center ${isFullView ? 'text-sm' : 'text-xs'} text-white transition-all duration-300`}
-                  style={{ 
-                    left: `${stringIdx * 20}%`, 
-                    top: `${displayPosition * 25}%`,
-                    transform: 'translate(-50%, -50%)'
+                <div
+                  key={`dot-${i}`}
+                  className="absolute flex items-center justify-center animate-pulse"
+                  style={{
+                    left: `${i * stringSpacing - 18}px`,
+                    top: `${y - 18}px`,
+                    width: 36,
+                    height: 36,
+                    zIndex: 4,
                   }}
                 >
-                  {finger || ''}
+                  <div className="bg-purple-500 rounded-full w-9 h-9 flex items-center justify-center shadow-lg">
+                    <span className="text-white text-lg font-bold">
+                      {voicing.fingers && voicing.fingers[i] && voicing.fingers[i] !== 'x' ? voicing.fingers[i] : ''}
+                    </span>
+                  </div>
                 </div>
               );
-            })}
-          </div>
-        </div>
-        
-        {/* Voicing details */}
-        <div className="flex-1">
-          <div className="flex flex-col space-y-2">
-            <div className="flex items-center">
-              <span className={`text-xs ${isGlassmorphism ? 'text-gray-300' : (darkMode ? 'text-gray-400' : 'text-gray-500')} w-16`}>Strings:</span>
-              <div className="flex gap-2">
-                {currentVoicing.frets.map((fret, idx) => (
-                  <span key={idx} className={`${isGlassmorphism 
-                    ? 'bg-gray-700/50 backdrop-blur-xs border border-gray-600/30' 
-                    : `${darkMode ? 'bg-gray-700/80' : 'bg-gray-200'}`} 
-                    px-2 py-0.5 rounded text-xs ${darkMode ? 'text-white' : 'text-gray-700'} font-mono transition-colors duration-200`}
-                  >
-                    {fret}
-                  </span>
-                ))}
-              </div>
-            </div>
-            
-            {currentVoicing.fingers && (
-              <div className="flex items-center">
-                <span className={`text-xs ${isGlassmorphism ? 'text-gray-300' : (darkMode ? 'text-gray-400' : 'text-gray-500')} w-16`}>Fingers:</span>
-                <div className="flex gap-2">
-                  {currentVoicing.fingers.map((finger, idx) => (
-                    <span key={idx} className={`${isGlassmorphism 
-                      ? 'bg-gray-700/50 backdrop-blur-xs border border-gray-600/30' 
-                      : `${darkMode ? 'bg-gray-700/80' : 'bg-gray-200'}`} 
-                      px-2 py-0.5 rounded text-xs ${darkMode ? 'text-white' : 'text-gray-700'} font-mono transition-colors duration-200`}
-                    >
-                      {finger}
-                    </span>
-                  ))}
+            }
+          }
+          // Open string dot (fret 0)
+          if (fret === 0 || fret === '0') {
+            const y = (0 - startFret + 0.5) * fretSpacing + 2;
+            return (
+              <div
+                key={`open-${i}`}
+                className="absolute flex items-center justify-center"
+                style={{
+                  left: `${i * stringSpacing - 18}px`,
+                  top: '-18px',
+                  width: 36,
+                  height: 36,
+                  zIndex: 3,
+                }}
+              >
+                <div className="bg-purple-500 rounded-full w-9 h-9 flex items-center justify-center shadow-lg">
+                  <span className="text-white text-lg font-bold">O</span>
                 </div>
               </div>
-            )}
-            
-            <div className="flex items-center">
-              {playChord && (
-                <button
-                  onClick={handlePlayVoicing}
-                  className={`px-3 py-1 rounded ${isGlassmorphism 
-                    ? 'bg-indigo-600/80 hover:bg-indigo-700/90 shadow-glow-sm shadow-indigo-500/30' 
-                    : 'bg-indigo-600 hover:bg-indigo-700'} 
-                    text-white text-sm mt-2 flex items-center transition-all duration-200`}
-                >
-                  <span className="mr-1">🔊</span>
-                  <span>Play Voicing</span>
-                </button>
-              )}
-            </div>
-            
-            <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-gray-500'} italic mt-2`}>
-              Finger positions are shown on the fretboard
-            </p>
-          </div>
-        </div>
+            );
+          }
+          return null;
+        })}
       </div>
+      {showName && selectedVoicings && selectedVoicings.length > 0 && (
+        <div className="text-gray-400 text-sm mt-2">
+          {currentVoicingIndex + 1} of {selectedVoicings.length} voicings
+        </div>
+      )}
     </div>
   );
 };

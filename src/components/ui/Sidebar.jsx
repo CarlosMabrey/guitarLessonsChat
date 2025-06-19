@@ -1,7 +1,19 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
-import { FiHome, FiMusic, FiPlay, FiBarChart2, FiSettings, FiHelpCircle, FiUser, FiGrid, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { 
+  FiHome, 
+  FiMusic, 
+  FiPlay, 
+  FiBarChart2, 
+  FiSettings, 
+  FiHelpCircle, 
+  FiUser, 
+  FiGrid, 
+  FiChevronLeft, 
+  FiChevronRight 
+} from 'react-icons/fi';
 import { clsx } from 'clsx';
 import ThemeSwitcher from './ThemeSwitcher';
 
@@ -16,7 +28,7 @@ const navItems = [
   // { icon: FiHelpCircle, label: 'Help', href: '/help' },
 ];
 
-export default function Sidebar() {
+export default function Sidebar({ onToggle, isMobile = false }) {
   const pathname = usePathname();
   const [collapsed, setCollapsed] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -25,23 +37,27 @@ export default function Sidebar() {
   useEffect(() => {
     setMounted(true);
     
-    // Load collapsed state from localStorage
-    const savedCollapsed = localStorage.getItem('sidebarCollapsed');
-    if (savedCollapsed !== null) {
-      setCollapsed(savedCollapsed === 'true');
+    // Only load from localStorage on desktop
+    if (!isMobile) {
+      const savedCollapsed = localStorage.getItem('sidebarCollapsed');
+      if (savedCollapsed !== null) {
+        setCollapsed(savedCollapsed === 'true');
+      }
     }
-  }, []);
+  }, [isMobile]);
 
-  // Save collapsed state to localStorage when it changes
+  // Save collapsed state to localStorage when it changes (desktop only)
   useEffect(() => {
-    if (mounted) {
+    if (mounted && !isMobile) {
       localStorage.setItem('sidebarCollapsed', collapsed.toString());
     }
-  }, [collapsed, mounted]);
+  }, [collapsed, mounted, isMobile]);
 
   // Handle toggling the sidebar
   const toggleSidebar = () => {
-    setCollapsed(prev => !prev);
+    const newCollapsed = !collapsed;
+    setCollapsed(newCollapsed);
+    if (onToggle) onToggle(newCollapsed);
   };
 
   if (!mounted) return null;
@@ -49,43 +65,55 @@ export default function Sidebar() {
   return (
     <aside
       className={clsx(
-        'fixed left-0 top-0 h-screen z-20 flex flex-col transition-all duration-300 ease-in-out',
-        'bg-background-light/80 backdrop-blur-md',
+        'h-full flex flex-col transition-all duration-300 ease-in-out',
+        'bg-background-light/95 dark:bg-card/95 backdrop-blur-md',
         'border-r border-border/50',
         'shadow-lg',
         'py-4',
-        collapsed ? 'w-20' : 'w-64',
-        'lg:translate-x-0',
-        '-translate-x-0' // Always show on mobile since it's managed in Layout.jsx
+        'flex flex-col justify-between',
+        'overflow-hidden',
+        {
+          'w-64': !collapsed,
+          'w-20': collapsed,
+          'fixed lg:relative': isMobile,
+          'z-30': isMobile,
+          'translate-x-0': isMobile && !collapsed,
+          '-translate-x-full': isMobile && collapsed,
+        }
       )}
       aria-label="Sidebar navigation"
     >
-      {/* Toggle Button */}
-      <button
-        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
-        onClick={toggleSidebar}
+      {/* Logo - Clickable */}
+      <div 
         className={clsx(
-          'absolute -right-3 top-6 z-30 w-6 h-6 flex items-center justify-center rounded-full',
-          'bg-card-hover dark:bg-card',
-          'border border-border',
-          'shadow-md',
-          'transition-all duration-200',
-          'hover:scale-110',
-          'focus:outline-none focus:ring-2 focus:ring-active',
+          'flex items-center px-3 pb-6 pt-1 cursor-pointer',
+          'transition-colors duration-200',
+          'hover:bg-card-hover/30 rounded-lg mx-2',
+          collapsed ? 'justify-center' : 'justify-start'
         )}
+        onClick={toggleSidebar}
+        aria-label={collapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        role="button"
         tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            toggleSidebar();
+          }
+        }}
       >
-        {collapsed ? <FiChevronRight size={14} /> : <FiChevronLeft size={14} />}
-      </button>
-
-      {/* Logo */}
-      <div className="flex items-center px-3 pb-6 pt-1">
         <div className={clsx(
           'flex items-center',
-          collapsed ? 'justify-center w-full' : 'gap-3'
+          collapsed ? 'justify-center w-full' : 'gap-3',
         )}>
-          <div className="w-10 h-10 flex items-center justify-center bg-active rounded-lg text-white font-bold text-lg shadow-md">
-            🎸
+          <div className="w-10 h-10 flex items-center justify-center bg-active rounded-lg shadow-md overflow-hidden">
+            <Image
+              src="/guitarlogo.png"
+              alt="Guitar Coach Logo"
+              width={32}
+              height={32}
+              className="object-contain"
+            />
           </div>
           {!collapsed && (
             <span className="ml-1 text-lg font-semibold text-text-primary">
@@ -144,12 +172,15 @@ export default function Sidebar() {
         })}
       </nav>
 
-      {/* Theme Switcher at bottom of sidebar */}
-      <div className={clsx(
-        'mt-auto pt-4 pb-2 border-t border-border/30', 
-        collapsed ? 'flex justify-center' : 'px-4'
-      )}> 
-        <ThemeSwitcher compact={collapsed} />
+      {/* Bottom section with theme switcher */}
+      <div className="mt-auto">
+        <div className={clsx(
+          'py-4 border-t border-border/30',
+          'flex items-center justify-center',
+          collapsed ? 'px-2' : 'px-4'
+        )}>
+          <ThemeSwitcher compact={collapsed} />
+        </div>
       </div>
     </aside>
   );
