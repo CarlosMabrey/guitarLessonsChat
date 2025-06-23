@@ -177,7 +177,7 @@ function FretboardPage() {
             </div>
 
             {/* Main Content - Fretboard */}
-            <div className="lg:col-span-3 flex flex-col h-full overflow-hidden">
+            <div className="lg:col-span-4 flex flex-col h-full overflow-hidden">
               {/* Voicing Navigator */}
               {chordType && singleVoicingMode && filteredVoicings.length > 0 && (
                 <div className="mb-4">
@@ -194,19 +194,21 @@ function FretboardPage() {
               )}
 
               {/* Fretboard Grid */}
-              <div className="flex-1 flex flex-col min-h-0">
-                <FretboardGrid
-                  strings={strings}
-                  frets={frets}
-                  highlightedNotes={highlightedNotes}
-                  intervalMap={intervalMap}
-                  selectedNotes={selectedNotes}
-                  onNoteClick={handleNoteClick}
-                  showOnlyRelevantNotes={showOnlyRelevantNotes}
-                  singleVoicingMode={singleVoicingMode}
-                  currentVoicing={currentVoicing}
-                  className="flex-1"
-                />
+              <div className="flex-1 flex flex-col min-h-0 w-full overflow-x-auto">
+                <div className="min-w-max w-full">
+                  <FretboardGrid
+                    strings={strings}
+                    frets={frets}
+                    highlightedNotes={highlightedNotes}
+                    intervalMap={intervalMap}
+                    selectedNotes={selectedNotes}
+                    onNoteClick={handleNoteClick}
+                    showOnlyRelevantNotes={showOnlyRelevantNotes}
+                    singleVoicingMode={singleVoicingMode}
+                    currentVoicing={currentVoicing}
+                    className="flex-1"
+                  />
+                </div>
               </div>
 
               {/* Display Settings */}

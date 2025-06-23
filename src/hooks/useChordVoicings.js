@@ -62,12 +62,17 @@ const useChordVoicings = (chordRoot, chordType, currentTuning, voicingFretRange,
     });
   }, [getVoicings, voicingFretRange, voicingStringSet]);
   
-  // Get chord notes for the current voicing
+  // Get chord notes for the current voicing, normalized to use consistent enharmonic spellings
   const getVoicingNotes = useMemo(() => {
     if (!chordType || !chordRoot) return [];
     
     try {
-      return Tonal.Chord.getChord(chordType, chordRoot).notes;
+      // Get the chord notes and normalize them to use consistent enharmonic spellings
+      const chord = Tonal.Chord.get(chordType, chordRoot);
+      const notes = chord.notes;
+      
+      // Convert all notes to their simplest form (e.g., Bb → A#)
+      return notes.map(note => Tonal.Note.simplify(note));
     } catch (e) {
       console.error('Error getting chord notes:', e);
       return [];

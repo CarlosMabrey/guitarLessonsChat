@@ -1,7 +1,7 @@
 import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import '@testing-library/jest-dom';
-import FretboardPage from '../index.new';
+import FretboardPage from '..';
 
 // Mock the hooks and components
 jest.mock('@/hooks/useFretboardState', () => ({

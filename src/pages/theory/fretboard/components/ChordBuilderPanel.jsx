@@ -20,6 +20,7 @@ const ChordBuilderPanel = ({
   onNextVoicing,
   onPreviousVoicing,
   onPlayChord,
+  selectVoicing,
   className = ''
 }) => {
   // Get chord notes to display when a chord is selected
@@ -41,6 +42,7 @@ const ChordBuilderPanel = ({
 
   // Handle voicing selection change
   const handleVoicingChange = (e) => {
+    if (!selectVoicing) return;
     const newIndex = parseInt(e.target.value, 10);
     if (!isNaN(newIndex) && newIndex >= 0 && newIndex < selectedVoicings.length) {
       selectVoicing(newIndex);
@@ -52,24 +54,50 @@ const ChordBuilderPanel = ({
   const voicingName = currentVoicing?.name || 'Default';
   const voicingPosition = hasVoicings ? `${currentVoicingIndex + 1} of ${selectedVoicings.length}` : '';
 
+  // Common select styles
+  const selectStyles = {
+    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 0.75rem center',
+    backgroundSize: '1rem',
+    backgroundClip: 'padding-box',
+    paddingRight: '2rem',
+    paddingLeft: '0.75rem',
+    paddingTop: '0.5rem',
+    paddingBottom: '0.5rem',
+    fontSize: '0.875rem',
+    lineHeight: '1.25rem',
+    minWidth: '10rem',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    borderRadius: '0.5rem',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    color: 'white',
+    appearance: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    '&:hover': {
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+      backgroundColor: 'rgba(0, 0, 0, 0.25)'
+    },
+    '&:focus': {
+      outline: 'none',
+      ring: '2px',
+      ringColor: 'rgba(96, 165, 250, 0.5)',
+      borderColor: 'rgba(96, 165, 250, 0.5)'
+    }
+  };
+
   return (
-    <div className={`bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-xl ${className}`}>
-      <h3 className="text-lg font-semibold text-white mb-4">Chord Builder</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+    <div className={`bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/5 shadow-sm ${className}`}>
+      <div className="space-y-4">
         {/* Root Note Selector */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm text-white/80">Root Note</label>
+        <div className="flex items-center space-x-3">
+          <span className="text-sm font-medium text-white/70 whitespace-nowrap w-24">Root Note</span>
           <select
             value={chordRoot}
             onChange={(e) => onRootChange(e.target.value)}
-            className="w-full bg-[var(--card)] border border-white/20 text-white rounded-xl px-4 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 1rem center',
-              backgroundSize: '1rem'
-            }}
+            className="flex-1 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+            style={selectStyles}
           >
             {allNotes.map((note) => (
               <option key={note} value={note} className="bg-gray-800 text-white">
@@ -80,18 +108,13 @@ const ChordBuilderPanel = ({
         </div>
         
         {/* Chord Type Selector */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm text-white/80">Chord Type</label>
+        <div className="flex items-center space-x-3">
+          <span className="text-sm font-medium text-white/70 whitespace-nowrap w-24">Chord Type</span>
           <select
             value={chordType}
             onChange={(e) => onChordTypeChange(e.target.value)}
-            className="w-full bg-[var(--card)] border border-white/20 text-white rounded-xl px-4 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 1rem center',
-              backgroundSize: '1rem'
-            }}
+            className="flex-1 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+            style={selectStyles}
           >
             <option value="" className="bg-gray-800 text-white">Select Chord</option>
             {chordTypes.map((c) => (
@@ -104,34 +127,30 @@ const ChordBuilderPanel = ({
 
         {/* Voicing Selector - Only show when we have voicings */}
         {hasVoicings && (
-          <div className="md:col-span-2 flex flex-col space-y-2">
-            <label className="text-sm text-white/80">Voicing</label>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-white/70">Voicing</span>
+              <span className="text-xs text-white/50">{voicingPosition}</span>
+            </div>
             <div className="flex items-center space-x-2">
               <button
                 onClick={onPreviousVoicing}
                 disabled={currentVoicingIndex <= 0}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 aria-label="Previous voicing"
               >
-                <ChevronLeftIcon className="w-5 h-5" />
+                <ChevronLeftIcon className="w-4 h-4 text-white" />
               </button>
               
               <select
                 value={currentVoicingIndex}
                 onChange={handleVoicingChange}
-                className="flex-1 bg-[var(--card)] border border-white/20 text-white rounded-xl px-4 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
-                style={{
-                  backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-                  backgroundRepeat: 'no-repeat',
-                  backgroundPosition: 'right 1rem center',
-                  backgroundSize: '1rem',
-                  paddingRight: '2.5rem',
-                  textOverflow: 'ellipsis'
-                }}
+                className="flex-1 min-w-0 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+                style={selectStyles}
               >
-                {selectedVoicings.map((voicing, index) => (
-                  <option key={`${voicing.name}-${index}`} value={index} className="bg-gray-800 text-white">
-                    {voicing.name} {voicing.position ? `(${voicing.position})` : ''}
+                {selectedVoicings.map((voicing, idx) => (
+                  <option key={idx} value={idx} className="bg-gray-800 text-white">
+                    {voicing.name || `Voicing ${idx + 1}`}
                   </option>
                 ))}
               </select>
@@ -139,17 +158,22 @@ const ChordBuilderPanel = ({
               <button
                 onClick={onNextVoicing}
                 disabled={currentVoicingIndex >= selectedVoicings.length - 1}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                className="p-1.5 rounded-lg bg-white/5 hover:bg-white/10 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
                 aria-label="Next voicing"
               >
-                <ChevronRightIcon className="w-5 h-5" />
+                <ChevronRightIcon className="w-4 h-4 text-white" />
+              </button>
+              
+              <button
+                onClick={() => onPlayChord(chordNotes)}
+                className="p-1.5 rounded-lg bg-blue-500/90 hover:bg-blue-500 text-white transition-colors flex-shrink-0"
+                aria-label="Play chord"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                </svg>
               </button>
             </div>
-            {voicingPosition && (
-              <div className="text-xs text-white/60 text-right">
-                {voicingPosition}
-              </div>
-            )}
           </div>
         )}
       </div>
@@ -216,8 +240,8 @@ ChordBuilderPanel.propTypes = {
   onPreviousVoicing: PropTypes.func.isRequired,
   /** Callback to select a specific voicing by index */
   selectVoicing: PropTypes.func.isRequired,
-  /** Callback to play the current chord */
-  onPlayChord: PropTypes.func.isRequired,
+  /** Callback when play chord button is clicked */
+  onPlayChord: PropTypes.func,
   /** Additional CSS classes */
   className: PropTypes.string,
 };

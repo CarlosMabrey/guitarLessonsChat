@@ -74,6 +74,12 @@ A powerful, interactive fretboard tool with:
 - Improved accessibility and mobile support (planned)
 - Modular, maintainable code
 
+## AI Functionality
+- AI-powered song analysis
+- Chord detection
+- Practice routines built from AI analysis (goals, current skill level, youtube videos, etc.)
+- Learning chat
+
 ## 👩‍💻 Development Status (Updated)
 - Fretboard visualizer refactored and improved
 - Voicings, analysis, patterns, and progressions tabs implemented

@@ -91,7 +91,7 @@ export default function Layout({ title, version, children }) {
         'h-screen',
         {
           'lg:pl-20': isSidebarCollapsed,
-          'lg:pl-64': !isSidebarCollapsed
+          'lg:pl-10': !isSidebarCollapsed
         }
       )}>
         <header className="h-16 flex items-center justify-between px-4 border-b border-border/50 shadow-sm bg-background-light/80 dark:bg-card/80 backdrop-blur-sm sticky top-0 z-10">

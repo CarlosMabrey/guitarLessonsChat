@@ -3,6 +3,7 @@ import PropTypes from 'prop-types';
 import NoteCell from '@/components/fretboard/NoteCell';
 import { getFretNote, fretMarkers } from '@/hooks/useFretboardState';
 import { useContainerSize } from '@/hooks/useContainerSize';
+import * as Tonal from '@tonaljs/tonal';
 
 /**
  * Main fretboard grid component that displays strings and frets
@@ -34,14 +35,78 @@ const FretboardGrid = ({
     return (note) => !!voicingNotes[note];
   }, [currentVoicing, singleVoicingMode, strings]);
 
-  // Check if a note is selected
-  const isNoteSelected = (note) => {
-    return selectedNotes.includes(note);
+  // Normalize a note to its simplest form and handle enharmonic equivalents
+  const normalizeNote = (note) => {
+    try {
+      if (!note) return '';
+      
+      // First get the pitch class (letter + accidental, no octave)
+      const pitchClass = Tonal.Note.pitchClass(note);
+      
+      // Use the midi number for comparison instead of string-based comparison
+      // This ensures all enharmonic equivalents match regardless of notation
+      const midiNumber = Tonal.Note.midi(pitchClass + '4');
+      if (midiNumber !== null) {
+        // Default to sharp notation which is used by allNotes array
+        const allNotesByMidi = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+        // Convert to 0-11 range C=0, C#=1, etc.
+        return allNotesByMidi[midiNumber % 12];
+      }
+      
+      // Fallback if midi number can't be determined
+      const standardized = Tonal.Note.standardize(pitchClass);
+      const simplified = Tonal.Note.simplify(standardized);
+      return simplified || standardized || pitchClass || note;
+    } catch (e) {
+      console.error('Error normalizing note:', note, e);
+      return note; // Return original if there's an error
+    }
   };
-
-  // Check if a note should be highlighted
+  
+  // Helper for MIDI-based note matching (most reliable way to match enharmonics)
+  const getMidiValue = (note) => {
+    try {
+      // Add octave 4 for consistent comparison
+      const noteWithOctave = Tonal.Note.pitchClass(note) + '4';
+      return Tonal.Note.midi(noteWithOctave);
+    } catch (e) {
+      console.error('Error getting MIDI value:', note, e);
+      return null;
+    }
+  };
+  
+  // Check if a note should be highlighted using MIDI values for reliable comparison
   const isNoteHighlighted = (note) => {
-    return highlightedNotes.includes(note);
+    if (!note) return false;
+    
+    // Get MIDI value for the note we're checking
+    const noteMidi = getMidiValue(note);
+    if (noteMidi === null) return false;
+    
+    // For debugging purposes - uncomment to see what's happening
+    // console.log(`Checking note: ${note} (MIDI: ${noteMidi}) against highlights:`, 
+    //   highlightedNotes.map(hn => `${hn} (MIDI: ${getMidiValue(hn)})`));
+    
+    // Compare MIDI values instead of string representations
+    return highlightedNotes.some(highlightedNote => {
+      const highlightedMidi = getMidiValue(highlightedNote);
+      return highlightedMidi === noteMidi;
+    });
+  };
+  
+  // Check if a note is selected using MIDI values
+  const isNoteSelected = (note) => {
+    if (!note) return false;
+    
+    // Get MIDI value for the note we're checking
+    const noteMidi = getMidiValue(note);
+    if (noteMidi === null) return false;
+    
+    // Compare MIDI values instead of string representations
+    return selectedNotes.some(selectedNote => {
+      const selectedMidi = getMidiValue(selectedNote);
+      return selectedMidi === noteMidi;
+    });
   };
 
   // Handle note cell click
@@ -92,7 +157,7 @@ const FretboardGrid = ({
   const stringHeight = cellSize;
   const noteSize = Math.min(cellSize * 0.8, 48);
 
-  // Calculate the container width based on the number of frets and available space
+  // Calculate the table width based on the number of frets and container size
   const calculateTableWidth = () => {
     if (!containerSize.width) return '100%';
     
@@ -100,18 +165,12 @@ const FretboardGrid = ({
     const stringLabelWidth = 48; // Width of the string label column
     const totalWidth = totalFretWidth + stringLabelWidth;
     
-    // On large screens (>= 1024px), try to fit all frets within the container
-    // On smaller screens, allow the table to be wider than the container (will scroll)
-    if (containerSize.width >= 1024) {
-      // If container can fit all frets, use container width
-      if (containerSize.width >= totalWidth) {
-        return '100%';
-      }
-    }
-    
-    // Otherwise use the calculated width (will enable scrolling)
-    return totalWidth;
+    // Return the calculated width to ensure all frets are visible
+    return `${totalWidth}px`;
   };
+  
+  // Get the calculated table width
+  const tableWidth = calculateTableWidth();
 
   return (
     <div 
@@ -128,91 +187,94 @@ const FretboardGrid = ({
       }}
     >
       <div 
-        className="flex-1 overflow-y-auto p-4"
+        className="flex-1 overflow-auto p-4"
         style={{
-          // Only enable horizontal scrolling on smaller screens
-          overflowX: containerSize.width < 1024 ? 'auto' : 'hidden',
+          overflowX: 'auto',
+          WebkitOverflowScrolling: 'touch',
         }}
       >
-        <table 
-          ref={tableRef} 
-          className="h-full border-separate border-spacing-0"
-          style={{
-            '--fret-width': `${fretWidth}px`,
-            '--string-height': `${stringHeight}px`,
-            width: calculateTableWidth(),
-            tableLayout: 'fixed'
-          }}
-        >
-          <colgroup>
-            <col style={{ width: '48px', minWidth: '48px' }} /> {/* String label column */}
-            {frets.map((_, index) => (
-              <col 
-                key={index} 
-                style={{ 
-                  width: `${fretWidth}px`,
-                  minWidth: `${fretWidth}px`,
-                  maxWidth: `${fretWidth * 1.2}px`,
-                }} 
-              />
-            ))}
-          </colgroup>
-        <thead>
-          <tr className="text-sm text-blue-300 font-medium">
-            <th className="px-3 py-2 text-left w-12">String</th>
-            {frets.map((fret) => (
-              <th key={fret} className="px-3 py-2 text-center w-12">
-                {fret === 0 || fretMarkers.includes(fret) ? (
-                  <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-500/20 text-blue-300">
-                    {fret}
-                  </span>
-                ) : (
-                  <span>{fret}</span>
-                )}
-              </th>
-            ))}
-          </tr>
-        </thead>
-        <tbody>
-          {strings.map((openNote, stringIndex) => (
-            <tr key={stringIndex} className="border-t border-white/5 hover:bg-white/5 transition-colors duration-200">
-              <td className="p-1 text-center">
-                <div className="flex items-center justify-center w-full h-full">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-900/30 border border-indigo-400/20 text-sm font-bold text-indigo-300">
-                    {openNote}
-                  </div>
-                </div>
-              </td>
-              {frets.map((fret) => {
-                const note = getFretNote(openNote, fret);
-                const isHighlighted = isNoteHighlighted(note);
-                const isSelected = isNoteSelected(note);
-                const isInVoicing = singleVoicingMode ? isNoteInVoicing(note) : true;
-                const interval = intervalMap[note] || '';
-                
-                return (
-                  <NoteCell
-                    key={fret}
-                    note={note}
-                    interval={interval}
-                    isHighlighted={isHighlighted}
-                    isSelected={isSelected}
-                    isInVoicing={isInVoicing}
-                    isRelevant={!showOnlyRelevantNotes || isHighlighted || isSelected || isInVoicing}
-                    onClick={() => handleNoteClick(note, stringIndex, fret)}
-                    fret={fret}
-                    stringIndex={stringIndex}
-                    cellSize={cellSize}
-                    className="px-3 py-3 text-center"
-                  />
-                );
-              })}
-            </tr>
-          ))}
-        </tbody>
-      </table>
+        <div style={{ minWidth: '100%', width: 'max-content' }}>
+          <table 
+            ref={tableRef} 
+            className="border-separate border-spacing-0"
+            style={{
+              '--fret-width': `${fretWidth}px`,
+              '--string-height': `${stringHeight}px`,
+              width: tableWidth,
+              tableLayout: 'fixed',
+              minWidth: '100%'
+            }}
+          >
+            <colgroup>
+              <col style={{ width: '48px', minWidth: '48px' }} /> {/* String label column */}
+              {frets.map((_, index) => (
+                <col 
+                  key={index} 
+                  style={{ 
+                    width: `${fretWidth}px`,
+                    minWidth: `${fretWidth}px`,
+                    maxWidth: `${fretWidth * 1.2}px`,
+                  }} 
+                />
+              ))}
+            </colgroup>
+            <thead>
+              <tr className="text-sm text-blue-300 font-medium">
+                <th className="px-3 py-2 text-left w-12">String</th>
+                {frets.map((fret) => (
+                  <th key={fret} className="px-3 py-2 text-center w-12">
+                    {fret === 0 || fretMarkers.includes(fret) ? (
+                      <span className="inline-flex items-center justify-center h-6 w-6 rounded-full bg-blue-500/20 text-blue-300">
+                        {fret}
+                      </span>
+                    ) : (
+                      <span>{fret}</span>
+                    )}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {strings.map((openNote, stringIndex) => (
+                <tr key={stringIndex} className="border-t border-white/5 hover:bg-white/5 transition-colors duration-200">
+                  <td className="p-1 text-center">
+                    <div className="flex items-center justify-center w-full h-full">
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-indigo-900/30 border border-indigo-400/20 text-sm font-bold text-indigo-300">
+                        {openNote}
+                      </div>
+                    </div>
+                  </td>
+                  {frets.map((fret) => {
+                    const note = getFretNote(openNote, fret);
+                    const isHighlighted = isNoteHighlighted(note);
+                    const isSelected = isNoteSelected(note);
+                    const isInVoicing = singleVoicingMode ? isNoteInVoicing(note) : true;
+                    const interval = intervalMap[note] || '';
+                    
+                    return (
+                      <NoteCell
+                        key={fret}
+                        note={note}
+                        interval={interval}
+                        isHighlighted={isHighlighted}
+                        isSelected={isSelected}
+                        isInVoicing={isInVoicing}
+                        isRelevant={!showOnlyRelevantNotes || isHighlighted || isSelected || isInVoicing}
+                        onClick={() => handleNoteClick(note, stringIndex, fret)}
+                        fret={fret}
+                        stringIndex={stringIndex}
+                        cellSize={cellSize}
+                        className="px-3 py-3 text-center"
+                      />
+                    );
+                  })}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-  </div>
   );
 };
 

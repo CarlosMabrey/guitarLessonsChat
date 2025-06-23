@@ -8,8 +8,22 @@ export const fretMarkers = [3, 5, 7, 9, 12];
 
 // Helper to get the note at a specific fret
 export const getFretNote = (openNote, fret) => {
-  const index = allNotes.indexOf(Tonal.Note.simplify(openNote));
-  return allNotes[(index + fret) % 12];
+  try {
+    // Convert the open note to a standard MIDI note (add octave 4 for consistent comparison)
+    const openNoteWithOctave = Tonal.Note.pitchClass(openNote) + '4';
+    const midiValue = Tonal.Note.midi(openNoteWithOctave);
+    
+    if (midiValue === null) return ''; // Invalid note
+    
+    // Calculate the new MIDI value after adding frets
+    const newMidiValue = (midiValue + fret) % 12;
+    
+    // Convert back to note name using allNotes array for consistent sharp notation
+    return allNotes[newMidiValue];
+  } catch (e) {
+    console.error('Error in getFretNote:', e);
+    return '';
+  }
 };
 
 export const useFretboardState = () => {
@@ -48,12 +62,29 @@ export const useFretboardState = () => {
   const strings = useMemo(() => getTuningStrings(), [getTuningStrings]);
   const frets = useMemo(() => Array.from({ length: 13 }, (_, i) => i), []);
 
+  // Helper function to normalize notes to consistent sharp notation using MIDI numbers
+  const normalizeToSharp = (note) => {
+    if (!note) return '';
+    
+    // Add octave for valid MIDI conversion and convert to MIDI number
+    const midiValue = Tonal.Note.midi(Tonal.Note.pitchClass(note) + '4');
+    
+    if (midiValue === null) return note; // Return original if conversion failed
+    
+    // Use consistent array for sharp notation - same as in allNotes
+    return allNotes[midiValue % 12];
+  };
+
   // Compute highlighted notes based on chord or scale selection
   const highlightedNotes = useMemo(() => {
     if (chordType) {
-      return Tonal.Chord.getChord(chordType, chordRoot).notes.map(Tonal.Note.pitchClass);
+      // Get chord notes and normalize to consistent sharp notation
+      return Tonal.Chord.getChord(chordType, chordRoot).notes
+        .map(note => normalizeToSharp(note));
     } else if (scaleType) {
-      return Tonal.Scale.get(`${chordRoot} ${scaleType}`).notes.map(Tonal.Note.pitchClass);
+      // Get scale notes and normalize to consistent sharp notation
+      return Tonal.Scale.get(`${chordRoot} ${scaleType}`).notes
+        .map(note => normalizeToSharp(note));
     }
     return [];
   }, [chordRoot, chordType, scaleType]);

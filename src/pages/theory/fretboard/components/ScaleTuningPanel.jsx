@@ -26,24 +26,50 @@ const ScaleTuningPanel = ({
     }
   }, [chordRoot, scaleType]);
 
+  // Common select styles
+  const selectStyles = {
+    backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'right 0.75rem center',
+    backgroundSize: '1rem',
+    backgroundClip: 'padding-box',
+    paddingRight: '2rem',
+    paddingLeft: '0.75rem',
+    paddingTop: '0.5rem',
+    paddingBottom: '0.5rem',
+    fontSize: '0.875rem',
+    lineHeight: '1.25rem',
+    minWidth: '10rem',
+    border: '1px solid rgba(255, 255, 255, 0.15)',
+    borderRadius: '0.5rem',
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    color: 'white',
+    appearance: 'none',
+    cursor: 'pointer',
+    transition: 'all 0.2s',
+    '&:hover': {
+      borderColor: 'rgba(255, 255, 255, 0.3)',
+      backgroundColor: 'rgba(0, 0, 0, 0.25)'
+    },
+    '&:focus': {
+      outline: 'none',
+      ring: '2px',
+      ringColor: 'rgba(96, 165, 250, 0.5)',
+      borderColor: 'rgba(96, 165, 250, 0.5)'
+    }
+  };
+
   return (
-    <div className={`bg-white/10 backdrop-blur-md p-6 rounded-3xl border border-white/10 shadow-xl ${className}`}>
-      <h3 className="text-lg font-semibold text-white mb-4">Scale & Tuning</h3>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+    <div className={`bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/5 shadow-sm ${className}`}>
+      <div className="space-y-4">
         {/* Tuning Selector */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm text-white/80">Tuning</label>
+        <div className="flex items-center space-x-3">
+          <span className="text-sm font-medium text-white/70 whitespace-nowrap">Tuning</span>
           <select
             value={currentTuning}
             onChange={(e) => onTuningChange(e.target.value)}
-            className="w-full bg-[var(--card)] border border-white/20 text-white rounded-xl px-4 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 1rem center',
-              backgroundSize: '1rem'
-            }}
+            className="flex-1 min-w-0 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+            style={selectStyles}
           >
             {Object.keys(tunings).map((key) => (
               <option key={key} value={key} className="bg-gray-800 text-white">
@@ -54,18 +80,13 @@ const ScaleTuningPanel = ({
         </div>
         
         {/* Root Note Selector */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm text-white/80">Root Note</label>
+        <div className="flex items-center space-x-3">
+          <span className="text-sm font-medium text-white/70 whitespace-nowrap">Root Note</span>
           <select
             value={chordRoot}
             onChange={(e) => onRootChange(e.target.value)}
-            className="w-full bg-[var(--card)] border border-white/20 text-white rounded-xl px-4 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 1rem center',
-              backgroundSize: '1rem'
-            }}
+            className="flex-1 min-w-0 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+            style={selectStyles}
           >
             {allNotes.map((note) => (
               <option key={note} value={note} className="bg-gray-800 text-white">
@@ -76,18 +97,13 @@ const ScaleTuningPanel = ({
         </div>
         
         {/* Scale Type Selector */}
-        <div className="flex flex-col space-y-2">
-          <label className="text-sm text-white/80">Scale Type</label>
+        <div className="flex items-center space-x-3">
+          <span className="text-sm font-medium text-white/70 whitespace-nowrap">Scale Type</span>
           <select
             value={scaleType}
             onChange={(e) => onScaleChange(e.target.value)}
-            className="w-full bg-[var(--card)] border border-white/20 text-white rounded-xl px-4 py-2.5 appearance-none focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-transparent transition-all duration-200"
-            style={{ 
-              backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E")`,
-              backgroundRepeat: 'no-repeat',
-              backgroundPosition: 'right 1rem center',
-              backgroundSize: '1rem'
-            }}
+            className="flex-1 min-w-0 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+            style={selectStyles}
           >
             <option value="" className="bg-gray-800 text-white">Select Scale</option>
             {scaleTypes.map((s) => (
