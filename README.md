@@ -160,11 +160,60 @@ To properly load specific tabs on a page:
 - Improved accessibility and mobile support (planned)
 - Modular, maintainable code
 
+## 🤖 AI Chat with RAG Functionality
+
+The Guitar Learning App now features an intelligent AI chat assistant that helps users with guitar practice, music theory, and learning techniques using Retrieval-Augmented Generation (RAG) technology.
+
+### Key Features
+
+- **Personalized Guitar Assistant**: Get tailored advice on guitar techniques, practice routines, and music theory
+- **Context-Aware Responses**: The AI understands guitar-specific terminology and concepts
+- **Knowledge Base**: Powered by a comprehensive guitar education knowledge base
+- **Persistent Chat History**: Your conversations are saved between sessions
+- **Suggested Prompts**: Get started quickly with pre-made questions
+
+### How It Works
+
+The chat system uses a combination of:
+
+1. **Retrieval-Augmented Generation (RAG)**: 
+   - Queries are matched against a knowledge base of guitar education content
+   - Most relevant information is retrieved and used to inform the AI's responses
+   - Ensures accurate and specific answers about guitar techniques and theory
+
+2. **Conversational AI**:
+   - Built on OpenAI's GPT-4 model
+   - Maintains conversation context
+   - Provides natural, helpful responses
+
+3. **Local Storage**:
+   - Chat history is saved in your browser
+   - API keys are stored securely locally
+
+### Getting Started
+
+1. Click on "AI Coach" in the sidebar
+2. Enter your OpenAI API key in the settings (gear icon) if prompted
+3. Start asking questions about guitar playing, music theory, or practice techniques
+
+### Example Queries
+
+- "What are some good warm-up exercises?"
+- "How do I improve my chord transitions?"
+- "Explain the CAGED system"
+- "Help me create a practice routine"
+- "What's the best way to learn barre chords?"
+
+### Privacy Note
+
+- Your API key is stored only in your browser's local storage
+- Chat history is stored locally and not sent to any server
+- No personal data is collected
+
 ## AI Functionality
 - AI-powered song analysis
 - Chord detection
 - Practice routines built from AI analysis (goals, current skill level, youtube videos, etc.)
-- Learning chat
 
 ## 👩‍💻 Development Status (Updated)
 - Fretboard visualizer refactored and improved
