@@ -54,9 +54,14 @@ export default function NoteCell({
   } else if (isSelected) {
     // Selected notes (user clicked) - make very bright and distinct
     noteClass += " bg-gradient-to-br from-blue-500/95 to-sky-400/95 text-white border-2 border-blue-300/70 shadow-lg scale-110 z-20";
-  } else if (isHighlighted && interval) {
-    // Highlighted notes (chord/scale) - use the shared interval color system
-    const colors = getIntervalColors(interval);
+  } else if (isHighlighted) {
+    // Highlighted notes (chord/scale)
+    // Get interval colors from the intervalColors utility
+    // The interval should be provided via findIntervalForNote from FretboardGrid
+    const colors = interval ? getIntervalColors(interval) : 
+      // Default to root note color (red) for notes without specific interval info
+      { bg: 'from-red-600/80 to-rose-500/80', border: 'border-red-400/30', text: 'text-white' };
+    
     noteClass += ` bg-gradient-to-br ${colors.bg} ${colors.text} border ${colors.border} shadow-md`;
   } else if (isScalePatternNote) {
     // Scale pattern notes

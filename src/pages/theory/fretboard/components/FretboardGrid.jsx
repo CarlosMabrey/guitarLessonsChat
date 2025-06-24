@@ -39,7 +39,7 @@ const FretboardGrid = ({
       voicingNotes[note] = true;
     });
     
-    return (note) => !!voicingNotes[note];
+    return (note) => !!voicingNotes[normalizeNote(note)];
   }, [currentVoicing, singleVoicingMode, strings]);
 
   // Normalize a note to its simplest form and handle enharmonic equivalents
@@ -73,17 +73,58 @@ const FretboardGrid = ({
   // Helper for MIDI-based note matching (most reliable way to match enharmonics)
   const getMidiValue = (note) => {
     try {
+      if (!note) return null;
+      
       // Extract just the pitch class (letter + accidental) to handle notes with or without octave
       const pitchClass = Tonal.Note.pitchClass(note);
       if (!pitchClass) return null;
       
       // Add octave 4 for consistent comparison
       const noteWithOctave = pitchClass + '4';
-      return Tonal.Note.midi(noteWithOctave);
+      const midi = Tonal.Note.midi(noteWithOctave);
+      
+      // For debugging
+      // console.log(`Converting note ${note} (pitch class: ${pitchClass}) to MIDI: ${midi}`);
+      
+      return midi;
     } catch (e) {
       console.error('Error getting MIDI value:', note, e);
       return null;
     }
+  };
+  
+  // Find interval for a note, handling enharmonic equivalents via MIDI comparison
+  const findIntervalForNote = (note) => {
+    if (!note || !highlightedNotes.length) return null;
+    
+    // Get MIDI value for this note
+    const noteMidi = getMidiValue(note);
+    if (noteMidi === null) return null;
+    
+    // Strategy 1: Direct lookup in intervalMap
+    if (intervalMap[note]) {
+      return intervalMap[note];
+    }
+    
+    // Strategy 2: Find match by MIDI value % 12 (enharmonic equivalent)
+    const noteMod12 = noteMidi % 12;
+    for (const highlightedNote of highlightedNotes) {
+      const highlightedMidi = getMidiValue(highlightedNote);
+      if (highlightedMidi !== null && (highlightedMidi % 12) === noteMod12) {
+        // Found a match - return its interval
+        return intervalMap[highlightedNote];
+      }
+    }
+    
+    // Strategy 3: Look directly in intervalMap for any note with same MIDI mod 12
+    for (const [mapNote, interval] of Object.entries(intervalMap)) {
+      const mapNoteMidi = getMidiValue(mapNote);
+      if (mapNoteMidi !== null && (mapNoteMidi % 12) === noteMod12) {
+        return interval;
+      }
+    }
+    
+    return null;
   };
   
   // Check if a note should be highlighted using MIDI values for reliable comparison
@@ -94,19 +135,28 @@ const FretboardGrid = ({
     const noteMidi = getMidiValue(note);
     if (noteMidi === null) return false;
     
-    // For debugging - uncomment to see enharmonic comparison details
-    // console.log(`Checking note: ${note} (MIDI: ${noteMidi}) against highlights:`, 
-    //   highlightedNotes.map(hn => `${hn} (MIDI: ${getMidiValue(hn)})`));
-    
-    // Compare MIDI note numbers (0-11) to handle enharmonic equivalents properly
-    // C=0, C#/Db=1, D=2, D#/Eb=3, etc.
-    return highlightedNotes.some(highlightedNote => {
-      const highlightedMidi = getMidiValue(highlightedNote);
-      // Only compare the note positions in the octave (0-11), ignoring octave differences
-      return highlightedMidi !== null && (highlightedMidi % 12) === (noteMidi % 12);
+    // Create a lookup table of MIDI % 12 values for faster comparison
+    // This avoids recalculating MIDI values for each comparison
+    const midiModLookup = {};
+    highlightedNotes.forEach(hn => {
+      const hMidi = getMidiValue(hn);
+      if (hMidi !== null) {
+        midiModLookup[hMidi % 12] = true;
+      }
     });
+    
+    // For debugging only
+    // const notePC = Tonal.Note.pitchClass(note);
+    // if (notePC === 'Bb' || notePC === 'A#') {
+    //   console.log(`Checking flat/sharp note: ${note} (PC: ${notePC}, MIDI: ${noteMidi}, mod12: ${noteMidi % 12})`);
+    //   console.log(`Highlighted notes mod12 values:`, Object.keys(midiModLookup));
+    //   console.log(`Will this note match?`, midiModLookup[noteMidi % 12] === true);
+    // }
+    
+    // Fast lookup using the MIDI % 12 value
+    return midiModLookup[noteMidi % 12] === true;
   };
-  
+
   // Check if a note is selected using MIDI values
   const isNoteSelected = (note) => {
     if (!note) return false;
@@ -324,20 +374,19 @@ const FretboardGrid = ({
                         const isHighlighted = isNoteHighlighted(note);
                         const isSelected = isNoteSelected(note);
                         const isInVoicing = singleVoicingMode ? isNoteInVoicing(note) : true;
-                        const interval = intervalMap[note] || '';
+                        const interval = isNoteHighlighted(note) ? findIntervalForNote(note) : null;
                         
                         return (
                           <NoteCell
-                            key={fret}
+                            key={`note-${stringIndex}-${fret}`}
                             note={note}
-                            interval={interval}
-                            isHighlighted={isHighlighted}
-                            isSelected={isSelected}
-                            isInVoicing={isInVoicing}
-                            isRelevant={!showOnlyRelevantNotes || isHighlighted || isSelected || isInVoicing}
-                            onClick={() => handleNoteClick(note, stringIndex, fret)}
                             fret={fret}
                             stringIndex={stringIndex}
+                            isSelected={isSelected}
+                            isHighlighted={isHighlighted}
+                            isRelevant={!showOnlyRelevantNotes || isHighlighted || isSelected || isInVoicing}
+                            interval={interval}
+                            onClick={() => handleNoteClick(note, stringIndex, fret)}
                             cellSize={cellSize}
                             className="px-3 py-3 text-center"
                           />

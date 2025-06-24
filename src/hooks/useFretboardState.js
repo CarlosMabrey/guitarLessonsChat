@@ -93,14 +93,24 @@ export const useFretboardState = () => {
   const intervalMap = useMemo(() => {
     if (chordType) {
       return Tonal.Chord.get(chordType, chordRoot).intervals.reduce((acc, intv) => {
-        const note = Tonal.Note.pitchClass(Tonal.Note.transpose(chordRoot, intv));
-        acc[note] = intv;
+        // Get the note for this interval and normalize it to sharp notation
+        const rawNote = Tonal.Note.pitchClass(Tonal.Note.transpose(chordRoot, intv));
+        const normalizedNote = normalizeToSharp(rawNote);
+        
+        // Store the interval using the normalized (sharp) note name as the key
+        acc[normalizedNote] = intv;
+        
         return acc;
       }, {});
     } else if (scaleType) {
       return Tonal.Scale.get(`${chordRoot} ${scaleType}`).intervals.reduce((acc, intv) => {
-        const note = Tonal.Note.pitchClass(Tonal.Note.transpose(chordRoot, intv));
-        acc[note] = intv;
+        // Get the note for this interval and normalize it to sharp notation
+        const rawNote = Tonal.Note.pitchClass(Tonal.Note.transpose(chordRoot, intv));
+        const normalizedNote = normalizeToSharp(rawNote);
+        
+        // Store the interval using the normalized (sharp) note name as the key
+        acc[normalizedNote] = intv;
+        
         return acc;
       }, {});
     }
