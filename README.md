@@ -178,11 +178,17 @@ Visit http://localhost:3000
 ⸻
 
 🧾 TODO (Next Steps)
-	•	Chord playback and voicing alternatives
-	•	Mobile-friendly metronome and video practice
-	•	Integrated AI chat feedback
-	•	Cloud sync and login
-	•	Consistent component naming and types
+
+The codebase contains additional features that are still being wired up in the UI or documented in detail:
+
+- **Tab caching service** for reducing repeated API requests
+- **AI feedback** Integrated AI chat feedback
+- **Tab search and scraping utilities** using DuckDuckGo and site-specific scrapers
+- **YouTube Tab Player** component for locating scrolling tab videos
+- **Chord Progression Player** with built-in metronome and countdown
+- **Local chat history** stored in the browser for each song
+- **Song discovery service** that aggregates results from multiple music APIs
+
 
 ⸻
 
