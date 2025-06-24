@@ -1,8 +1,6 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { useRouter } from 'next/router';
 import { 
   FiMenu, 
   FiX, 
@@ -19,7 +17,8 @@ import Sidebar from './Sidebar';
 export default function Layout({ title, version, children }) {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
-  const pathname = usePathname();
+  const router = useRouter();
+  const pathname = router.pathname;
   
   const toggleMobileSidebar = () => {
     setIsMobileSidebarOpen(prev => !prev);
@@ -36,7 +35,7 @@ export default function Layout({ title, version, children }) {
   // Close mobile sidebar when route changes
   useEffect(() => {
     closeMobileSidebar();
-  }, [pathname]);
+  }, [router.pathname]);
   
   // Navigation items
   const navItems = [

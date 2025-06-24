@@ -1,5 +1,3 @@
-'use client';
-
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { FiHome, FiMusic, FiActivity, FiBookOpen } from 'react-icons/fi';

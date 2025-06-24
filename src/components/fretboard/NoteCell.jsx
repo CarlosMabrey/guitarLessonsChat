@@ -16,6 +16,7 @@ export default function NoteCell({
   isScalePatternNote,
   cellSize = 40, // Default size if not provided
   className = '',
+  displayMode = 'chord', // 'chord' or 'scale' - determines coloring strategy
   onClick 
 }) {
   // Extract pitch class for simpler display
@@ -56,13 +57,26 @@ export default function NoteCell({
     noteClass += " bg-gradient-to-br from-blue-500/95 to-sky-400/95 text-white border-2 border-blue-300/70 shadow-lg scale-110 z-20";
   } else if (isHighlighted) {
     // Highlighted notes (chord/scale)
-    // Get interval colors from the intervalColors utility
-    // The interval should be provided via findIntervalForNote from FretboardGrid
-    const colors = interval ? getIntervalColors(interval) : 
-      // Default to root note color (red) for notes without specific interval info
-      { bg: 'from-red-600/80 to-rose-500/80', border: 'border-red-400/30', text: 'text-white' };
-    
-    noteClass += ` bg-gradient-to-br ${colors.bg} ${colors.text} border ${colors.border} shadow-md`;
+    if (displayMode === 'scale') {
+      // For scales, only color the root with red, other notes get a default color
+      if (interval === '1P') {
+        // Root is always red
+        const rootColors = { bg: 'from-red-600/100 to-rose-500/100', border: 'border-red-400/30', text: 'text-white' };
+        noteClass += ` bg-gradient-to-br ${rootColors.bg} ${rootColors.text} border ${rootColors.border} shadow-md`;
+      } else {
+        // Non-root scale notes get an indigo/violet color
+        noteClass += ` bg-gradient-to-br from-rose-500/50 to-grey-600/20 border border-indigo-400/30 shadow-md`;
+      }
+    } else {
+      // Chord mode - use interval colors for all notes
+      // Get interval colors from the intervalColors utility
+      // The interval should be provided via findIntervalForNote from FretboardGrid
+      const colors = interval ? getIntervalColors(interval) : 
+        // Default to root note color (red) for notes without specific interval info
+        { bg: 'from-red-600/80 to-rose-500/80', border: 'border-red-400/30', text: 'text-white' };
+      
+      noteClass += ` bg-gradient-to-br ${colors.bg} ${colors.text} border ${colors.border} shadow-md`;
+    }
   } else if (isScalePatternNote) {
     // Scale pattern notes
     noteClass += " bg-amber-500/70 text-white border border-amber-400/50 shadow-md";

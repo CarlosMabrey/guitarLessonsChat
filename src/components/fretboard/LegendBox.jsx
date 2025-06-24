@@ -1,7 +1,7 @@
 import React from 'react';
 import { intervalColorMap, getIntervalColors } from '@/lib/intervalColors';
 
-export default function LegendBox({ theme }) {
+export default function LegendBox({ theme, displayMode = 'chord' }) {
   // Get exact colors from our intervalColorMap for consistency
   const rootColors = intervalColorMap['1P'];
   const thirdColors = intervalColorMap['3M']; // Using major third
@@ -20,29 +20,39 @@ export default function LegendBox({ theme }) {
           <span className="text-white/80">Root Note</span>
         </div>
         
-        {/* Third - green */}
-        <div className="flex items-center space-x-3">
-          <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${thirdColors.bg} border ${thirdColors.border}`}></div>
-          <span className="text-white/80">Third (3rd)</span>
-        </div>
-        
-        {/* Fifth - blue */}
-        <div className="flex items-center space-x-3">
-          <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${fifthColors.bg} border ${fifthColors.border}`}></div>
-          <span className="text-white/80">Fifth (5th)</span>
-        </div>
-        
-        {/* 7th - Yellow (using bg-yellow-500/80 instead of gradient) */}
-        <div className="flex items-center space-x-3">
-          <div className={`flex-shrink-0 w-8 h-8 rounded-full ${seventhColors.bg} border ${seventhColors.border}`}></div>
-          <span className="text-white/80">Seventh (7th)</span>
-        </div>
-        
-        {/* 9th - Purple */}
-        <div className="flex items-center space-x-3">
-          <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${ninthColors.bg} border ${ninthColors.border}`}></div>
-          <span className="text-white/80">Ninth (9th)</span>
-        </div>
+        {/* For scale mode, only show root and scale note */}
+        {displayMode === 'scale' ? (
+          <div className="flex items-center space-x-3">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-gray-600/70 to-gray-500/70 border border-gray-400/30"></div>
+            <span className="text-white/80">Scale Note</span>
+          </div>
+        ) : (
+          <>
+            {/* Third - green */}
+            <div className="flex items-center space-x-3">
+              <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${thirdColors.bg} border ${thirdColors.border}`}></div>
+              <span className="text-white/80">Third (3rd)</span>
+            </div>
+            
+            {/* Fifth - blue */}
+            <div className="flex items-center space-x-3">
+              <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${fifthColors.bg} border ${fifthColors.border}`}></div>
+              <span className="text-white/80">Fifth (5th)</span>
+            </div>
+            
+            {/* 7th - Yellow (using bg-yellow-500/80 instead of gradient) */}
+            <div className="flex items-center space-x-3">
+              <div className={`flex-shrink-0 w-8 h-8 rounded-full ${seventhColors.bg} border ${seventhColors.border}`}></div>
+              <span className="text-white/80">Seventh (7th)</span>
+            </div>
+            
+            {/* 9th - Purple */}
+            <div className="flex items-center space-x-3">
+              <div className={`flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br ${ninthColors.bg} border ${ninthColors.border}`}></div>
+              <span className="text-white/80">Ninth (9th)</span>
+            </div>
+          </>
+        )}
         
         {/* Selected note - blue */}
         <div className="flex items-center space-x-3">

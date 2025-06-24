@@ -6,7 +6,7 @@
 
 import { parse } from 'node-html-parser';
 import { search_ug_link } from './tabSearchService';
-import { createCacheKey, getTabCache, setTabCache } from './tabCacheService';
+import { createCacheKey, getTabCache, setTabCache } from '@/data/tabs';
 import { getTabUrl } from '../../../app/services/tabUrlMappings';
 
 // Cache expiration time (24 hours)

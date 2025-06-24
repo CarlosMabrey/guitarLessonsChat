@@ -9,9 +9,12 @@ import * as Tonal from '@tonaljs/tonal';
  * Main fretboard grid component that displays strings and frets
  */
 // const [startX, setStartX] = useState(0);
+// Default string tuning for a standard 6-string guitar
+const DEFAULT_STRINGS = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
+
 const FretboardGrid = ({
-  strings,
-  frets,
+  strings = DEFAULT_STRINGS, // Default to standard tuning if not provided
+  frets = Array.from({ length: 13 }, (_, i) => i), // Default to frets 0-12 if not provided
   highlightedNotes = [],
   intervalMap = {},
   selectedNotes = [],
@@ -19,6 +22,7 @@ const FretboardGrid = ({
   showOnlyRelevantNotes = true,
   singleVoicingMode = false,
   currentVoicing = null,
+  displayMode = 'chord', // 'chord' or 'scale' mode for coloring
   className = ''
 }) => {
   
@@ -186,17 +190,17 @@ const FretboardGrid = ({
 
   // Update cell size when container size changes
   useEffect(() => {
-    if (!containerSize.height || !tableRef.current) return;
+    if (!containerSize) return;
     
-    const table = tableRef.current;
-    const headerHeight = table.querySelector('thead')?.offsetHeight || 48;
-    const availableHeight = containerSize.height - headerHeight - 48; // Account for padding
-    const numRows = strings.length;
+    // Ensure strings is an array with at least one string
+    const validStrings = Array.isArray(strings) && strings.length > 0 ? strings : DEFAULT_STRINGS;
     
-    // Calculate max cell size that fits all rows
+    // Calculate cell size based on available height and number of strings
+    const numRows = validStrings.length + 1; // +1 for the nut/header row
+    const availableHeight = containerSize.height - 60; // Account for padding and controls
     const maxCellSize = Math.min(60, Math.max(32, Math.floor(availableHeight / numRows) - 4));
     setCellSize(maxCellSize);
-  }, [containerSize, strings.length]);
+  }, [containerSize, strings]);
 
   // Calculate responsive fret width based on cell size and container width
   const containerRef2 = useRef(null);
@@ -364,6 +368,7 @@ const FretboardGrid = ({
                             fret={-1} /* Use -1 to avoid the vertical line styling for fret 0 */
                             stringIndex={stringIndex}
                             cellSize={cellSize}
+                            displayMode={displayMode}
                             className="mx-auto"
                             onClick={() => handleNoteClick(openNote, stringIndex, 0)}
                           />
@@ -388,6 +393,7 @@ const FretboardGrid = ({
                             interval={interval}
                             onClick={() => handleNoteClick(note, stringIndex, fret)}
                             cellSize={cellSize}
+                            displayMode={displayMode}
                             className="px-3 py-3 text-center"
                           />
                         );
@@ -423,6 +429,8 @@ FretboardGrid.propTypes = {
   singleVoicingMode: PropTypes.bool,
   /** Current voicing to highlight */
   currentVoicing: PropTypes.object,
+  /** Display mode to determine coloring style ('chord' or 'scale') */
+  displayMode: PropTypes.string,
   /** Additional CSS classes */
   className: PropTypes.string,
 };
@@ -433,6 +441,7 @@ FretboardGrid.defaultProps = {
   selectedNotes: [],
   showOnlyRelevantNotes: true,
   singleVoicingMode: false,
+  displayMode: 'chord',
 };
 
 export default React.memo(FretboardGrid);

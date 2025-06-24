@@ -1,7 +1,7 @@
 'use client';
 
 import * as cheerio from 'cheerio';
-import { getTabCache, setTabCache, createCacheKey } from './tabCacheService';
+import { getTabCache, setTabCache, createCacheKey } from '@/data/tabs';
 import { find_and_scrape_tab } from './tabScraperService';
 import { parseTabNotation, countMeasures, estimateTabDifficulty } from '@/lib/parsers/tabNotationParser';
 

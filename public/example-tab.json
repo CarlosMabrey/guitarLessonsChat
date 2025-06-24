@@ -1,0 +1,212 @@
+{
+  "name": "Example Tab - Smoke on the Water Riff",
+  "artist": "Deep Purple",
+  "tuning": "Standard",
+  "bpm": 120,
+  "notes": [
+    {
+      "time": 0,
+      "duration": 500,
+      "string": 4,
+      "fret": 0,
+      "finger": 0,
+      "measure": 0
+    },
+    {
+      "time": 500,
+      "duration": 500,
+      "string": 4,
+      "fret": 3,
+      "finger": 3,
+      "measure": 0
+    },
+    {
+      "time": 1000,
+      "duration": 500,
+      "string": 4,
+      "fret": 5,
+      "finger": 1,
+      "measure": 0
+    },
+    {
+      "time": 2000,
+      "duration": 500,
+      "string": 4,
+      "fret": 0,
+      "finger": 0,
+      "measure": 1
+    },
+    {
+      "time": 2500,
+      "duration": 500,
+      "string": 4,
+      "fret": 3,
+      "finger": 3,
+      "measure": 1
+    },
+    {
+      "time": 3000,
+      "duration": 500,
+      "string": 4,
+      "fret": 6,
+      "finger": 2,
+      "measure": 1
+    },
+    {
+      "time": 3500,
+      "duration": 500,
+      "string": 4,
+      "fret": 5,
+      "finger": 1,
+      "measure": 1
+    },
+    {
+      "time": 4000,
+      "duration": 500,
+      "string": 4,
+      "fret": 0,
+      "finger": 0,
+      "measure": 2
+    },
+    {
+      "time": 4500,
+      "duration": 500,
+      "string": 4,
+      "fret": 3,
+      "finger": 3,
+      "measure": 2
+    },
+    {
+      "time": 5000,
+      "duration": 500,
+      "string": 4,
+      "fret": 5,
+      "finger": 1,
+      "measure": 2
+    },
+    {
+      "time": 5500,
+      "duration": 500,
+      "string": 4,
+      "fret": 3,
+      "finger": 3,
+      "measure": 2
+    },
+    {
+      "time": 6000,
+      "duration": 500,
+      "string": 4,
+      "fret": 0,
+      "finger": 0,
+      "measure": 3
+    }
+  ],
+  "measures": [
+    [
+      {
+        "time": 0,
+        "duration": 500,
+        "string": 4,
+        "fret": 0,
+        "finger": 0,
+        "measure": 0
+      },
+      {
+        "time": 500,
+        "duration": 500,
+        "string": 4,
+        "fret": 3,
+        "finger": 3,
+        "measure": 0
+      },
+      {
+        "time": 1000,
+        "duration": 500,
+        "string": 4,
+        "fret": 5,
+        "finger": 1,
+        "measure": 0
+      }
+    ],
+    [
+      {
+        "time": 2000,
+        "duration": 500,
+        "string": 4,
+        "fret": 0,
+        "finger": 0,
+        "measure": 1
+      },
+      {
+        "time": 2500,
+        "duration": 500,
+        "string": 4,
+        "fret": 3,
+        "finger": 3,
+        "measure": 1
+      },
+      {
+        "time": 3000,
+        "duration": 500,
+        "string": 4,
+        "fret": 6,
+        "finger": 2,
+        "measure": 1
+      },
+      {
+        "time": 3500,
+        "duration": 500,
+        "string": 4,
+        "fret": 5,
+        "finger": 1,
+        "measure": 1
+      }
+    ],
+    [
+      {
+        "time": 4000,
+        "duration": 500,
+        "string": 4,
+        "fret": 0,
+        "finger": 0,
+        "measure": 2
+      },
+      {
+        "time": 4500,
+        "duration": 500,
+        "string": 4,
+        "fret": 3,
+        "finger": 3,
+        "measure": 2
+      },
+      {
+        "time": 5000,
+        "duration": 500,
+        "string": 4,
+        "fret": 5,
+        "finger": 1,
+        "measure": 2
+      },
+      {
+        "time": 5500,
+        "duration": 500,
+        "string": 4,
+        "fret": 3,
+        "finger": 3,
+        "measure": 2
+      }
+    ],
+    [
+      {
+        "time": 6000,
+        "duration": 500,
+        "string": 4,
+        "fret": 0,
+        "finger": 0,
+        "measure": 3
+      }
+    ]
+  ],
+  "totalDuration": 6500,
+  "description": "Famous intro riff from Smoke on the Water by Deep Purple. This example shows how to format tab data for the TabFretboardVisualizer component."
+}

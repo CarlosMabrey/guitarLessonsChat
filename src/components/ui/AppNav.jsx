@@ -10,6 +10,7 @@ export default function AppNav() {
   const links = [
     { href: '/dashboard', label: 'Dashboard', icon: FiHome },
     { href: '/songs', label: 'Songs', icon: FiMusic },
+    { href: '/tabs', label: 'Tabs', icon: FiMusic },
     { href: '/practice', label: 'Practice', icon: FiBook },
     { href: '/progress', label: 'Progress', icon: FiActivity },
     { href: '/theory', label: 'Theory', icon: FiGrid },

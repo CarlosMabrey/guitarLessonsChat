@@ -253,6 +253,7 @@ function FretboardPage() {
                     showOnlyRelevantNotes={showOnlyRelevantNotes}
                     singleVoicingMode={singleVoicingMode}
                     currentVoicing={currentVoicing}
+                    displayMode={scaleType && !chordType ? 'scale' : 'chord'}
                     className="flex-1"
                   />
                 </div>

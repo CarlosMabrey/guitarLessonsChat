@@ -48,16 +48,102 @@ A powerful, interactive fretboard tool with:
 ### Code Structure
 ```
 ├── components/
-│   ├── theory/
-│   │   ├── fretboard/
-│   │   │   ├── FretboardPage.jsx
-│   │   │   ├── NoteCell.jsx
-│   │   │   ├── VoicingDisplay.jsx
-│   │   │   ├── ChordPositions.jsx
-│   │   │   ├── ScalePatterns.jsx
-│   │   │   ├── ChordProgressions.jsx
-│   │   ├── TonnetzVisualizer.jsx 
+│   ├── fretboard/
+│   │   ├── FretboardPage.jsx
+│   │   ├── NoteCell.jsx
+│   │   ├── VoicingDisplay.jsx
+│   │   ├── ChordPositions.jsx
+│   │   ├── ScalePatterns.jsx
+│   │   ├── ChordProgressions.jsx
+│   │   └── LegendBox.jsx
 ```
+
+## 🎸 Tab Engine & Renderer
+
+The application includes a robust tab engine with multiple rendering options for guitar tablature:
+
+### How It Works
+
+1. **Tab Data Flow**:
+   - Tabs are loaded via `getTabForSong()` which implements a fallback chain:
+     1. Checks cache
+     2. Tries hardcoded samples
+     3. Attempts to scrape tab data
+     4. Falls back to API calls
+     5. Generates basic tabs as last resort
+
+2. **Rendering Components**:
+   - `TabRenderer`: Basic VexFlow-based renderer for single-stave tabs
+   - `SimpleTabRenderer`: Advanced renderer with multi-stave support and error handling
+   - `InlineTabRenderer`: Lightweight renderer for simple tab display
+
+3. **Key Files**:
+   ```
+   src/components/tabs/
+   ├── TabRenderer.jsx       # Main tab rendering component
+   ├── SimpleTabRenderer.jsx # Advanced tab rendering with error handling
+   └── InlineTabRenderer.jsx # Lightweight tab display
+   
+   src/components/songs/
+   └── SongTabViewer.jsx    # Tab viewing interface with tab switching
+   
+   src/lib/services/
+   ├── tabFetcherService.js # Handles tab data retrieval
+   └── songsterrApi.js      # Songsterr API integration
+   ```
+
+4. **Fretboard Integration**:
+   - The fretboard visualizer can display tab notes with consistent styling
+   - Nut is positioned between 0 and 1st frets
+   - Fret 0 notes have consistent styling with other frets
+   - String labels are displayed in a separate column
+
+### What Needs to Be Implemented for Tab Loading
+
+To properly load specific tabs on a page:
+
+1. **Tab Selection Mechanism**: Currently missing a clear way to load specific tabs based on user selection or URL parameters.
+2. **Integration with Router**: Need to handle route parameters to load specific tabs by ID.
+3. **Tab Database/Repository**: A structured way to store and retrieve tabs beyond the current hardcoded samples.
+4. **Error Boundaries**: Better handling of cases where tab data is genuinely unavailable or malformed.
+
+### To Visualize Tabs on the Fretboard
+
+1. **Tab-to-Fretboard Conversion**: Create utility to translate tab positions (string/fret) to fretboard notes.
+2. **Time-based Navigation**: Add controls to step through tab measures and highlight corresponding notes.
+3. **Two-way Interaction**: Allow clicking fretboard notes to highlight corresponding tab positions.
+4. **Visual Synchronization**: Ensure tab and fretboard scroll/highlight in sync during playback.
+
+### Todo List for Tab Functionality
+
+- [ ] **Tab Selection & Routing**
+  - [ ] Implement URL-based tab selection
+  - [ ] Add tab browser with search and filtering
+  - [ ] Support tab collections and playlists
+
+- [ ] **Rendering Improvements**
+  - [ ] Add support for Guitar Pro files
+  - [ ] Implement scrolling tab playback
+  - [ ] Add note highlighting during playback
+  - [ ] Support for different tunings
+  - [ ] Improve tab-to-fretboard synchronization
+
+- [ ] **Interactive Features**
+  - [ ] Click-to-play functionality
+  - [ ] Looping sections
+  - [ ] Speed control for practice
+  - [ ] Tab annotation tools
+
+- [ ] **Integration**
+  - [ ] Connect tab player with metronome
+  - [ ] Add tab-to-chord diagram conversion
+  - [ ] Implement tab transposition
+  - [ ] Add tab difficulty ratings
+
+- [ ] **Performance**
+  - [ ] Optimize tab rendering for large files
+  - [ ] Implement virtualized scrolling for long tabs
+  - [ ] Add tab caching and offline support
 
 ## 🕸️ Tonnetz Chord Visualizer (Planned)
 - Interactive Tonnetz navigation

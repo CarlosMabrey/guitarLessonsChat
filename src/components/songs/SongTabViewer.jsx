@@ -18,8 +18,7 @@ const SongTabViewer = ({ songId, artist, title }) => {
   const [browserUrl, setBrowserUrl] = useState('');
   const [refreshKey, setRefreshKey] = useState(0);
   const [tabData, setTabData] = useState(null);
-  const [activeTab, setActiveTab] = useState('internal'); // 'internal' or 'external'
-  
+
   // Clean text for URL usage
   const cleanTextForUrl = (text) => {
     if (!text) return '';
@@ -34,9 +33,9 @@ const SongTabViewer = ({ songId, artist, title }) => {
     let isMounted = true;
     setLoading(true);
     setError(null);
-    
+
     console.log('[SongTabViewer] Props received:', { songId, artist, title });
-    
+
     // Validate that songId isn't an internal app ID
     if (songId && String(songId).startsWith('song-')) {
       console.error('[SongTabViewer] ERROR: Received internal app ID instead of Songsterr ID:', songId);
@@ -44,18 +43,18 @@ const SongTabViewer = ({ songId, artist, title }) => {
       setLoading(false);
       return;
     }
-    
+
     const fetchData = async () => {
       try {
         const artistName = typeof artist === 'string' 
           ? artist 
           : artist?.name || 'Unknown Artist';
-          
+
         // Parallel fetch both internal tabs and Songsterr URL
         const [tabDataResult, songsterrUrlResult] = await Promise.all([
           // 1. Fetch tab data for our internal renderer
           getTabForSong(artistName, title),
-          
+
           // 2. Get Songsterr URL (for the external button)
           (async () => {
             if (songId && !isNaN(Number(songId))) {
@@ -67,7 +66,7 @@ const SongTabViewer = ({ songId, artist, title }) => {
             }
           })()
         ]);
-        
+
         if (isMounted) {
           // Set both tab data and browser URL
           setTabData(tabDataResult);
@@ -82,7 +81,7 @@ const SongTabViewer = ({ songId, artist, title }) => {
         }
       }
     };
-    
+
     if (artist && title) {
       fetchData();
     } else {
@@ -90,19 +89,19 @@ const SongTabViewer = ({ songId, artist, title }) => {
       setError('Missing song information');
       setLoading(false);
     }
-    
+
     return () => {
       isMounted = false;
     };
   }, [songId, artist, title, refreshKey]);
-  
+
   // Force a refresh of the tab information
   const refreshTabData = () => {
     setRefreshKey(prev => prev + 1);
     setLoading(true);
   };
 
-  // Render tab content based on active tab
+  // Render tab content
   const renderTabContent = () => {
     if (loading) {
       return (
@@ -112,7 +111,7 @@ const SongTabViewer = ({ songId, artist, title }) => {
         </div>
       );
     }
-    
+
     if (error) {
       return (
         <div className="flex flex-col items-center justify-center h-64 p-6 text-center">
@@ -124,8 +123,8 @@ const SongTabViewer = ({ songId, artist, title }) => {
         </div>
       );
     }
-    
-    if (activeTab === 'internal' && tabData) {
+
+    if (tabData) {
       return (
         <div className="p-4">
           <div className="mb-4">
@@ -136,6 +135,18 @@ const SongTabViewer = ({ songId, artist, title }) => {
                   {tabData.artist} • Tuning: {tabData.tuning || 'Standard'}
                 </p>
               </div>
+
+              {browserUrl && (
+                <a 
+                  href={browserUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn btn-primary btn-sm px-4 py-2 rounded-md inline-flex items-center"
+                >
+                  <span className="mr-2">Full Songsterr Tab</span>
+                  <FiExternalLink />
+                </a>
+              )}
             </div>
           </div>
           <div className="bg-card-hover rounded-lg p-2">
@@ -147,32 +158,7 @@ const SongTabViewer = ({ songId, artist, title }) => {
         </div>
       );
     }
-    
-    if (activeTab === 'external' && browserUrl) {
-      return (
-        <div className="flex flex-col items-center justify-center h-64 p-6">
-          <div className="bg-card-hover w-full max-w-md p-6 rounded-lg text-center">
-            <div className="w-16 h-16 mx-auto mb-3 bg-primary/10 text-primary rounded-full flex items-center justify-center">
-              <FiMusic size={28} />
-            </div>
-            <h3 className="text-xl font-medium mb-2">Full Tab on Songsterr</h3>
-            <p className="text-text-secondary mb-6">
-              View the complete tab with playback features on Songsterr.
-            </p>
-            <a 
-              href={browserUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn btn-primary px-6 py-3 rounded-md inline-flex items-center"
-            >
-              <span className="mr-2">Open in Songsterr</span>
-              <FiExternalLink />
-            </a>
-          </div>
-        </div>
-      );
-    }
-    
+
     return (
       <div className="flex justify-center items-center h-64 p-6">
         <p className="text-text-secondary">No tab data available</p>
@@ -196,35 +182,17 @@ const SongTabViewer = ({ songId, artist, title }) => {
           </button>
         </div>
       </div>
-      
-      {/* Tab navigation */}
+
+      {/* Tab header */}
       <div className="border-b border-border">
         <div className="flex">
-          <button
-            className={`py-2 px-4 text-sm font-medium flex items-center ${
-              activeTab === 'internal' 
-                ? 'border-b-2 border-primary text-primary' 
-                : 'text-text-secondary hover:text-text-primary'
-            }`}
-            onClick={() => setActiveTab('internal')}
-          >
+          <div className="py-2 px-4 text-sm font-medium flex items-center border-b-2 border-primary text-primary">
             <FiCode className="mr-2" size={14} />
             <span>Basic Tab</span>
-          </button>
-          <button
-            className={`py-2 px-4 text-sm font-medium flex items-center ${
-              activeTab === 'external' 
-                ? 'border-b-2 border-primary text-primary' 
-                : 'text-text-secondary hover:text-text-primary'
-            }`}
-            onClick={() => setActiveTab('external')}
-          >
-            <FiLayers className="mr-2" size={14} />
-            <span>Full Songsterr Tab</span>
-          </button>
+          </div>
         </div>
       </div>
-      
+
       {/* Tab content area */}
       <div className="w-full">
         {renderTabContent()}

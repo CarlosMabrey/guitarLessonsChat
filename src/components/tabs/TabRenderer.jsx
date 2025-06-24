@@ -28,9 +28,46 @@ const TabRenderer = ({ notes = [], options = {} }) => {
   // Merge default options with provided options
   const renderOptions = { ...defaultOptions, ...options };
   
+  // Load example tab data for development testing
   useEffect(() => {
-    if (!containerRef.current || notes.length === 0) return;
-    
+    // If no notes are provided, load example tab JSON
+    if (notes?.length === 0 && containerRef.current) {
+      fetch('/example-tab.json')
+        .then(response => response.json())
+        .then(data => {
+          if (data && data.notes) {
+            renderTab(data.notes);
+          }
+        })
+        .catch(err => {
+          console.error('Error loading example tab:', err);
+          setError('Failed to load example tab data');
+          setLoading(false);
+        });
+    } else if (notes?.length > 0 && containerRef.current) {
+      renderTab(notes);
+    }
+  }, [notes, renderOptions]);
+
+  // Convert string/fret format to VexFlow positions format
+  const convertToVexFlowFormat = (notesArray) => {
+    return notesArray.map(note => {
+      // VexFlow uses 1-based string numbering (1=high E, 6=low E)
+      // and our example-tab.json uses the same convention
+      return {
+        positions: [
+          {
+            str: note.string, // String number (1-6, high to low)
+            fret: note.fret.toString() // Fret number as string
+          }
+        ],
+        duration: 'q' // Use quarter notes by default
+      };
+    });
+  };
+
+  // Render the tab using VexFlow
+  const renderTab = (notesArray) => {
     try {
       setLoading(true);
       setError(null);
@@ -57,9 +94,13 @@ const TabRenderer = ({ notes = [], options = {} }) => {
           .setContext(context)
           .draw();
       
-      // Create tab notes from the provided notes array
-      const tabNotes = notes.map(noteData => {
-        // Convert note data to VexFlow format
+      // Convert to VexFlow format if needed and create tab notes
+      const vexFlowNotes = Array.isArray(notesArray) && notesArray.length > 0 && notesArray[0].positions
+        ? notesArray // Already in VexFlow format
+        : convertToVexFlowFormat(notesArray); // Convert string/fret format
+          
+      // Create TabNote instances
+      const tabNotes = vexFlowNotes.map(noteData => {
         return new TabNote({
           positions: noteData.positions,
           duration: noteData.duration || 'q' // quarter note by default
@@ -75,7 +116,7 @@ const TabRenderer = ({ notes = [], options = {} }) => {
       setError('Failed to render tablature');
       setLoading(false);
     }
-  }, [notes, renderOptions]);
+  };
   
   if (loading) {
     return (

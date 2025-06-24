@@ -12,7 +12,8 @@ import {
   FiUser, 
   FiGrid, 
   FiChevronLeft, 
-  FiChevronRight 
+  FiChevronRight,
+  FiFileText 
 } from 'react-icons/fi';
 import { clsx } from 'clsx';
 import ThemeSwitcher from './ThemeSwitcher';
@@ -20,6 +21,7 @@ import ThemeSwitcher from './ThemeSwitcher';
 const navItems = [
   { icon: FiHome, label: 'Dashboard', href: '/dashboard' },
   { icon: FiMusic, label: 'Songs', href: '/songs' },
+  { icon: FiFileText, label: 'Tabs', href: '/tabs' },
   { icon: FiPlay, label: 'Practice', href: '/practice' },
   { icon: FiBarChart2, label: 'Progress', href: '/progress' },
   { icon: FiGrid, label: 'Theory', href: '/theory' },
