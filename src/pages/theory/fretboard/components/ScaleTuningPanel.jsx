@@ -39,7 +39,6 @@ const ScaleTuningPanel = ({
     paddingBottom: '0.5rem',
     fontSize: '0.875rem',
     lineHeight: '1.25rem',
-    minWidth: '10rem',
     border: '1px solid rgba(255, 255, 255, 0.15)',
     borderRadius: '0.5rem',
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
@@ -47,16 +46,20 @@ const ScaleTuningPanel = ({
     appearance: 'none',
     cursor: 'pointer',
     transition: 'all 0.2s',
-    '&:hover': {
-      borderColor: 'rgba(255, 255, 255, 0.3)',
-      backgroundColor: 'rgba(0, 0, 0, 0.25)'
-    },
-    '&:focus': {
-      outline: 'none',
-      ring: '2px',
-      ringColor: 'rgba(96, 165, 250, 0.5)',
-      borderColor: 'rgba(96, 165, 250, 0.5)'
-    }
+    // Remove min-width which can cause overflow issues
+    width: '100%',
+    maxWidth: '100%',
+    // Ensure dropdown doesn't get cut off
+    position: 'relative',
+    zIndex: 10
+  };
+  
+  // Style for select dropdown options to prevent cut-off
+  const selectOptionStyles = {
+    backgroundColor: '#1f2937', // dark gray
+    color: 'white',
+    padding: '8px',
+    maxHeight: '200px' // Limit dropdown height
   };
 
   return (
@@ -68,11 +71,11 @@ const ScaleTuningPanel = ({
           <select
             value={currentTuning}
             onChange={(e) => onTuningChange(e.target.value)}
-            className="flex-1 min-w-0 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+            className="flex-1 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
             style={selectStyles}
           >
             {Object.keys(tunings).map((key) => (
-              <option key={key} value={key} className="bg-gray-800 text-white">
+              <option key={key} value={key} style={selectOptionStyles}>
                 {key}
               </option>
             ))}
@@ -85,11 +88,11 @@ const ScaleTuningPanel = ({
           <select
             value={chordRoot}
             onChange={(e) => onRootChange(e.target.value)}
-            className="flex-1 min-w-0 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+            className="flex-1 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
             style={selectStyles}
           >
             {allNotes.map((note) => (
-              <option key={note} value={note} className="bg-gray-800 text-white">
+              <option key={note} value={note} style={selectOptionStyles}>
                 {note}
               </option>
             ))}
@@ -102,12 +105,12 @@ const ScaleTuningPanel = ({
           <select
             value={scaleType}
             onChange={(e) => onScaleChange(e.target.value)}
-            className="flex-1 min-w-0 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+            className="flex-1 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
             style={selectStyles}
           >
-            <option value="" className="bg-gray-800 text-white">Select Scale</option>
+            <option value="" style={selectOptionStyles}>Select Scale</option>
             {scaleTypes.map((s) => (
-              <option key={s.label} value={s.type} className="bg-gray-800 text-white">
+              <option key={s.label} value={s.type} style={selectOptionStyles}>
                 {s.label}
               </option>
             ))}

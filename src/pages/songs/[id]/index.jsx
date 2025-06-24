@@ -18,7 +18,7 @@ import { getSongById } from '@/lib/db';
 import Layout from '@/components/ui/Layout';
 import SongTabViewer from '@/components/songs/SongTabViewer';
 import SongVideoResources from '@/components/songs/SongVideoResources';
-import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
+import ChordTooltip from '@/components/songs/ChordTooltip';
 
 export default function SongDetailsPage() {
   const router = useRouter();
@@ -87,15 +87,14 @@ export default function SongDetailsPage() {
               </div>
               {song.chords && song.chords.length > 0 && (
                 <div className="mt-4">
-                  <h3 className="text-lg font-semibold mb-2">Chords</h3>
-                  <div className="flex flex-wrap gap-2 mb-2">
+                  <h3 className="text-lg font-semibold mb-3">Chords in this song</h3>
+                  <div className="flex flex-wrap gap-2">
                     {song.chords.map((chord, idx) => (
-                      <div key={idx} className="px-3 py-1 bg-primary/10 rounded-full text-primary text-sm font-medium">{chord}</div>
-                    ))}
-                  </div>
-                  <div className="flex flex-wrap gap-4">
-                    {song.chords.map((chord, idx) => (
-                      <VoicingDisplay key={chord + idx} chordName={chord} size="sm" showName={false} />
+                      <ChordTooltip key={chord + idx} chord={chord}>
+                        <div className="px-4 py-2 bg-primary/10 hover:bg-primary/20 rounded-full text-primary text-sm font-medium transition-colors duration-200 cursor-help">
+                          {chord}
+                        </div>
+                      </ChordTooltip>
                     ))}
                   </div>
                 </div>

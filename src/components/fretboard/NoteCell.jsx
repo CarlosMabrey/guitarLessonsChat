@@ -1,4 +1,5 @@
 import React from 'react';
+import { getIntervalColors } from '@/lib/intervalColors';
 
 export default function NoteCell({ 
   note, 
@@ -48,20 +49,20 @@ export default function NoteCell({
   
   // Apply appropriate styling based on the note's status
   if (voicingPosition) {
-    noteClass += " bg-purple-600/80 text-white border-2 border-purple-300/40 shadow-lg scale-110 z-10";
+    // Voicing position (chord diagram)
+    noteClass += " bg-purple-600/90 text-white border-2 border-purple-300/60 shadow-lg scale-110 z-20";
   } else if (isSelected) {
-    noteClass += " bg-blue-500 text-white border-2 border-blue-300/50 shadow-lg scale-110 z-10";
-  } else if (isHighlighted && interval === '1P') {
-    noteClass += " bg-gradient-to-br from-red-600/80 to-rose-500/80 text-white border border-red-400/30 shadow-md";
-  } else if (isHighlighted && (interval === '3M' || interval === '3m')) {
-    noteClass += " bg-gradient-to-br from-green-600/80 to-emerald-500/80 text-white border border-green-400/30 shadow-md";
-  } else if (isHighlighted && interval === '5P') {
-    noteClass += " bg-gradient-to-br from-blue-600/80 to-cyan-500/80 text-white border border-blue-400/30 shadow-md";
-  } else if (isHighlighted) {
-    noteClass += " bg-gradient-to-br from-indigo-600/80 to-violet-500/80 text-white border border-indigo-400/30 shadow-md";
+    // Selected notes (user clicked) - make very bright and distinct
+    noteClass += " bg-gradient-to-br from-blue-500/95 to-sky-400/95 text-white border-2 border-blue-300/70 shadow-lg scale-110 z-20";
+  } else if (isHighlighted && interval) {
+    // Highlighted notes (chord/scale) - use the shared interval color system
+    const colors = getIntervalColors(interval);
+    noteClass += ` bg-gradient-to-br ${colors.bg} ${colors.text} border ${colors.border} shadow-md`;
   } else if (isScalePatternNote) {
-    noteClass += " bg-amber-500/50 text-white border border-amber-400/30 shadow-md";
+    // Scale pattern notes
+    noteClass += " bg-amber-500/70 text-white border border-amber-400/50 shadow-md";
   } else {
+    // Default note appearance
     noteClass += " bg-gray-800/30 text-gray-300/70 border border-gray-700/30 hover:bg-gray-700/50 hover:text-white hover:scale-105";
   }
   

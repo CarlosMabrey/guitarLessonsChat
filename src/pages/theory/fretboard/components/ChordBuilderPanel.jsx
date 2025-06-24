@@ -2,6 +2,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import * as Tonal from 'tonal';
 import { allNotes, chordTypes } from '@/lib/musicTheory';
+import { getChordNoteColorClass, getIntervalColors } from '@/lib/intervalColors';
 import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/outline';
 // Note: If the above import fails, try this alternative:
@@ -21,6 +22,7 @@ const ChordBuilderPanel = ({
   onPreviousVoicing,
   onPlayChord,
   selectVoicing,
+  intervalMap = {},
   className = ''
 }) => {
   // Get chord notes to display when a chord is selected
@@ -58,16 +60,17 @@ const ChordBuilderPanel = ({
   const selectStyles = {
     backgroundImage: "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E\")",
     backgroundRepeat: 'no-repeat',
-    backgroundPosition: 'right 0.75rem center',
+    backgroundPosition: 'right 0.5rem center',
     backgroundSize: '1rem',
     backgroundClip: 'padding-box',
-    paddingRight: '2rem',
+    paddingRight: '1.75rem',
     paddingLeft: '0.75rem',
     paddingTop: '0.5rem',
     paddingBottom: '0.5rem',
     fontSize: '0.875rem',
     lineHeight: '1.25rem',
-    minWidth: '10rem',
+    width: '100%',
+    maxWidth: '100%',
     border: '1px solid rgba(255, 255, 255, 0.15)',
     borderRadius: '0.5rem',
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
@@ -75,6 +78,9 @@ const ChordBuilderPanel = ({
     appearance: 'none',
     cursor: 'pointer',
     transition: 'all 0.2s',
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap',
     '&:hover': {
       borderColor: 'rgba(255, 255, 255, 0.3)',
       backgroundColor: 'rgba(0, 0, 0, 0.25)'
@@ -86,6 +92,16 @@ const ChordBuilderPanel = ({
       borderColor: 'rgba(96, 165, 250, 0.5)'
     }
   };
+  
+  // Style for dropdown options
+  const optionStyles = {
+    backgroundColor: '#1f2937',
+    color: 'white',
+    padding: '0.5rem 0.75rem',
+    '&:hover': {
+      backgroundColor: '#374151'
+    }
+  };
 
   return (
     <div className={`bg-white/5 backdrop-blur-sm p-4 rounded-xl border border-white/5 shadow-sm ${className}`}>
@@ -93,36 +109,40 @@ const ChordBuilderPanel = ({
         {/* Root Note Selector */}
         <div className="flex items-center space-x-3">
           <span className="text-sm font-medium text-white/70 whitespace-nowrap w-24">Root Note</span>
-          <select
-            value={chordRoot}
-            onChange={(e) => onRootChange(e.target.value)}
-            className="flex-1 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
-            style={selectStyles}
-          >
-            {allNotes.map((note) => (
-              <option key={note} value={note} className="bg-gray-800 text-white">
-                {note}
-              </option>
-            ))}
-          </select>
+          <div className="relative flex-1 min-w-0">
+            <select
+              value={chordRoot}
+              onChange={(e) => onRootChange(e.target.value)}
+              className="w-full text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+              style={selectStyles}
+            >
+              {allNotes.map((note) => (
+                <option key={note} value={note} style={optionStyles}>
+                  {note}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
         
         {/* Chord Type Selector */}
         <div className="flex items-center space-x-3">
           <span className="text-sm font-medium text-white/70 whitespace-nowrap w-24">Chord Type</span>
-          <select
-            value={chordType}
-            onChange={(e) => onChordTypeChange(e.target.value)}
-            className="flex-1 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
-            style={selectStyles}
-          >
-            <option value="" className="bg-gray-800 text-white">Select Chord</option>
-            {chordTypes.map((c) => (
-              <option key={c.label} value={c.type} className="bg-gray-800 text-white">
-                {c.label}
-              </option>
-            ))}
-          </select>
+          <div className="relative flex-1 min-w-0">
+            <select
+              value={chordType}
+              onChange={(e) => onChordTypeChange(e.target.value)}
+              className="w-full text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+              style={selectStyles}
+            >
+              <option value="" style={optionStyles}>Select Chord</option>
+              {chordTypes.map((c) => (
+                <option key={c.label} value={c.type} style={optionStyles}>
+                  {c.label}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Voicing Selector - Only show when we have voicings */}
@@ -142,18 +162,20 @@ const ChordBuilderPanel = ({
                 <ChevronLeftIcon className="w-4 h-4 text-white" />
               </button>
               
-              <select
-                value={currentVoicingIndex}
-                onChange={handleVoicingChange}
-                className="flex-1 min-w-0 text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
-                style={selectStyles}
-              >
-                {selectedVoicings.map((voicing, idx) => (
-                  <option key={idx} value={idx} className="bg-gray-800 text-white">
-                    {voicing.name || `Voicing ${idx + 1}`}
-                  </option>
-                ))}
-              </select>
+              <div className="relative flex-1 min-w-0">
+                <select
+                  value={currentVoicingIndex}
+                  onChange={handleVoicingChange}
+                  className="w-full text-sm bg-white/5 border border-white/10 rounded-lg px-3 py-1.5 text-white focus:outline-none focus:ring-1 focus:ring-blue-400/50 focus:border-blue-400/50 transition-colors"
+                  style={selectStyles}
+                >
+                  {selectedVoicings.map((voicing, idx) => (
+                    <option key={idx} value={idx} style={optionStyles}>
+                      {voicing.name || `Voicing ${idx + 1}`}
+                    </option>
+                  ))}
+                </select>
+              </div>
               
               <button
                 onClick={onNextVoicing}
@@ -183,18 +205,30 @@ const ChordBuilderPanel = ({
         <div className="mt-6">
           <h4 className="text-sm font-medium text-white/80 mb-2">Chord Notes</h4>
           <div className="flex flex-wrap gap-2 mb-4">
-            {chordNotes.map((note, i) => (
-              <div 
-                key={i} 
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
-                  i === 0 ? 'bg-red-600/80' : 
-                  i % 2 === 0 ? 'bg-green-600/80' : 
-                  'bg-blue-600/80'
-                }`}
-              >
-                {note}
-              </div>
-            ))}
+            {chordNotes.map((note, i) => {
+              // First try to get the interval from intervalMap for consistent coloring with fretboard
+              const pitchClass = Tonal.Note.pitchClass(note);
+              const interval = intervalMap[pitchClass];
+              
+              let colorClass = "";
+              if (interval) {
+                // Use the same coloring approach as NoteCell
+                const colors = getIntervalColors(interval);
+                colorClass = `bg-gradient-to-br ${colors.bg} ${colors.text} border ${colors.border}`;
+              } else {
+                // Fallback to index-based coloring using getChordNoteColorClass
+                colorClass = getChordNoteColorClass(note, i, chordRoot, chordType);
+              }
+              
+              return (
+                <div 
+                  key={note + i}
+                  className={`px-3 py-1.5 rounded-lg text-sm font-medium shadow-sm ${colorClass}`}
+                >
+                  {note}
+                </div>
+              );
+            })}
           </div>
           
           {/* Chord Shape Preview */}
@@ -230,6 +264,8 @@ ChordBuilderPanel.propTypes = {
   selectedVoicings: PropTypes.array,
   /** Index of the currently selected voicing */
   currentVoicingIndex: PropTypes.number,
+  /** Interval mapping for consistent coloring */
+  intervalMap: PropTypes.object,
   /** Callback when root note changes */
   onRootChange: PropTypes.func.isRequired,
   /** Callback when chord type changes */
@@ -238,10 +274,10 @@ ChordBuilderPanel.propTypes = {
   onNextVoicing: PropTypes.func.isRequired,
   /** Callback to go to previous voicing */
   onPreviousVoicing: PropTypes.func.isRequired,
-  /** Callback to select a specific voicing by index */
-  selectVoicing: PropTypes.func.isRequired,
-  /** Callback when play chord button is clicked */
+  /** Callback to play a chord */
   onPlayChord: PropTypes.func,
+  /** Callback to select a specific voicing */
+  selectVoicing: PropTypes.func.isRequired,
   /** Additional CSS classes */
   className: PropTypes.string,
 };

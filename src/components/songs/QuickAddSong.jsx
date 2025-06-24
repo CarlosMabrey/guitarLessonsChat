@@ -29,11 +29,11 @@ export default function QuickAddSong({ onSongAdded, onCancel }) {
   const [error, setError] = useState(null);
   const [showFullDetails, setShowFullDetails] = useState(false);
   const [suggestedSongs, setSuggestedSongs] = useState([
-    "Wonderwall - Oasis",
-    "Hotel California - Eagles",
-    "Sweet Child O' Mine - Guns N' Roses",
-    "Stairway to Heaven - Led Zeppelin",
-    "Smoke on the Water - Deep Purple"
+    "Oasis - Wonderwall",
+    "Eagles - Hotel California",
+    "Guns N' Roses - Sweet Child O' Mine",
+    "Led Zeppelin - Stairway to Heaven",
+    "Deep Purple - Smoke on the Water"
   ]);
   const [recognition, setRecognition] = useState(null);
   const inputRef = useRef(null);
@@ -336,8 +336,8 @@ export default function QuickAddSong({ onSongAdded, onCancel }) {
               type="text"
               value={query}
               onChange={handleInputChange}
-              placeholder="Enter song name or Artist - Song"
-              className="input w-full pl-10 pr-10 h-12 text-base"
+              placeholder="Enter artist - song (e.g. Oasis - Wonderwall)"
+              className="w-full pl-10 pr-4 py-3 rounded-lg bg-input border border-border focus:outline-none focus:border-primary"
               disabled={status === 'listening' || status === 'searching' || status === 'preview' || status === 'success'}
               onKeyDown={(e) => e.key === 'Enter' && handleDiscover()}
             />

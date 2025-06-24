@@ -1,5 +1,5 @@
 // pages/theory/fretboard/index.jsx
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import Head from 'next/head';
 import * as Tonal from 'tonal';
 import Layout from '@/components/ui/Layout';
@@ -131,6 +131,32 @@ function FretboardPage() {
     ? selectedVoicings[currentVoicingIndex] 
     : null;
 
+  // State to manage sidebar visibility on small screens
+  const [sidebarVisible, setSidebarVisible] = useState(true);
+  
+  // Check window width and auto-collapse sidebar on small screens
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 768) {
+        setSidebarVisible(false);
+      } else {
+        setSidebarVisible(true);
+      }
+    };
+    
+    // Initial check
+    handleResize();
+    
+    // Listen for window resize events
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+  
+  // Toggle sidebar visibility
+  const toggleSidebar = () => {
+    setSidebarVisible(!sidebarVisible);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-950 to-indigo-950 text-white flex flex-col">
       <Layout>
@@ -142,9 +168,29 @@ function FretboardPage() {
             className="mb-6"
           />
 
-          <div className="flex-1 grid grid-cols-1 lg:grid-cols-5 gap-6 overflow-hidden">
-            {/* Left Sidebar - Controls */}
-            <div className="space-y-6 overflow-y-auto pr-2">
+          {/* Main Grid Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 mt-6 relative">
+            {/* Sidebar Toggle Button - Only visible on mobile/small screens */}
+            <div className="md:hidden absolute top-0 right-0 z-10">
+              <button 
+                onClick={toggleSidebar}
+                className="bg-blue-700/50 hover:bg-blue-700/70 text-white rounded-full p-2 flex items-center justify-center"
+                aria-label={sidebarVisible ? 'Hide sidebar' : 'Show sidebar'}
+              >
+                {sidebarVisible ? (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                ) : (
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
+                  </svg>
+                )}
+              </button>
+            </div>
+            
+            {/* Sidebar - Controls */}
+            <div className={`lg:col-span-1 transition-all duration-300 ${sidebarVisible ? 'block' : 'hidden md:block'}`}>
               <ScaleTuningPanel
                 currentTuning={currentTuning}
                 chordRoot={chordRoot}
@@ -163,6 +209,7 @@ function FretboardPage() {
                 chordType={chordType}
                 selectedVoicings={filteredVoicings}
                 currentVoicingIndex={currentVoicingIndex}
+                intervalMap={intervalMap}
                 onRootChange={setChordRoot}
                 onChordTypeChange={(type) => {
                   setChordType(type);
@@ -177,7 +224,7 @@ function FretboardPage() {
             </div>
 
             {/* Main Content - Fretboard */}
-            <div className="lg:col-span-4 flex flex-col h-full overflow-hidden">
+            <div className={`lg:col-span-4 flex flex-col h-full overflow-hidden ${!sidebarVisible ? 'col-span-full' : ''}`}>
               {/* Voicing Navigator */}
               {chordType && singleVoicingMode && filteredVoicings.length > 0 && (
                 <div className="mb-4">

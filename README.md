@@ -48,15 +48,15 @@ A powerful, interactive fretboard tool with:
 ### Code Structure
 ```
 ├── components/
-│   ├── fretboard/
-│   │   ├── FretboardPage.jsx
-│   │   ├── NoteCell.jsx
-│   │   ├── VoicingDisplay.jsx
-│   │   ├── ChordPositions.jsx
-│   │   ├── ScalePatterns.jsx
-│   │   ├── ChordProgressions.jsx
-│   │   ├── LegendBox.jsx
-│   │   └── TonnetzVisualizer.jsx (planned)
+│   ├── theory/
+│   │   ├── fretboard/
+│   │   │   ├── FretboardPage.jsx
+│   │   │   ├── NoteCell.jsx
+│   │   │   ├── VoicingDisplay.jsx
+│   │   │   ├── ChordPositions.jsx
+│   │   │   ├── ScalePatterns.jsx
+│   │   │   ├── ChordProgressions.jsx
+│   │   ├── TonnetzVisualizer.jsx 
 ```
 
 ## 🕸️ Tonnetz Chord Visualizer (Planned)

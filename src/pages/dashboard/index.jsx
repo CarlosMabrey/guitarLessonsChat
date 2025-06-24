@@ -76,6 +76,23 @@ export default function DashboardPage() {
             </Link>
           </div>
         </div>
+        {/* Fretboard Card */}
+        <div className="p-6 backdrop-blur-md bg-card border border-border rounded-xl transition-all duration-300 hover:shadow-lg">
+          <div className="flex items-center mb-4">
+            <div className="w-12 h-12 bg-indigo-500/20 rounded-full flex items-center justify-center mr-4">
+              <FiMusic className="text-indigo-400 text-2xl" />
+            </div>
+            <h2 className="text-xl font-bold text-text-primary">Fretboard</h2>
+          </div>
+          <p className="text-text-secondary mb-6">Explore the fretboard and learn new chords and scales</p>
+          
+          <Link 
+            href="/theory/fretboard" 
+            className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-md font-medium transition-colors inline-block"
+          >
+            View Fretboard
+          </Link>
+        </div>
       </div>
     </Layout>
   );

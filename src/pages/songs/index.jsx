@@ -8,6 +8,7 @@ import { getAllSongs } from '@/lib/db';
 import Layout from '@/components/ui/Layout';
 import SongItem from '@/components/songs/SongItem';
 import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
+import ChordTooltip from '@/components/songs/ChordTooltip';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
 import Modal from '@/components/ui/Modal';
 import QuickAddSong from '@/components/songs/QuickAddSong';
@@ -95,7 +96,7 @@ export default function SongsPage() {
     setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
   };
   
-  // New function to display chord information
+  // Function to display chord information with hover tooltips
   const renderChords = (song) => {
     if (!song || !song.chords || song.chords.length === 0) {
       return (
@@ -106,15 +107,13 @@ export default function SongsPage() {
     return (
       <div className="mt-2">
         <div className="text-sm font-medium mb-2">Chords in this song:</div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-3 items-center">
           {song.chords.map((chord, index) => (
-            <div key={index} className="flex flex-col items-center">
-              <VoicingDisplay 
-                chord={chord} 
-                size="sm" 
-                className="cursor-pointer hover:opacity-80 transition-opacity"
-              />
-            </div>
+            <ChordTooltip key={index} chord={chord}>
+              <div className="px-3 py-1.5 bg-primary/10 hover:bg-primary/20 rounded-full text-primary font-medium transition-colors cursor-help">
+                {chord}
+              </div>
+            </ChordTooltip>
           ))}
         </div>
       </div>

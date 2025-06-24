@@ -49,10 +49,45 @@ async function webSearchSongInfo(query) {
  * Analyze song name to extract artist and title
  */
 function analyzeSongQuery(query) {
-  // Check if query is in "Artist - Title" format
+  // Check if query has the "X - Y" format (either artist-song or song-artist)
   if (query.includes(' - ')) {
-    const [artist, title] = query.split(' - ').map(part => part.trim());
-    return { artist, title, fullQuery: query };
+    const parts = query.split(' - ').map(part => part.trim());
+    
+    if (parts.length === 2) {
+      // We need to determine if it's "artist - song" or "song - artist"
+      // Default to assuming it's "artist - song" (preferred format)
+      // but we can use some intelligence to try and figure it out
+      
+      const firstPart = parts[0];
+      const secondPart = parts[1];
+      
+      // Common artists are more likely to have multiple words
+      // while song titles can be shorter, but this isn't always true
+      
+      // Keywords that strongly suggest the first part is a song title
+      const songTitleIndicators = ['intro', 'solo', 'acoustic', 'live', 'unplugged', 'remix'];
+      const containsSongKeyword = songTitleIndicators.some(keyword => 
+        firstPart.toLowerCase().includes(keyword)
+      );
+      
+      // If the first part contains a song title indicator, it's likely "song - artist"
+      if (containsSongKeyword) {
+        return { 
+          artist: secondPart, 
+          title: firstPart, 
+          fullQuery: query,
+          detectedFormat: 'song-artist'
+        };
+      }
+      
+      // Otherwise, default to "artist - song" format (preferred)
+      return { 
+        artist: firstPart, 
+        title: secondPart, 
+        fullQuery: query,
+        detectedFormat: 'artist-song'
+      };
+    }
   }
   
   // Try to guess if there's an artist name before a song
