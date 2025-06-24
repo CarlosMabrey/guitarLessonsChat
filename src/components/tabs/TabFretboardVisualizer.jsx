@@ -33,30 +33,35 @@ const TabFretboardVisualizer = ({ tabData = {}, onTabDataChange }) => {
   const [error, setError] = useState(null);
   const stringTuning = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
   
-  // Load example tab data for development testing
+  // Load initial tab data or example tab data if none provided
   useEffect(() => {
-    // Always load example-tab.json for testing
-    if (!currentTabData?.notes || currentTabData.notes.length === 0) {
-      setIsLoading(true);
-      fetch('/example-tab.json')
-        .then(response => response.json())
-        .then(exampleData => {
-          setCurrentTabData(exampleData);
-          setFileName('example-tab.json');
-          setIsLoading(false);
-          if (onTabDataChange) {
-            onTabDataChange(exampleData);
-          }
-        })
-        .catch(err => {
-          console.error('Error loading example tab:', err);
-          setError('Failed to load example tab data');
-          setIsLoading(false);
-        });
-    } else {
+    // If we have tabData from props, use it
+    if (tabData?.notes && tabData.notes.length > 0) {
+      console.log('[TabFretboardVisualizer] Using provided tab data with', tabData.notes.length, 'notes');
       setCurrentTabData(tabData);
+      setIsLoading(false);
+      return;
     }
-  }, [tabData, onTabDataChange, currentTabData?.notes]);
+    
+    // Otherwise fall back to example-tab.json
+    console.log('[TabFretboardVisualizer] No tab data provided, loading example tab');
+    setIsLoading(true);
+    fetch('/example-tab.json')
+      .then(response => response.json())
+      .then(exampleData => {
+        setCurrentTabData(exampleData);
+        setFileName('example-tab.json');
+        setIsLoading(false);
+        if (onTabDataChange) {
+          onTabDataChange(exampleData);
+        }
+      })
+      .catch(err => {
+        console.error('Error loading example tab:', err);
+        setError('Failed to load example tab data');
+        setIsLoading(false);
+      });
+  }, [tabData, onTabDataChange]);
   
   // Handle tab data updates
   const handleTabDataUpdate = useCallback((newTabData) => {
@@ -68,12 +73,28 @@ const TabFretboardVisualizer = ({ tabData = {}, onTabDataChange }) => {
   
   // Initialize Audio Service
   useEffect(() => {
+    console.log('[TabFretboardVisualizer] Initializing audio service');
     audioService.initialize();
     audioService.setVolume(volume);
     
+    // Force audio context initialization with user interaction
+    const unlockAudio = () => {
+      console.log('[TabFretboardVisualizer] Unlocking audio context on user interaction');
+      audioService.initialize();
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
+    };
+    
+    // Add event listeners to unlock audio on user interaction
+    document.addEventListener('click', unlockAudio);
+    document.addEventListener('touchstart', unlockAudio);
+    
     // Cleanup function
     return () => {
+      console.log('[TabFretboardVisualizer] Cleaning up audio service');
       audioService.cleanup();
+      document.removeEventListener('click', unlockAudio);
+      document.removeEventListener('touchstart', unlockAudio);
     };
   }, []);
   

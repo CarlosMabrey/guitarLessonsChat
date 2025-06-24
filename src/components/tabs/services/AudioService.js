@@ -15,10 +15,24 @@ class AudioService {
   initialize() {
     if (!this.audioContext) {
       try {
+        console.log('[AudioService] Initializing Web Audio API');
         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        console.log('[AudioService] Audio context created, state:', this.audioContext.state);
+        
+        // Force resume if suspended (browser autoplay policy)
+        if (this.audioContext.state === 'suspended') {
+          console.log('[AudioService] Attempting to resume suspended audio context');
+          this.audioContext.resume().then(() => {
+            console.log('[AudioService] Audio context resumed successfully');
+          }).catch(err => {
+            console.error('[AudioService] Failed to resume audio context:', err);
+          });
+        }
       } catch (err) {
-        console.error('Web Audio API not supported:', err);
+        console.error('[AudioService] Web Audio API not supported or blocked:', err);
       }
+    } else {
+      console.log('[AudioService] Audio context already exists, state:', this.audioContext.state);
     }
     return this;
   }

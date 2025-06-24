@@ -182,6 +182,22 @@ const FretboardGrid = ({
       onNoteClick(note, stringIndex, fret);
     }
   };
+  
+  // Get interval for a note based on the current chord/scale context
+  const getNoteInterval = (note) => {
+    if (!note || !highlightedNotes.length) return null;
+    
+    // First try to find the interval from the interval map
+    const interval = findIntervalForNote(note);
+    if (interval) return interval;
+    
+    // If no interval found but note is highlighted, return default
+    if (isNoteHighlighted(note)) {
+      return '1P'; // Default to root if no specific interval found
+    }
+    
+    return null;
+  };
 
   // Calculate dynamic cell size based on container height
   const [containerRef, containerSize] = useContainerSize();
@@ -379,7 +395,7 @@ const FretboardGrid = ({
                         const isHighlighted = isNoteHighlighted(note);
                         const isSelected = isNoteSelected(note);
                         const isInVoicing = singleVoicingMode ? isNoteInVoicing(note) : true;
-                        const interval = isNoteHighlighted(note) ? findIntervalForNote(note) : null;
+                        const interval = isHighlighted ? getNoteInterval(note) : null;
                         
                         return (
                           <NoteCell
@@ -389,8 +405,8 @@ const FretboardGrid = ({
                             stringIndex={stringIndex}
                             isSelected={isSelected}
                             isHighlighted={isHighlighted}
-                            isRelevant={!showOnlyRelevantNotes || isHighlighted || isSelected || isInVoicing}
                             interval={interval}
+                            isRelevant={!showOnlyRelevantNotes || isHighlighted || isSelected || isInVoicing}
                             onClick={() => handleNoteClick(note, stringIndex, fret)}
                             cellSize={cellSize}
                             displayMode={displayMode}
