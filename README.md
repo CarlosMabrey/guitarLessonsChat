@@ -4,9 +4,78 @@ A professional guitar learning application that helps users break down songs the
 
 ## 📋 Overview
 
-Guitar Learning App is a Next.js application designed to help guitarists of all skill levels learn and practice songs more effectively. The app combines AI-powered song analysis, interactive guitar tabs, chord diagrams, and practice tools to provide a comprehensive learning experience.
+The Guitar Learning App is built with Next.js and offers a full-featured environment for learning guitar through:
+	•	AI-powered song analysis
+	•	Interactive guitar fretboard visualizations
+	•	Chord diagrams and scale patterns
+	•	Practice tracking and personalized routines
 
-### App Features Overview
+
+⸻
+
+🎸 Guitar Learning App
+
+A professional guitar learning platform combining AI-powered analysis with interactive practice tools to help users break down and master songs.
+
+🌟 Key Features
+
+🎼 Song Library
+	•	Search, filter, and organize songs
+	•	Tagging and categorization
+	•	Quick and advanced song add flows
+	•	Chord previews and embedded YouTube videos
+
+🤖 AI Features
+	•	Chord and progression detection
+	•	Song breakdown with difficulty estimation
+	•	Personalized practice plans
+	•	AI-powered learning chat
+
+🎯 Practice Tools
+	•	Interactive fretboard and chord builder
+	•	Scale patterns and chord progressions
+	•	Video playback, metronome, and tab viewer
+	•	Practice history, stats, and achievements
+
+🎸 Fretboard Visualizer
+	•	Tabbed views: Fretboard, Voicings, Patterns, Progressions
+	•	Interval highlighting and sound playback
+	•	Chord diagrams and alternative fingerings
+	•	Mobile-responsive and accessible UI
+
+🧠 Tonnetz Visualizer (Planned)
+	•	Interactive Tonnetz grid
+	•	Visualize chord/scale relationships
+	•	Advanced ear training tools
+
+⸻
+
+🗂️ File Structure
+
+├── public/                 # Static assets
+├── src/                    # Main source code
+│   ├── app/                # Next.js App Router
+│   │   ├── dashboard/      # Dashboard page
+│   │   ├── songs/          # Songs management
+│   │   ├── practice/       # Practice session pages
+│   │   ├── progress/       # Progress tracking
+│   ├── components/         # Reusable components
+│   │   ├── ui/             # General UI
+│   │   ├── charts/         # Charts and visualizations
+│   │   ├── player/         # Video players
+│   │   ├── diagrams/       # Fretboard and chord diagrams
+│   │   ├── practice/       # Practice tools
+│   ├── lib/                # Utilities and APIs
+│   │   ├── ai/             # AI integration
+│   │   ├── db/             # Database utils
+│   │   ├── services/       # External APIs
+│   ├── data/               # Mock data
+│   └── styles/             # Global stylesheets
+├── scripts/                # Tab scraping and utility scripts
+├── tests/                  # Jest tests
+
+
+⸻
 
 ```mermaid
 mindmap
@@ -33,148 +102,102 @@ mindmap
       Learning Path
 ```
 
-## 🎸 Guitar Fretboard Visualizer
+⸻
 
-A powerful, interactive fretboard tool with:
-- Tabbed workflow (Fretboard, Voicings, Analysis, Patterns, Progressions)
-- Dynamic chord voicings for all roots and types
-- Interactive fretboard with note/interval highlighting and sound playback
-- Mini floating legend with toggleable visibility
-- Prominent chord diagrams and alternative fingerings
-- Scale patterns and chord progressions views
-- Responsive, accessible UI with mobile support
-- Modular, maintainable code structure
+🧰 Tech Stack
+	•	Frontend: Next.js, React, Tailwind CSS
+	•	State Management: React Context API, Zustand
+	•	AI: OpenAI API
+	•	APIs: Songsterr, YouTube, Spotify, Uberchord
+	•	Animations: Framer Motion
+	•	Audio: Tone.js
+	•	Testing: Jest, React Testing Library
+	•	Planned DB: SQLite via Prisma
 
-### Code Structure
-```
-├── components/
-│   ├── theory/
-│   │   ├── fretboard/
-│   │   │   ├── FretboardPage.jsx
-│   │   │   ├── NoteCell.jsx
-│   │   │   ├── VoicingDisplay.jsx
-│   │   │   ├── ChordPositions.jsx
-│   │   │   ├── ScalePatterns.jsx
-│   │   │   ├── ChordProgressions.jsx
-│   │   ├── TonnetzVisualizer.jsx 
-```
+⸻
 
-## 🕸️ Tonnetz Chord Visualizer (Planned)
-- Interactive Tonnetz navigation
-- Chord/scale relationships visualized on a Tonnetz grid
-- Advanced analysis and ear training features
+⚙️ Setup Instructions
 
-## 🚀 Key Features (Updated)
-- Tabbed workflow for contextual views
-- Dynamic chord voicings and alternative fingerings
-- Interactive, accessible fretboard
-- Mini floating legend
-- Scale patterns and chord progressions
-- Tonnetz visualizer (planned)
-- Improved accessibility and mobile support (planned)
-- Modular, maintainable code
+Prerequisites
+	•	Node.js v18+
+	•	npm or yarn
 
-## AI Functionality
-- AI-powered song analysis
-- Chord detection
-- Practice routines built from AI analysis (goals, current skill level, youtube videos, etc.)
-- Learning chat
+Install & Run
 
-## 👩‍💻 Development Status (Updated)
-- Fretboard visualizer refactored and improved
-- Voicings, analysis, patterns, and progressions tabs implemented
-- Code structure modularized for maintainability
-- Tonnetz visualizer and advanced analysis planned
-- Test coverage and refactoring in progress
-
-See [todo.md](./todo.md) for detailed roadmap and recent changes.
-
-## 📝 Documentation
-
-This repository includes several documentation files to help you understand and contribute to the project:
-
-- [Technical Documentation](./TECHNICAL_DOCS.md) - Architecture, components, and implementation details
-- [API Documentation](./API_DOCUMENTATION.md) - Setup and usage of OpenAI, Spotify, YouTube, and Songsterr
-- [Development Roadmap](./ROADMAP.md) - MVP plan, completed features, and future enhancements
-
-## 🛠️ Setup Instructions
-
-### Prerequisites
-
-- Node.js (v18.0.0 or newer)
-- npm or yarn
-
-### Installation
-
-1. Clone the repository:
-```bash
 git clone https://github.com/yourusername/guitar-learning-app.git
 cd guitar-learning-app
-```
 
-2. Install dependencies:
-```bash
-npm install
-# or
-yarn install
-```
+npm install        # or yarn install
+cp .env.example .env.local  # Add your API keys
+npm run dev        # or yarn dev
 
-3. Set up API keys:
-   - Create a `.env.local` file in the root directory
-   - Add your API keys following the format in `.env.example`
-   - See [API Documentation](./API_DOCUMENTATION.md) for detailed instructions
+Visit http://localhost:3000
 
-4. Start the development server:
-```bash
-npm run dev
-# or
-yarn dev
-```
+⸻
 
-5. Open [http://localhost:3000](http://localhost:3000) in your browser.
+🧩 Component Highlights
+	•	QuickAddSong: One-click song search and addition
+	•	AddSongForm: Advanced entry with metadata
+	•	SongTabViewer: Loads tabs via Songsterr
+	•	SongVideoResources: Embeds YouTube lessons
+	•	FretboardGrid: Interactive fretboard matrix
+	•	ChordBuilderPanel: Root/type selector and voicing browser
+	•	DisplaySettings: Toggle intervals, tunings, and visuals
 
-## 🧰 Tech Stack
+⸻
 
-- **Frontend**: Next.js, React, Tailwind CSS
-- **State Management**: React Context API, Zustand
-- **Database**: Local storage (plan to implement SQLite through Prisma)
-- **AI Integration**: OpenAI API
-- **Music APIs**: Songsterr, YouTube, Spotify
-- **Animations**: Framer Motion
-- **Styling**: Tailwind CSS with dark mode
+📈 Practice & Progress
+	•	Track sessions with progression player
+	•	View charts and achievements
+	•	AI-driven suggestions based on history and difficulty
 
-## 📱 Project Structure
+⸻
 
-```
-├── public/                 # Static assets
-├── src/                    # Source code
-│   ├── app/                # Next.js App Router
-│   │   ├── dashboard/      # Dashboard page
-│   │   ├── songs/          # Songs management
-│   │   ├── practice/       # Practice session pages
-│   │   ├── progress/       # Progress tracking page
-│   ├── components/         # Reusable components
-│   │   ├── ui/             # UI components
-│   │   ├── charts/         # Chart components
-│   │   ├── player/         # Video player components
-│   │   ├── diagrams/       # Guitar diagrams components
-│   │   ├── practice/       # Practice-related components
-│   ├── lib/                # Utilities and helpers
-│   │   ├── ai/             # AI services
-│   │   ├── db/             # Database functions
-│   │   ├── services/       # API services
-│   ├── data/               # Mock data for development
-│   └── styles/             # Global styles
-└── scripts/                # Utility scripts
-```
+🔬 AI & Discovery
+	•	src/lib/ai handles OpenAI-powered song breakdown
+	•	musicDiscoveryApi.js unifies multi-source search
+	•	Fallback mappings in app/services/tabUrlMappings.js
 
-## 🙏 Credits
+⸻
 
-- [Songsterr](https://www.songsterr.com/) for tab data
-- [Uberchord](https://www.uberchord.com/) for chord information
-- [Ultimate Guitar](https://www.ultimate-guitar.com/) for additional resources
-- [AlphaTab](https://www.alphatab.net/) for music notation rendering
+🎓 Documentation
+	•	Technical Documentation
+	•	API Docs
+	•	Roadmap
+	•	Todo List
 
-## 📄 License
+⸻
 
-MIT
+🛠 Development Status
+	•	✅ Fretboard visualizer refactored
+	•	✅ Practice and analysis tabs implemented
+	•	✅ Modularized codebase
+	•	🛠️ Tonnetz visualizer in planning
+	•	🧪 Test coverage and CI in progress
+
+⸻
+
+🧾 TODO (Next Steps)
+	•	Chord playback and voicing alternatives
+	•	Mobile-friendly metronome and video practice
+	•	Integrated AI chat feedback
+	•	Cloud sync and login
+	•	Consistent component naming and types
+
+⸻
+
+🙏 Credits
+	•	Songsterr
+	•	Uberchord
+	•	Ultimate Guitar
+	•	AlphaTab
+
+⸻
+
+📄 License
+
+MIT License
+
+⸻
+
+Let me know if you’d like this saved to a .md file for download or if you’d like a version optimized for publishing (e.g., GitHub Pages or a Notion wiki).
