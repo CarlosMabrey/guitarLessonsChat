@@ -6,9 +6,45 @@ const KEYS = {
   PRACTICE_SESSIONS: 'guitarCoach_practice',
   ACHIEVEMENTS: 'guitarCoach_achievements',
   USER_PREFERENCES: 'guitarCoach_preferences',
+  USER_PROFILE: 'guitarCoach_user_profile',
   CHAT_HISTORY: 'guitarCoach_chat',
   CHORD_DATA: 'guitarCoach_chords',
   SONG_ANALYSIS: 'guitarCoach_song_analysis'
+};
+
+// Default user profile
+const DEFAULT_USER_PROFILE = {
+  // Basic info
+  name: 'Guitar Student',
+  joinDate: new Date().toISOString(),
+  
+  // Skill assessment
+  skillLevel: 'beginner', // beginner, intermediate, advanced
+  playingStyle: [], // e.g., ['fingerstyle', 'picking', 'strumming']
+  genres: [], // e.g., ['rock', 'blues', 'jazz']
+  
+  // Goals and preferences
+  goals: [],
+  practiceFrequency: 'a few times a week',
+  practiceDuration: '30 minutes',
+  
+  // Progress tracking
+  lastPracticeDate: null,
+  totalPracticeMinutes: 0,
+  favoriteChords: [],
+  favoriteSongs: [],
+  
+  // Learning preferences
+  learningFocus: 'chords', // chords, scales, songs, theory, etc.
+  preferredLearningStyle: 'visual', // visual, auditory, hands-on
+  
+  // Guitar details
+  guitarType: 'acoustic', // acoustic, electric, classical
+  tuning: 'standard', // standard, dropD, openG, etc.
+  
+  // System fields
+  lastUpdated: new Date().toISOString(),
+  version: 1
 };
 
 // Initialize default data if not present
@@ -34,6 +70,11 @@ export const initializeDatabase = () => {
       metronomeVolume: 50,
       defaultPracticeTime: 20, // minutes
     }));
+  }
+  
+  // Initialize user profile if it doesn't exist
+  if (!localStorage.getItem(KEYS.USER_PROFILE)) {
+    localStorage.setItem(KEYS.USER_PROFILE, JSON.stringify(DEFAULT_USER_PROFILE));
   }
   
   if (!localStorage.getItem(KEYS.CHAT_HISTORY)) {
@@ -352,7 +393,64 @@ export const getProgressStats = () => {
   }
 };
 
+// User Profile operations
+export const getUserProfile = () => {
+  if (typeof window === 'undefined') return DEFAULT_USER_PROFILE;
+  
+  try {
+    const profile = localStorage.getItem(KEYS.USER_PROFILE);
+    return profile ? JSON.parse(profile) : DEFAULT_USER_PROFILE;
+  } catch (error) {
+    console.error('Error getting user profile:', error);
+    return DEFAULT_USER_PROFILE;
+  }
+};
+
+export const updateUserProfile = (updates) => {
+  if (typeof window === 'undefined') return false;
+  
+  try {
+    const currentProfile = getUserProfile();
+    const updatedProfile = {
+      ...currentProfile,
+      ...updates,
+      lastUpdated: new Date().toISOString()
+    };
+    
+    localStorage.setItem(KEYS.USER_PROFILE, JSON.stringify(updatedProfile));
+    return true;
+  } catch (error) {
+    console.error('Error updating user profile:', error);
+    return false;
+  }
+};
+
+export const updateUserGoals = (goals) => {
+  return updateUserProfile({ goals });
+};
+
+export const updateSkillLevel = (skillLevel) => {
+  return updateUserProfile({ skillLevel });
+};
+
+export const addFavoriteSong = (songId) => {
+  const profile = getUserProfile();
+  const updatedFavorites = [...new Set([...profile.favoriteSongs, songId])];
+  return updateUserProfile({ favoriteSongs: updatedFavorites });
+};
+
+export const recordPracticeSession = (minutes) => {
+  const profile = getUserProfile();
+  const now = new Date().toISOString();
+  
+  return updateUserProfile({
+    lastPracticeDate: now,
+    totalPracticeMinutes: (profile.totalPracticeMinutes || 0) + minutes,
+    lastUpdated: now
+  });
+};
+
 // Initialize database when module is imported
 if (typeof window !== 'undefined') {
   initializeDatabase();
-} 
+}

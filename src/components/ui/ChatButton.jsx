@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { FiMessageCircle } from 'react-icons/fi';
+import { FiMessageSquare } from 'react-icons/fi';
 import Modal from './Modal';
 import Chat from './Chat';
 
@@ -17,7 +17,7 @@ export default function ChatButton({ songId, title, className = '' }) {
         onClick={openChat}
         className={`btn btn-primary flex items-center ${className}`}
       >
-        <FiMessageCircle className="mr-2" />
+        <FiMessageSquare className="mr-2" />
         AI Breakdown
       </button>
       

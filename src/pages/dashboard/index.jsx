@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FiHome, FiMusic, FiActivity, FiBookOpen } from 'react-icons/fi';
+import { FiHome, FiMusic, FiActivity, FiBookOpen, FiUser, FiEdit, FiGuitar } from 'react-icons/fi';
+import { useUser } from '@/contexts/UserContext';
 import Layout from '@/components/ui/Layout';
 
 export default function DashboardPage() {
+  const { userProfile, isLoading: profileLoading } = useUser();
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
@@ -37,7 +39,38 @@ export default function DashboardPage() {
         </div>
         
         {/* Main cards in a grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+          {/* User Profile Card */}
+          <div className="p-6 backdrop-blur-md bg-card border border-border rounded-xl transition-all duration-300 hover:shadow-lg">
+            <div className="flex items-center mb-4">
+              <div className="w-12 h-12 bg-green-500/20 rounded-full flex items-center justify-center mr-4">
+                <FiUser className="text-green-400 text-2xl" />
+              </div>
+              <h2 className="text-xl font-bold text-text-primary">My Profile</h2>
+            </div>
+            
+            {!profileLoading && userProfile ? (
+              <div className="mb-4">
+                <p className="text-lg text-text-primary font-medium">{userProfile.name || 'Guitarist'}</p>
+                <p className="text-text-secondary">Level: {userProfile.skillLevel ? userProfile.skillLevel.charAt(0).toUpperCase() + userProfile.skillLevel.slice(1) : 'Beginner'}</p>
+                {userProfile.guitarType && (
+                  <div className="flex items-center mt-2">
+                    <FiGuitar className="text-indigo-400 mr-2" />
+                    <span className="text-sm text-text-secondary">{userProfile.guitarType.charAt(0).toUpperCase() + userProfile.guitarType.slice(1)}</span>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <p className="text-text-secondary mb-6">Set up your guitarist profile</p>
+            )}
+            
+            <Link 
+              href="/profile" 
+              className="px-6 py-3 bg-primary hover:bg-primary-hover text-white rounded-md font-medium transition-colors inline-flex items-center"
+            >
+              <FiEdit className="mr-2" /> Edit Profile
+            </Link>
+          </div>
           {/* Practice Progress Card */}
           <div className="p-6 backdrop-blur-md bg-card border border-border rounded-xl transition-all duration-300 hover:shadow-lg">
             <div className="flex items-center mb-4">

@@ -1,29 +1,92 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
-import { FiSend, FiSettings, FiMessageSquare, FiRefreshCw, FiTrash2, FiCopy } from 'react-icons/fi';
-import { clsx } from 'clsx';
-import Head from 'next/head';
+'use client';
 
-// Message component for individual chat messages
-const Message = ({ message, isUser }) => {
+import { useState, useRef, useEffect } from 'react';
+import dynamic from 'next/dynamic';
+import { FiMenu, FiX, FiSettings, FiMessageSquare, FiPlus, FiHome, FiTrash2} from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { useRouter } from 'next/router';
+import Head from 'next/head';
+import { v4 as uuidv4 } from 'uuid';
+import { clsx } from 'clsx';
+
+// Dynamically import the Chat component with no SSR to avoid hydration issues
+const Chat = dynamic(() => import('@/components/ui/Chat'), {
+  ssr: false,
+  loading: () => (
+    <div className="flex-1 flex items-center justify-center">
+      <div className="animate-pulse text-text-secondary">Loading chat...</div>
+    </div>
+  ),
+});
+
+// Sidebar component
+const Sidebar = ({ isOpen, onClose, onNewChat, onClearChat }) => {
+  const [chats, setChats] = useState([{ id: 1, title: 'New Chat' }]);
+  const [activeChat, setActiveChat] = useState(1);
+
   return (
     <div className={clsx(
-      'flex mb-4',
-      isUser ? 'justify-end' : 'justify-start'
+      'fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border/30 transform transition-transform duration-300 ease-in-out',
+      'md:relative md:translate-x-0',
+      isOpen ? 'translate-x-0' : '-translate-x-full'
     )}>
-      <div
-        className={clsx(
-          'rounded-lg px-4 py-3 max-w-[80%]',
-          isUser
-            ? 'bg-primary text-white rounded-br-none'
-            : 'bg-card-light dark:bg-card-dark text-text-primary rounded-bl-none',
-          'shadow-sm'
-        )}
-      >
-        <div className="whitespace-pre-wrap">{message.content}</div>
+      <div className="h-full flex flex-col">
+        <div className="p-4 border-b border-border/30">
+          <button
+            onClick={onNewChat}
+            className="w-full flex items-center justify-center space-x-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg py-2 px-4 transition-colors"
+          >
+            <FiPlus size={18} />
+            <span>New Chat</span>
+          </button>
+        </div>
+        <div className="flex-1 overflow-y-auto py-2">
+          {chats.map((chat) => (
+            <button
+              key={chat.id}
+              onClick={() => setActiveChat(chat.id)}
+              className={clsx(
+                'w-full text-left px-4 py-3 text-sm font-medium transition-colors',
+                activeChat === chat.id
+                  ? 'bg-primary/10 text-primary'
+                  : 'text-text-secondary hover:bg-card-hover/50'
+              )}
+            >
+              <div className="truncate">{chat.title}</div>
+            </button>
+          ))}
+        </div>
+        <div className="p-4 border-t border-border/30">
+          <button
+            onClick={onClearChat}
+            className="w-full flex items-center space-x-2 text-text-secondary hover:text-danger transition-colors p-2 rounded-lg"
+          >
+            <FiTrash2 size={18} />
+            <span>Clear Conversations</span>
+          </button>
+          <button
+            onClick={() => {}}
+            className="w-full flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors p-2 rounded-lg"
+          >
+            <FiSettings size={18} />
+            <span>Settings</span>
+          </button>
+        </div>
       </div>
     </div>
   );
 };
+
+// Overlay for mobile when sidebar is open
+const Overlay = ({ isOpen, onClick }) => (
+  <div
+    className={clsx(
+      'fixed inset-0 bg-black/50 z-30 transition-opacity md:hidden',
+      isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+    )}
+    onClick={onClick}
+  />
+);
 
 // Settings modal component
 const SettingsModal = ({ isOpen, onClose, apiKey, setApiKey, onSave }) => {
@@ -32,30 +95,41 @@ const SettingsModal = ({ isOpen, onClose, apiKey, setApiKey, onSave }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-background dark:bg-card rounded-lg p-6 w-full max-w-md">
-        <h3 className="text-lg font-semibold mb-4">OpenAI API Settings</h3>
-        <div className="space-y-4">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-card/95 backdrop-blur-lg rounded-2xl p-6 w-full max-w-md border border-border/30 shadow-2xl transform transition-all duration-300 scale-100">
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-semibold text-text-primary">API Settings</h3>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-full hover:bg-card-hover/50 transition-colors text-text-secondary hover:text-text-primary"
+            aria-label="Close"
+          >
+            <FiX size={20} />
+          </button>
+        </div>
+        <div className="space-y-6">
           <div>
-            <label htmlFor="api-key" className="block text-sm font-medium mb-1">
+            <label htmlFor="api-key" className="block text-sm font-medium text-text-secondary mb-2">
               OpenAI API Key
             </label>
-            <input
-              id="api-key"
-              type="password"
-              value={localApiKey}
-              onChange={(e) => setLocalApiKey(e.target.value)}
-              placeholder="sk-..."
-              className="w-full px-3 py-2 border border-border rounded-md bg-background-light dark:bg-card-dark text-text-primary"
-            />
-            <p className="text-xs text-text-secondary mt-1">
-              Your API key is stored locally in your browser
+            <div className="relative">
+              <input
+                id="api-key"
+                type="password"
+                value={localApiKey}
+                onChange={(e) => setLocalApiKey(e.target.value)}
+                placeholder="sk-..."
+                className="w-full px-4 py-3 bg-card-hover/50 border border-border/30 rounded-xl text-text-primary placeholder-text-secondary/60 focus:outline-none focus:ring-2 focus:ring-primary/50 focus:border-transparent transition-all duration-200"
+              />
+            </div>
+            <p className="mt-2 text-xs text-text-secondary/70">
+              Your API key is stored locally in your browser and never sent to our servers.
             </p>
           </div>
-          <div className="flex justify-end space-x-2 pt-2">
+          <div className="flex justify-end space-x-3 pt-2">
             <button
               onClick={onClose}
-              className="px-4 py-2 text-sm font-medium rounded-md border border-border hover:bg-card-hover"
+              className="px-5 py-2.5 text-sm font-medium rounded-xl border border-border/30 bg-transparent hover:bg-card-hover/50 text-text-primary transition-colors duration-200"
             >
               Cancel
             </button>
@@ -64,9 +138,9 @@ const SettingsModal = ({ isOpen, onClose, apiKey, setApiKey, onSave }) => {
                 onSave(localApiKey);
                 onClose();
               }}
-              className="px-4 py-2 text-sm font-medium rounded-md bg-primary text-white hover:bg-primary-dark"
+              className="px-5 py-2.5 text-sm font-medium rounded-xl bg-gradient-to-r from-primary to-primary/80 text-white hover:from-primary/90 hover:to-primary/70 transition-all duration-200 shadow-sm hover:shadow-md"
             >
-              Save
+              Save Changes
             </button>
           </div>
         </div>
@@ -76,36 +150,82 @@ const SettingsModal = ({ isOpen, onClose, apiKey, setApiKey, onSave }) => {
 };
 
 // Suggested prompts for the user
+// const SUGGESTED_PROMPTS = [
+//   {
+//     title: "Warm-up Exercises",
+//     description: "Get personalized warm-up routines",
+//     prompt: "What are some good warm-up exercises for intermediate players?"
+//   },
+//   {
+//     title: "Chord Transitions",
+//     description: "Improve your chord changes",
+//     prompt: "How do I improve my chord transitions between G, C, and D?"
+//   },
+//   {
+//     title: "Music Theory",
+//     description: "Understand the CAGED system",
+//     prompt: "Can you explain the CAGED system for guitar?"
+//   },
+//   {
+//     title: "Practice Routine",
+//     description: "Create a custom practice plan",
+//     prompt: "Help me create a 30-minute daily practice routine"
+//   }
+// ];
+
+// Suggested prompts to show when chat is empty
 const SUGGESTED_PROMPTS = [
-  "What are some good warm-up exercises?",
-  "How do I improve my chord transitions?",
-  "Explain the CAGED system",
-  "Help me create a practice routine"
+  {
+    title: "Song Analysis",
+    description: "Break down chords, structure, and techniques",
+    icon: "🎸",
+    prompt: "Can you analyze the chord progression and structure of this song?"
+  },
+  {
+    title: "Practice Tips",
+    description: "Get personalized practice recommendations",
+    icon: "🎯",
+    prompt: "What are some effective practice techniques for this song?"
+  },
+  {
+    title: "Technique Help",
+    description: "Master specific playing techniques",
+    icon: "✋",
+    prompt: "Can you explain the strumming pattern for this song?"
+  },
+  {
+    title: "Music Theory",
+    description: "Understand the theory behind the music",
+    icon: "🎼",
+    prompt: "What music theory concepts are used in this song?"
+  }
 ];
 
-// Load messages from localStorage
-const loadMessages = () => {
-  if (typeof window === 'undefined') return [];
-  const saved = localStorage.getItem('chat_messages');
-  return saved ? JSON.parse(saved) : [];};
-
 export default function ChatPage() {
-  const [messages, setMessages] = useState(() => {
-    const savedMessages = loadMessages();
-    return savedMessages.length > 0 
-      ? savedMessages 
-      : [{
-          id: Date.now(),
-          content: "Hello! I'm your guitar practice assistant. How can I help you today?",
-          isUser: false,
-          timestamp: new Date().toISOString()
-        }];
-  });
-  const [inputValue, setInputValue] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [showSettings, setShowSettings] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const closeSidebar = () => setSidebarOpen(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
-  const messagesEndRef = useRef(null);
+  const [chatId, setChatId] = useState(null);
+  const [messages, setMessages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isNewChat, setIsNewChat] = useState(true);
+  const router = useRouter();
+  const chatRef = useRef(null);
+  const inputRef = useRef(null);
+
+  // Load API key from localStorage on mount
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('openai_api_key') || '';
+    setApiKey(savedApiKey);
+    
+    // Generate a new chat ID if none exists
+    if (!chatId) {
+      const newChatId = `chat_${uuidv4()}`;
+      setChatId(newChatId);
+      setIsNewChat(true);
+    }
+  }, []);
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
@@ -114,249 +234,166 @@ export default function ChatPage() {
     }
   }, [messages]);
 
-  // Load API key from localStorage on component mount
-  useEffect(() => {
-    const savedApiKey = localStorage.getItem('openai_api_key') || '';
-    setApiKey(savedApiKey);
-  }, []);
-
-  // Save API key to localStorage when it changes
-  const saveApiKey = (key) => {
-    localStorage.setItem('openai_api_key', key);
-    setApiKey(key);
-  };
-
-  // Clear chat history
-  const clearChat = () => {
-    if (window.confirm('Are you sure you want to clear the chat history?')) {
-      setMessages([{
-        id: Date.now(),
-        content: "I've cleared our chat history. How can I help you today?",
-        isUser: false,
-        timestamp: new Date().toISOString()
-      }]);
-      localStorage.removeItem('chat_messages');
-    }
-  };
-
-  // Copy message to clipboard
-  const copyToClipboard = (text) => {
-    navigator.clipboard.writeText(text);
-  };
-
-  // Scroll to bottom of messages
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!inputValue.trim() || isLoading) return;
-
-    // Add user message
+  const handleSendMessage = async (message) => {
+    if (!message.trim()) return;
+    
     const userMessage = {
-      id: Date.now(),
-      content: inputValue,
-      isUser: true,
+      id: `msg_${Date.now()}`,
+      content: message,
+      sender: 'user',
       timestamp: new Date().toISOString()
     };
-
-    setMessages((prev) => [...prev, userMessage]);
-    setInputValue('');
+    
+    // Update local state
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    
+    // If this is a new chat, update the URL with the chat ID
+    if (isNewChat && chatId) {
+      router.push(`/chat?id=${chatId}`, undefined, { shallow: true });
+      setIsNewChat(false);
+    }
+    
+    // Get AI response
     setIsLoading(true);
-
     try {
-      // Check if API key is set
-      if (!apiKey) {
-        throw new Error('Please set your OpenAI API key in settings');
-      }
-
-      // Call OpenAI API
       const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          messages: [...messages, userMessage],
-          apiKey,
+          messages: updatedMessages,
+          apiKey: apiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY
         }),
       });
-
+      
+      const responseData = await response.json().catch(() => ({}));
+      
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to get response');
+        console.error('API Error Response:', responseData);
+        throw new Error(
+          responseData.message || 
+          responseData.error?.message || 
+          `Error: ${response.status} ${response.statusText}`
+        );
       }
-
-      const data = await response.json();
       
-      // Add assistant's response
-      const assistantMessage = {
-        id: Date.now() + 1,
+      const data = responseData;
+      
+      const aiMessage = {
+        id: `msg_${Date.now()}`,
         content: data.message,
-        isUser: false,
+        sender: 'ai',
         timestamp: new Date().toISOString(),
-        context: data.context || []
+        metadata: data.metadata || {}
       };
-
-      setMessages((prev) => [...prev, assistantMessage]);
-    } catch (error) {
-      console.error('Error sending message:', error);
       
-      // Add error message
+      setMessages(prev => [...prev, aiMessage]);
+    } catch (error) {
+      console.error('Error getting AI response:', error);
+      
       const errorMessage = {
-        id: messages.length + 2,
-        content: `Error: ${error.message}. Please check your API key and try again.`,
-        isUser: false,
+        id: `err_${Date.now()}`,
+        content: `Sorry, there was an error: ${error.message || 'Please try again'}`,
+        sender: 'ai',
         isError: true,
+        timestamp: new Date().toISOString()
       };
-
-      setMessages((prev) => [...prev, errorMessage]);
+      
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
+  
+  // Start a new chat
+  const handleNewChat = () => {
+    const newChatId = `chat_${uuidv4()}`;
+    setChatId(newChatId);
+    setMessages([]);
+    setIsNewChat(true);
+    router.push('/chat', undefined, { shallow: true });
+    setSidebarOpen(false);
+  };
 
   return (
-    <>
+    <div className="flex h-screen bg-gradient-to-br from-gray-900 to-gray-950 text-text-primary overflow-hidden">
       <Head>
-        <title>Guitar Coach AI</title>
-        <meta name="description" content="AI-powered guitar practice assistant" />
+        <title>Guitar Practice Assistant</title>
+        <meta name="description" content="Your AI guitar practice assistant" />
+        <meta name="theme-color" content="#030712" />
       </Head>
 
-      <div className="flex flex-col h-full">
+      {/* Sidebar */}
+      <Sidebar 
+        isOpen={sidebarOpen}
+        onClose={closeSidebar}
+        onNewChat={handleNewChat}
+        onClearChat={handleNewChat}
+      />
+      
+      {/* Overlay for mobile */}
+      <Overlay isOpen={sidebarOpen} onClick={closeSidebar} />
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Header */}
-        <div className="flex justify-between items-center mb-6">
-          <h1 className="text-2xl font-bold">Guitar Coach AI</h1>
-          <div className="flex space-x-2">
-            <button
-              onClick={clearChat}
-              className="p-2 rounded-md hover:bg-card-hover transition-colors text-text-secondary hover:text-text-primary"
-              aria-label="Clear chat"
-              title="Clear chat"
+        <header className="border-b border-border/20 bg-card/50 backdrop-blur-sm px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center">
+            <button 
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="p-2 rounded-full hover:bg-card-hover/50 mr-2 lg:hidden transition-colors"
+              aria-label="Toggle sidebar"
             >
-              <FiTrash2 size={18} />
+              {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
+            </button>
+            <div className="flex items-center space-x-2">
+              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                <FiMessageSquare className="text-white" size={18} />
+              </div>
+              <h1 className="text-lg font-semibold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+                Guitar Coach AI
+              </h1>
+            </div>
+          </div>
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={handleNewChat}
+              className="p-2 rounded-xl hover:bg-card-hover/50 transition-colors text-text-secondary hover:text-text-primary"
+              title="New chat"
+            >
+              <FiPlus size={20} />
             </button>
             <button
-              onClick={() => window.location.reload()}
-              className="p-2 rounded-md hover:bg-card-hover transition-colors text-text-secondary hover:text-text-primary"
-              aria-label="Refresh"
-              title="Refresh"
-            >
-              <FiRefreshCw size={18} />
-            </button>
-            <button
-              onClick={() => setShowSettings(true)}
-              className="p-2 rounded-md hover:bg-card-hover transition-colors text-text-secondary hover:text-text-primary"
-              aria-label="Settings"
+              onClick={() => setIsSettingsOpen(true)}
+              className="p-2 rounded-xl hover:bg-card-hover/50 transition-colors text-text-secondary hover:text-text-primary"
               title="Settings"
             >
               <FiSettings size={20} />
             </button>
           </div>
+        </header>
+
+        {/* Chat Component */}
+        <div className="flex-1 overflow-hidden relative">
+          <Chat 
+            messages={messages}
+            onSendMessage={handleSendMessage}
+            isLoading={isLoading}
+            suggestedPrompts={SUGGESTED_PROMPTS}
+            inputRef={inputRef}
+          />
         </div>
-
-        {/* Suggested prompts */}
-        {messages.length <= 1 && (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
-            {SUGGESTED_PROMPTS.map((prompt, index) => (
-              <button
-                key={index}
-                onClick={() => {
-                  setInputValue(prompt);
-                  // Auto-focus the input after a small delay
-                  setTimeout(() => {
-                    document.querySelector('input[type="text"]')?.focus();
-                  }, 50);
-                }}
-                className="p-3 text-left rounded-lg border border-border hover:border-primary/30 hover:bg-card-hover/50 transition-colors text-sm text-text-secondary hover:text-text-primary"
-              >
-                {prompt}
-              </button>
-            ))}
-          </div>
-        )}
-
-        {/* Chat messages */}
-        <div className="flex-1 overflow-y-auto mb-4 space-y-6 pr-2">
-          {messages.map((message) => (
-            <div key={message.id} className="group relative">
-              <Message
-                message={message}
-                isUser={message.isUser}
-              />
-              {!message.isUser && (
-                <button
-                  onClick={() => copyToClipboard(message.content)}
-                  className="absolute right-2 top-2 p-1 rounded-md opacity-0 group-hover:opacity-100 bg-card/80 hover:bg-card-hover transition-all"
-                  title="Copy to clipboard"
-                >
-                  <FiCopy size={16} className="text-text-secondary" />
-                </button>
-              )}
-            </div>
-          ))}
-          <div ref={messagesEndRef} />
-        </div>
-
-        {/* Input area */}
-        <form onSubmit={handleSendMessage} className="mt-4">
-          <div className="relative">
-            <input
-              type="text"
-              value={inputValue}
-              onChange={(e) => setInputValue(e.target.value)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
-                  e.preventDefault();
-                  handleSendMessage(e);
-                }
-              }}
-              placeholder="Ask me anything about guitar practice..."
-              className="w-full px-4 py-3 pr-12 rounded-lg border border-border bg-background-light dark:bg-card-dark text-text-primary focus:outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-70"
-              disabled={isLoading || !apiKey}
-              aria-label="Type your message"
-            />
-            <button
-              type="submit"
-              disabled={isLoading || !inputValue.trim() || !apiKey}
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 p-2 text-text-secondary hover:text-primary disabled:opacity-50 disabled:cursor-not-allowed"
-              aria-label="Send message"
-            >
-              {isLoading ? (
-                <div className="w-5 h-5 border-2 border-t-primary border-r-primary border-transparent rounded-full animate-spin"></div>
-              ) : (
-                <FiSend size={20} />
-              )}
-            </button>
-          </div>
-          <p className="text-xs text-text-secondary mt-2 text-center">
-            {!apiKey ? (
-              <>
-                <button
-                  type="button"
-                  onClick={() => setShowSettings(true)}
-                  className="text-primary hover:underline"
-                >
-                  Set your OpenAI API key
-                </button>{' '}
-                to start chatting
-              </>
-            ) : (
-              <span>Press Enter to send • Shift+Enter for new line</span>
-            )}
-          </p>
-        </form>
       </div>
 
       {/* Settings Modal */}
       <SettingsModal
-        isOpen={showSettings}
-        onClose={() => setShowSettings(false)}
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
         apiKey={apiKey}
         setApiKey={setApiKey}
-        onSave={saveApiKey}
       />
-    </>
+    </div>
   );
 }

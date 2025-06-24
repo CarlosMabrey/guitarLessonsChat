@@ -14,8 +14,7 @@ import {
   FiChevronLeft, 
   FiChevronRight,
   FiFileText,
-  FiMessageSquare, 
-  FiMessageCircle 
+  FiMessageSquare
 } from 'react-icons/fi';
 import { clsx } from 'clsx';
 import ThemeSwitcher from './ThemeSwitcher';
@@ -28,7 +27,7 @@ const navItems = [
   { icon: FiBarChart2, label: 'Progress', href: '/progress' },
   { icon: FiGrid, label: 'Theory', href: '/theory' },
   { icon: FiMessageSquare, label: 'AI Coach', href: '/chat' },
-  // { icon: FiUser, label: 'Profile', href: '/profile' },
+  { icon: FiUser, label: 'My Profile', href: '/profile' },
   // { icon: FiSettings, label: 'Settings', href: '/settings' },
   // { icon: FiHelpCircle, label: 'Help', href: '/help' },
 ];
