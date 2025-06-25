@@ -1,6 +1,8 @@
+'use client';
+
 import { createContext, useContext, useEffect, useState } from "react";
 
-const ThemeContext = createContext();
+export const ThemeContext = createContext();
 
 // Default theme that will be used for both server and client initially
 const DEFAULT_THEME = "glassmorphism";
@@ -13,21 +15,29 @@ export function ThemeProvider({ children }) {
   // After hydration, we can safely use localStorage
   useEffect(() => {
     setIsClient(true);
-    const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
-    setTheme(storedTheme);
+    // Only access localStorage when on the client side
+    if (typeof window !== 'undefined') {
+      const storedTheme = localStorage.getItem("theme") || DEFAULT_THEME;
+      setTheme(storedTheme);
+    }
   }, []);
 
   // Only update DOM after client-side rendering is established
   useEffect(() => {
-    if (isClient) {
+    if (isClient && typeof document !== 'undefined') {
+      // Remove all theme classes first
       document.documentElement.classList.remove(
         "theme-glassmorphism", 
         "theme-light-minimal", 
         "theme-retrowave",
         "theme-glassmorphism-ultramodern"
       );
+      // Add the current theme class
       document.documentElement.classList.add(`theme-${theme}`);
-      localStorage.setItem("theme", theme);
+      // Update localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem("theme", theme);
+      }
     }
   }, [theme, isClient]);
 
@@ -39,5 +49,11 @@ export function ThemeProvider({ children }) {
 }
 
 export function useTheme() {
-  return useContext(ThemeContext);
+  const context = useContext(ThemeContext);
+  if (context === undefined) {
+    throw new Error('useTheme must be used within a ThemeProvider');
+  }
+  return context;
 }
+
+export default ThemeProvider;

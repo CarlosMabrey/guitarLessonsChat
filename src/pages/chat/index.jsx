@@ -2,12 +2,15 @@
 
 import { useState, useRef, useEffect } from 'react';
 import dynamic from 'next/dynamic';
-import { FiMenu, FiX, FiSettings, FiMessageSquare, FiPlus, FiHome, FiTrash2} from 'react-icons/fi';
+import { FiMenu, FiX, FiSettings, FiMessageSquare, FiPlus, FiHome, FiTrash2, FiGrid, FiMusic, FiClock, FiZap, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
+import { TbProgress } from 'react-icons/tb';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRouter } from 'next/router';
 import Head from 'next/head';
 import { v4 as uuidv4 } from 'uuid';
 import { clsx } from 'clsx';
+import Link from 'next/link';
+import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 
 // Dynamically import the Chat component with no SSR to avoid hydration issues
 const Chat = dynamic(() => import('@/components/ui/Chat'), {
@@ -19,59 +22,181 @@ const Chat = dynamic(() => import('@/components/ui/Chat'), {
   ),
 });
 
-// Sidebar component
-const Sidebar = ({ isOpen, onClose, onNewChat, onClearChat }) => {
-  const [chats, setChats] = useState([{ id: 1, title: 'New Chat' }]);
-  const [activeChat, setActiveChat] = useState(1);
+// Function to format chat date
+const formatChatDate = (dateString) => {
+  if (!dateString) return '';
+  
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) return '';
+  
+  const now = new Date();
+  const diffInDays = Math.floor((now - date) / (1000 * 60 * 60 * 24));
+  
+  if (diffInDays === 0) {
+    return 'Today';
+  } else if (diffInDays === 1) {
+    return 'Yesterday';
+  } else if (diffInDays < 7) {
+    return `${diffInDays} days ago`;
+  } else {
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+};
+
+// Collapsible Sidebar component with improved styling
+const Sidebar = ({ 
+  isOpen, 
+  onClose, 
+  onNewChat, 
+  onClearChat, 
+  onChatSelect, 
+  onOpenSettings, 
+  isCollapsed, 
+  toggleCollapse, 
+  activeChat,
+  chats = []
+}) => {
+  const router = useRouter();
+  
+  const navigation = [
+    { name: 'Dashboard', href: '/', icon: FiHome },
+    { name: 'Songs', href: '/songs', icon: FiMusic },
+    { name: 'Practice', href: '/practice', icon: FiClock },
+    { name: 'Progress', href: '/progress', icon: TbProgress },
+    { name: 'Theory', href: '/theory', icon: FiGrid },
+  ];
 
   return (
     <div className={clsx(
-      'fixed inset-y-0 left-0 z-40 w-64 bg-card border-r border-border/30 transform transition-transform duration-300 ease-in-out',
-      'md:relative md:translate-x-0',
-      isOpen ? 'translate-x-0' : '-translate-x-full'
+      'fixed inset-y-0 left-0 z-40 flex flex-col bg-[#1e2536] border-r border-[#2a3343] transform transition-all duration-300 ease-in-out',
+      isCollapsed ? 'w-16' : 'w-64',
+      isOpen ? 'translate-x-0' : '-translate-x-full',
+      'md:relative md:translate-x-0'
     )}>
-      <div className="h-full flex flex-col">
-        <div className="p-4 border-b border-border/30">
+      <div className="h-16 flex items-center justify-between px-4 border-b border-[#2a3343]">
+        <Link href="/" className="flex items-center">
+          <span className="text-xl font-bold text-blue-400">🎸</span>
+          {!isCollapsed && <h1 className="text-xl font-bold ml-2 text-gray-100">GuitarCoach</h1>}
+        </Link>
+        <button 
+          onClick={toggleCollapse}
+          className="hidden md:flex items-center justify-center text-gray-400 hover:text-white p-1 rounded-lg"
+        >
+          {isCollapsed ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
+        </button>
+      </div>
+      
+      {/* App Navigation */}
+      <nav className="p-2 border-b border-[#2a3343]">
+        <ul className="space-y-1">
+          {navigation.map((item) => (
+            <li key={item.name}>
+              <Link
+                href={item.href}
+                className={`flex items-center px-3 py-2 rounded-md transition-colors ${
+                  router.pathname === item.href
+                    ? 'bg-blue-600 bg-opacity-40 text-blue-400'
+                    : 'text-gray-400 hover:bg-[#2a3343] hover:text-gray-200'
+                }`}
+              >
+                <item.icon className="w-5 h-5" />
+                {!isCollapsed && <span className="ml-3">{item.name}</span>}
+              </Link>
+            </li>
+          ))}
+          <li>
+            <Link 
+              href="/chat" 
+              className="flex items-center px-3 py-2 rounded-md transition-colors bg-blue-600 bg-opacity-40 text-blue-400"
+            >
+              <FiMessageSquare className="w-5 h-5" />
+              {!isCollapsed && <span className="ml-3">Chat</span>}
+            </Link>
+          </li>
+        </ul>
+      </nav>
+
+      {/* Chat-specific section */}
+      <div className="flex-1 flex flex-col">
+        <div className="p-2 border-b border-[#2a3343]">
           <button
             onClick={onNewChat}
-            className="w-full flex items-center justify-center space-x-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg py-2 px-4 transition-colors"
+            className={clsx(
+              "w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 transition-colors",
+              isCollapsed ? "px-2" : "px-4 space-x-2"
+            )}
           >
             <FiPlus size={18} />
-            <span>New Chat</span>
+            {!isCollapsed && <span>New Chat</span>}
           </button>
         </div>
+        
+        {/* Chat history */}
         <div className="flex-1 overflow-y-auto py-2">
-          {chats.map((chat) => (
-            <button
-              key={chat.id}
-              onClick={() => setActiveChat(chat.id)}
-              className={clsx(
-                'w-full text-left px-4 py-3 text-sm font-medium transition-colors',
-                activeChat === chat.id
-                  ? 'bg-primary/10 text-primary'
-                  : 'text-text-secondary hover:bg-card-hover/50'
-              )}
-            >
-              <div className="truncate">{chat.title}</div>
-            </button>
-          ))}
+          {chats.length === 0 ? (
+            <div className="px-3 py-2 text-sm text-gray-400 text-center">
+              No chats yet
+            </div>
+          ) : (
+            chats.map((chat) => (
+              <button
+                key={chat.id}
+                onClick={() => onChatSelect && onChatSelect(chat.id)}
+                className={clsx(
+                  'w-full flex items-center px-3 py-2 text-sm transition-colors rounded-md group',
+                  isCollapsed ? 'justify-center' : 'justify-between',
+                  activeChat === chat.id
+                    ? 'bg-blue-600 bg-opacity-40 text-blue-400'
+                    : 'text-gray-400 hover:bg-[#2a3343] hover:text-gray-200'
+                )}
+                title={chat.title}
+              >
+                <div className="flex items-center overflow-hidden">
+                  <FiMessageSquare className="w-5 h-5 flex-shrink-0" />
+                  {!isCollapsed && (
+                    <div className="ml-3 text-left truncate">
+                      <div className="truncate">{chat.title}</div>
+                      <div className="text-xs text-gray-500">
+                        {formatChatDate(chat.updatedAt || chat.createdAt || new Date().toISOString())}
+                      </div>
+                    </div>
+                  )}
+                </div>
+                {!isCollapsed && activeChat === chat.id && (
+                  <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 ml-2"></span>
+                )}
+              </button>
+            ))
+          )}
         </div>
-        <div className="p-4 border-t border-border/30">
+        
+        {/* Footer controls */}
+        <div className="p-2 border-t border-[#2a3343]">
           <button
             onClick={onClearChat}
-            className="w-full flex items-center space-x-2 text-text-secondary hover:text-danger transition-colors p-2 rounded-lg"
+            className={clsx(
+              "w-full flex items-center text-gray-400 hover:text-red-500 transition-colors p-2 rounded-md",
+              isCollapsed ? "justify-center" : "space-x-2"
+            )}
           >
             <FiTrash2 size={18} />
-            <span>Clear Conversations</span>
+            {!isCollapsed && <span>Clear Conversations</span>}
           </button>
           <button
-            onClick={() => {}}
-            className="w-full flex items-center space-x-2 text-text-secondary hover:text-text-primary transition-colors p-2 rounded-lg"
+            onClick={onOpenSettings}
+            className={clsx(
+              "w-full flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md mt-1",
+              isCollapsed ? "justify-center" : "space-x-2"
+            )}
           >
             <FiSettings size={18} />
-            <span>Settings</span>
+            {!isCollapsed && <span>Settings</span>}
           </button>
         </div>
+      </div>
+      
+      <div className="p-2 border-t border-[#2a3343] flex justify-center">
+        <ThemeSwitcher compact={isCollapsed} />
       </div>
     </div>
   );
@@ -81,7 +206,7 @@ const Sidebar = ({ isOpen, onClose, onNewChat, onClearChat }) => {
 const Overlay = ({ isOpen, onClick }) => (
   <div
     className={clsx(
-      'fixed inset-0 bg-black/50 z-30 transition-opacity md:hidden',
+      'fixed inset-0 bg-black/70 z-30 transition-opacity md:hidden',
       isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
     )}
     onClick={onClick}
@@ -204,6 +329,8 @@ const SUGGESTED_PROMPTS = [
 export default function ChatPage() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const closeSidebar = () => setSidebarOpen(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const toggleCollapse = () => setIsCollapsed(!isCollapsed);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [apiKey, setApiKey] = useState('');
   const [chatId, setChatId] = useState(null);
@@ -214,13 +341,44 @@ export default function ChatPage() {
   const chatRef = useRef(null);
   const inputRef = useRef(null);
 
-  // Load API key from localStorage on mount
+  // Load chats and API key from localStorage on mount
+  const [chats, setChats] = useState([]);
+
   useEffect(() => {
+    // Load API key
     const savedApiKey = localStorage.getItem('openai_api_key') || '';
     setApiKey(savedApiKey);
     
-    // Generate a new chat ID if none exists
-    if (!chatId) {
+    // Load chat history
+    const savedChats = JSON.parse(localStorage.getItem('chat_history') || '[]');
+    setChats(savedChats);
+    
+    // Check for chat ID in URL or create a new one
+    const urlParams = new URLSearchParams(window.location.search);
+    const urlChatId = urlParams.get('id');
+    
+    if (urlChatId) {
+      // Load existing chat
+      const chatData = localStorage.getItem(`chat_${urlChatId}`);
+      if (chatData) {
+        const { messages: savedMessages, title } = JSON.parse(chatData);
+        setChatId(urlChatId);
+        setMessages(savedMessages);
+        setIsNewChat(false);
+      }
+    } else if (savedChats.length > 0) {
+      // Load most recent chat
+      const mostRecentChat = savedChats[0];
+      const chatData = localStorage.getItem(`chat_${mostRecentChat.id}`);
+      if (chatData) {
+        const { messages: savedMessages } = JSON.parse(chatData);
+        setChatId(mostRecentChat.id);
+        setMessages(savedMessages);
+        setIsNewChat(false);
+        router.push(`/chat?id=${mostRecentChat.id}`, undefined, { shallow: true });
+      }
+    } else {
+      // Create new chat
       const newChatId = `chat_${uuidv4()}`;
       setChatId(newChatId);
       setIsNewChat(true);
@@ -229,10 +387,48 @@ export default function ChatPage() {
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem('chat_messages', JSON.stringify(messages));
+    if (messages.length > 0 && chatId) {
+      // Save the chat
+      const chatData = {
+        id: chatId,
+        title: messages[0]?.content?.substring(0, 30) || 'New Chat',
+        lastMessage: messages[messages.length - 1]?.content || '',
+        updatedAt: new Date().toISOString(),
+        messages: messages
+      };
+      
+      // Save chat data
+      localStorage.setItem(`chat_${chatId}`, JSON.stringify(chatData));
+      
+      // Update chat list
+      setChats(prevChats => {
+        const existingChatIndex = prevChats.findIndex(chat => chat.id === chatId);
+        const newChats = [...prevChats];
+        
+        if (existingChatIndex >= 0) {
+          // Update existing chat
+          newChats[existingChatIndex] = {
+            ...newChats[existingChatIndex],
+            title: chatData.title,
+            lastMessage: chatData.lastMessage,
+            updatedAt: chatData.updatedAt
+          };
+        } else {
+          // Add new chat
+          newChats.unshift({
+            id: chatId,
+            title: chatData.title,
+            lastMessage: chatData.lastMessage,
+            updatedAt: chatData.updatedAt
+          });
+        }
+        
+        // Save updated chat list
+        localStorage.setItem('chat_history', JSON.stringify(newChats));
+        return newChats;
+      });
     }
-  }, [messages]);
+  }, [messages, chatId]);
 
   const handleSendMessage = async (message) => {
     if (!message.trim()) return;
@@ -313,16 +509,29 @@ export default function ChatPage() {
     setChatId(newChatId);
     setMessages([]);
     setIsNewChat(true);
-    router.push('/chat', undefined, { shallow: true });
+    router.push(`/chat?id=${newChatId}`, undefined, { shallow: true });
     setSidebarOpen(false);
+  };
+  
+  // Handle chat selection from sidebar
+  const handleChatSelect = (selectedChatId) => {
+    const chatData = localStorage.getItem(`chat_${selectedChatId}`);
+    if (chatData) {
+      const { messages: savedMessages } = JSON.parse(chatData);
+      setChatId(selectedChatId);
+      setMessages(savedMessages);
+      setIsNewChat(false);
+      router.push(`/chat?id=${selectedChatId}`, undefined, { shallow: true });
+      setSidebarOpen(false);
+    }
   };
 
   return (
-    <div className="flex h-screen bg-gradient-to-br from-gray-900 to-gray-950 text-text-primary overflow-hidden">
+    <div className="flex h-screen bg-app text-primary overflow-hidden">
       <Head>
         <title>Guitar Practice Assistant</title>
         <meta name="description" content="Your AI guitar practice assistant" />
-        <meta name="theme-color" content="#030712" />
+        <meta name="theme-color" content="#000000" />
       </Head>
 
       {/* Sidebar */}
@@ -330,7 +539,13 @@ export default function ChatPage() {
         isOpen={sidebarOpen}
         onClose={closeSidebar}
         onNewChat={handleNewChat}
+        onChatSelect={handleChatSelect}
         onClearChat={handleNewChat}
+        onOpenSettings={() => setIsSettingsOpen(true)}
+        isCollapsed={isCollapsed}
+        toggleCollapse={toggleCollapse}
+        chats={chats}
+        activeChat={chatId}
       />
       
       {/* Overlay for mobile */}
@@ -339,35 +554,32 @@ export default function ChatPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Header */}
-        <header className="border-b border-border/20 bg-card/50 backdrop-blur-sm px-4 py-3 flex items-center justify-between sticky top-0 z-20">
+        <header className="px-4 py-3 flex items-center justify-between sticky top-0 z-20">
           <div className="flex items-center">
             <button 
               onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-full hover:bg-card-hover/50 mr-2 lg:hidden transition-colors"
+              className="p-2 rounded-full hover:bg-accent mr-3 lg:hidden transition-colors"
               aria-label="Toggle sidebar"
             >
               {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
             </button>
             <div className="flex items-center space-x-2">
-              <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-                <FiMessageSquare className="text-white" size={18} />
-              </div>
-              <h1 className="text-lg font-semibold bg-gradient-to-r from-text-primary to-text-primary/80 bg-clip-text text-transparent">
+              <h1 className="text-lg font-bold">
                 Guitar Coach AI
               </h1>
             </div>
           </div>
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center space-x-3">
             <button
               onClick={handleNewChat}
-              className="p-2 rounded-xl hover:bg-card-hover/50 transition-colors text-text-secondary hover:text-text-primary"
+              className="p-2 rounded-xl hover:bg-accent transition-colors text-muted hover:text-white"
               title="New chat"
             >
               <FiPlus size={20} />
             </button>
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="p-2 rounded-xl hover:bg-card-hover/50 transition-colors text-text-secondary hover:text-text-primary"
+              className="p-2 rounded-xl hover:bg-accent transition-colors text-muted hover:text-white"
               title="Settings"
             >
               <FiSettings size={20} />
@@ -376,7 +588,7 @@ export default function ChatPage() {
         </header>
 
         {/* Chat Component */}
-        <div className="flex-1 overflow-hidden relative">
+        <div className="flex-1 overflow-hidden relative px-4">
           <Chat 
             messages={messages}
             onSendMessage={handleSendMessage}

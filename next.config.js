@@ -1,6 +1,12 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true, // maybe change
+  reactStrictMode: true,
+  // Enable SWC minification and compilation
+  swcMinify: true,
+  compiler: {
+    // Enable styled-components support
+    styledComponents: true,
+  },
   // Add these options for more verbose logging
   logging: {
     fetches: {

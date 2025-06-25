@@ -1,16 +1,36 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
-import VoicingDisplay from '../fretboard/VoicingDisplay';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import * as Tonal from 'tonal';
+import ChordDiagram from '@/components/diagrams/ChordDiagram';
 import { chordVoicings, normalizeChordName } from '@/lib/musicTheory';
 
+/**
+ * Props for the ChordProgressionPlayer component
+ * @typedef {Object} ChordProgressionPlayerProps
+ * @property {string[]} [progression] - Array of chord names to play in sequence
+ * @property {number} [beatsPerChord] - Number of beats to spend on each chord
+ * @property {number} [bpm] - Beats per minute
+ * @property {boolean} [autoPlay] - Whether to start playing automatically
+ * @property {() => void} [onComplete] - Callback when the progression completes a full cycle
+ * @property {string} [className] - Additional CSS classes
+ * @property {boolean} [showChordNames] - Whether to display chord names
+ * @property {boolean} [showDiagrams] - Whether to show chord diagrams
+ */
+
+/**
+ * A component that plays through a chord progression with a metronome
+ * @param {ChordProgressionPlayerProps} props 
+ */
 export default function ChordProgressionPlayer({ 
   progression = ['G', 'Em', 'C', 'D'], 
   beatsPerChord = 4,
   bpm = 70,
   autoPlay = false,
   onComplete = () => {},
-  className = ''
+  className = '',
+  showChordNames = true,
+  showDiagrams = true
 }) {
   const [currentChordIndex, setCurrentChordIndex] = useState(0);
   const [currentBeat, setCurrentBeat] = useState(0);
@@ -122,8 +142,39 @@ export default function ChordProgressionPlayer({
   // Calculate which chord is coming next
   const nextChordIndex = (currentChordIndex + 1) % progression.length;
   
+  // Get current and next chord names with validation
+  const getValidChordName = useCallback((chord) => {
+    try {
+      if (!chord) return null;
+      const normalized = normalizeChordName(chord);
+      // Verify the chord exists in our library
+      const parsed = Tonal.Chord.tokenize(normalized);
+      const voicingKey = `${parsed[0]}-${parsed[1] || 'M'}`;
+      return chordVoicings[voicingKey] ? normalized : null;
+    } catch (e) {
+      console.warn(`Invalid chord: ${chord}`, e);
+      return null;
+    }
+  }, []);
+  
+  const currentChord = getValidChordName(progression[currentChordIndex]);
+  const nextChord = getValidChordName(progression[nextChordIndex]);
+  
   // Determine when to show the "Coming next" indicator
-  const showNextChord = currentBeat >= beatsPerChord - 2;
+  const showNextChord = currentBeat >= beatsPerChord - 2; 
+  
+  // Get the current chord display name
+  const getDisplayName = (chord) => {
+    if (!chord) return 'N/A';
+    try {
+      const parsed = Tonal.Chord.tokenize(chord);
+      return `${parsed[0]}${parsed[1] || ''}`.replace('M', 'maj');
+    } catch (e) {
+      return chord;
+    }
+  }; 
+  const currentChordName = chordName ? getDisplayName(chordName) : null; 
+  const nextChordName = nextChord ? getDisplayName(nextChord) : null; 
   
   return (
     <div className={`p-4 rounded-lg theme-card ${className}`}>
@@ -172,17 +223,25 @@ export default function ChordProgressionPlayer({
           <div className="flex flex-col items-center">
             <div className="text-sm text-muted mb-2">Current</div>
             <div className="relative">
-              <VoicingDisplay 
-                chord={normalizeChordName(progression[currentChordIndex])} 
-                size="lg"
-              />
+              {showDiagrams && currentChord ? (
+                <ChordDiagram 
+                  chordName={currentChord}
+                  size="lg"
+                  showName={showChordNames}
+                  interactive={false}
+                />
+              ) : (
+                <div className="w-24 h-32 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+                  <span className="text-2xl font-bold">{getDisplayName(progression[currentChordIndex])}</span>
+                </div>
+              )}
               
               {/* Beat indicator dots */}
               <div className="flex gap-1 mt-2 justify-center">
                 {Array.from({ length: beatsPerChord }).map((_, i) => (
                   <div 
                     key={i} 
-                    className={`w-2 h-2 rounded-full ${i === currentBeat ? 'bg-active' : 'text-muted opacity-30'}`}
+                    className={`w-2 h-2 rounded-full ${i === currentBeat ? 'bg-active' : 'bg-muted opacity-30'}`}
                   />
                 ))}
               </div>
@@ -192,10 +251,18 @@ export default function ChordProgressionPlayer({
           {/* Next chord preview */}
           <div className={`flex flex-col items-center transition-opacity duration-300 ${showNextChord ? 'opacity-100' : 'opacity-30'}`}>
             <div className="text-sm text-muted mb-2">Coming Next</div>
-            <VoicingDisplay 
-              chord={normalizeChordName(progression[nextChordIndex])} 
-              size="md"
-            />
+            {showDiagrams && nextChord ? (
+              <ChordDiagram 
+                chordName={nextChord}
+                size="md"
+                showName={showChordNames}
+                interactive={false}
+              />
+            ) : (
+              <div className="w-20 h-24 flex items-center justify-center bg-gray-100 dark:bg-gray-800 rounded-lg">
+                <span className="text-xl font-bold">{getDisplayName(progression[nextChordIndex])}</span>
+              </div>
+            )}
           </div>
         </div>
         

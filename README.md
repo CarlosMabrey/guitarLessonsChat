@@ -2,6 +2,92 @@
 
 A professional guitar learning application that helps users break down songs they want to learn through AI-powered analysis and interactive learning features. The app includes personalized user profiles to tailor the learning experience to each guitarist's skill level, goals, and preferences.
 
+## 🚀 Prompt Builder API
+
+The Prompt Builder is a utility that generates optimized system prompts for the AI chat interface, ensuring efficient token usage while maintaining essential teaching instructions and personalization.
+
+### Key Features
+- **Token Efficiency**: Dynamically builds prompts to minimize token usage
+- **Tiered Structure**: Separates core instructions from dynamic user context
+- **Personalization**: Includes relevant user profile information
+- **Consistency**: Ensures all necessary teaching elements are included
+
+### Core Components
+
+#### 1. `buildPrompt(userProfile, context)`
+- **Location**: `/src/lib/utils/promptBuilder.js`
+- **Purpose**: Generates an optimized system prompt for the AI
+- **Parameters**:
+  - `userProfile` (Object): User profile data (can be partial)
+  - `context` (String, optional): Additional context or knowledge base information
+- **Returns**: Object with `{ role: 'system', content: string }`
+
+#### 2. `CORE_TIER` Constant
+- Contains essential teaching instructions and diagram formats
+- Always included in every prompt
+- Includes chord/scale/tab diagram specifications
+- Defines teaching guidelines and response formatting
+
+### Usage Example
+
+```javascript
+import { buildPrompt } from '@/lib/utils/promptBuilder';
+
+// Example user profile
+const userProfile = {
+  name: 'Jane Doe',
+  skillLevel: 'intermediate',
+  playingStyle: ['fingerpicking', 'strumming'],
+  genres: ['blues', 'folk'],
+  goals: ['learn barre chords', 'improve timing']
+};
+
+// Additional context from knowledge base
+const context = 'User is working on "Dust in the Wind" fingerpicking pattern.';
+
+// Generate the system prompt
+const systemMessage = buildPrompt(userProfile, context);
+
+// Use with OpenAI API
+const response = await openai.chat.completions.create({
+  model: 'gpt-4',
+  messages: [systemMessage, ...conversationHistory],
+  // ... other options
+});
+```
+
+### Prompt Structure
+
+1. **Core Tier** (Always included)
+   - AI role definition
+   - Teaching guidelines
+   - Required diagram formats (chord, scale, tab, fretboard)
+   - Response formatting rules
+
+2. **Dynamic Tier** (Conditional)
+   - User profile context (only non-empty fields)
+   - Personalized teaching instructions
+   - Additional context from knowledge base
+
+3. **Formatting**
+   - Uses markdown for structure
+   - Clear section headers
+   - Consistent bullet points and lists
+
+### Best Practices
+1. **Profile Data**: Only include fields with actual values
+2. **Context**: Keep additional context concise and relevant
+3. **Testing**: Verify prompt length and token usage
+4. **Updates**: Keep the core tier updated with any changes to teaching methodology
+
+### Testing
+
+Unit tests are available in `src/lib/utils/promptBuilder.test.js` to ensure:
+- Core tier is always included
+- Empty profile fields are omitted
+- Token efficiency is maintained
+- All required teaching elements are present
+
 ## 📋 Overview
 
 Guitar Learning App is a Next.js application designed to help guitarists of all skill levels learn and practice songs more effectively. The app combines AI-powered song analysis, interactive guitar tabs, chord diagrams, and practice tools to provide a comprehensive learning experience.
@@ -149,7 +235,47 @@ const ChatMessage = () => {
 };
 ```
 
-## 🎸 Guitar Fretboard Visualizer
+## 🎸 Core Components
+
+### 1. ChordDiagram Component
+
+A reusable chord diagram component that displays guitar chord diagrams with multiple voicings and interactive features.
+
+**Location**: `/src/components/diagrams/ChordDiagram.jsx`
+
+**Features**:
+- Displays chord diagrams for any standard chord
+- Supports multiple voicings with navigation
+- Customizable size and appearance
+- Interactive or static display options
+- Shows fret numbers and fingering
+- Works with different guitar tunings
+
+**Usage**:
+```jsx
+import ChordDiagram from '@/components/diagrams/ChordDiagram';
+
+// Basic usage
+<ChordDiagram chordName="C" />
+
+// With customization
+<ChordDiagram 
+  chordName="Am7" 
+  size="lg"
+  showFretNumbers={true}
+  showFingering={true}
+  interactive={true}
+  onVoicingChange={(voicing, index) => console.log(voicing, index)}
+/>
+
+// With direct voicing object
+<ChordDiagram 
+  voicingObject={customVoicing} 
+  showName={false}
+/>
+```
+
+### 2. Guitar Fretboard Visualizer
 
 A powerful, interactive fretboard tool with:
 - Tabbed workflow (Fretboard, Voicings, Analysis, Patterns, Progressions)

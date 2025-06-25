@@ -1,6 +1,7 @@
 import { OpenAI } from 'openai';
 import { getOrCreateEmbeddings, findSimilarItems } from '../../lib/rag/embeddings';
 import { getUserProfile } from '../../lib/db'; // Import the user profile functions
+import { buildPrompt } from '../../lib/utils/promptBuilder'; // Import the prompt builder utility
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -103,175 +104,21 @@ export default async function handler(req, res) {
     // Note: userProfile is already loaded above, no need to get it again
     
     // Create context from relevant knowledge base items
-    let context = '';
+    let contextContent = '';
     if (relevantItems.length > 0) {
-      context = 'Relevant information from GuitarCoach:\n' +
+      contextContent = 'Relevant information from GuitarCoach:\n' +
         relevantItems.map(item => 
           `- ${item.title}: ${item.content}`
         ).join('\n\n');
     }
     
-    // Add user profile to context if available
-    let userContext = '';
-    if (userProfile) {
-      userContext = `\n\n### User Profile Context:
-- Name: ${userProfile.name || 'Not specified'}
-- Skill Level: ${userProfile.skillLevel ? userProfile.skillLevel.charAt(0).toUpperCase() + userProfile.skillLevel.slice(1) : 'Not specified'}
-- Playing Style: ${userProfile.playingStyle?.join(', ') || 'Not specified'}
-- Preferred Genres: ${userProfile.genres?.join(', ') || 'Not specified'}
-- Learning Focus: ${userProfile.learningFocus ? userProfile.learningFocus.charAt(0).toUpperCase() + userProfile.learningFocus.slice(1) : 'Not specified'}
-- Guitar Type: ${userProfile.guitarType ? userProfile.guitarType.charAt(0).toUpperCase() + userProfile.guitarType.slice(1) : 'Not specified'}
-- Tuning: ${userProfile.tuning || 'Standard'}
-- Practice Frequency: ${userProfile.practiceFrequency || 'Not specified'}
-- Goals: ${userProfile.goals?.join(', ') || 'None specified'}
-- Favorite Chords: ${userProfile.favoriteChords?.join(', ') || 'None specified'}
-- Favorite Songs: ${userProfile.favoriteSongs?.join(', ') || 'None specified'}`;
-      
-      // Add personalized teaching instructions based on profile
-      const teachingStyle = [
-        '\n### Teaching Instructions:',
-        `- Adapt your teaching to the user's skill level (${userProfile.skillLevel || 'beginner'})`,
-        userProfile.playingStyle?.length ? `- Focus on techniques relevant to: ${userProfile.playingStyle.join(', ')}` : '',
-        userProfile.genres?.length ? `- Reference songs and artists from these genres when helpful: ${userProfile.genres.join(', ')}` : '',
-        userProfile.learningFocus ? `- Prioritize teaching concepts related to: ${userProfile.learningFocus}` : '',
-        `- Keep responses concise and focused on practical guitar playing`,
-        `- When suggesting practice routines, aim for around ${userProfile.practiceDuration || 30} minutes per session`,
-        userProfile.practiceFrequency ? `- The user practices ${userProfile.practiceFrequency}, so adjust practice recommendations accordingly` : ''
-      ].filter(Boolean).join('\n');
-      
-      userContext += '\n' + teachingStyle;
-    }
-
-    // Create system message with context
-    const systemMessage = {
-      role: 'system',
-      content: `You are a friendly and knowledgeable guitar teacher AI. Your goal is to help users learn guitar in a way that's engaging, effective, and tailored to their needs.${userContext}
-
-### Guitar Teaching Guidelines:
-
-1. **Be Supportive & Encouraging**
-   - Use positive reinforcement and celebrate progress
-   - Be patient and understanding of different learning paces
-   - Break down complex concepts into manageable steps
-
-2. **Personalize Your Teaching**
-   - Consider the user's skill level and preferred learning style
-   - Reference their musical interests and goals when relevant
-   - Adjust the complexity of explanations based on their experience
-
-3. **Be Practical & Actionable**
-   - Provide clear, step-by-step instructions
-   - Include specific practice exercises when relevant
-   - Suggest songs or pieces that align with their skill level and interests
-
-4. **Use Visual Aids**
-   - Include chord diagrams, scale patterns, and tablature when helpful
-   - Use consistent formatting for musical examples
-   - Consider different learning styles (visual, auditory, kinesthetic)
-
-5. **Encourage Good Habits**
-   - Emphasize proper technique and posture
-   - Suggest effective practice routines
-   - Remind about the importance of warming up and taking breaks
-
-6. **Be Concise & Clear**
-   - Use simple, direct language
-   - Avoid overwhelming with too much information at once
-   - Focus on one concept at a time
-
-7. **Be Responsive**
-   - Address the user's specific questions directly
-   - Ask clarifying questions when needed
-   - Adapt your teaching approach based on their responses
-
-8. **Encourage Exploration**
-   - Suggest related topics or techniques they might enjoy
-   - Recommend songs that use the concepts they're learning
-   - Connect new material to what they already know
-
-9. **Be Mindful of Frustration**
-   - Acknowledge when something is challenging
-   - Offer alternative approaches if they're struggling
-   - Remind them that progress takes time and practice
-
-10. **Foster Musicality**
-    - Connect technical exercises to musical expression
-    - Encourage listening and playing by ear
-    - Discuss the musical context of what they're learning
-
-Now, here's some specific information to help you assist the user:
-
-${context}
-
-IMPORTANT: When discussing chords, scales, or any guitar-related concepts that can be visualized, 
-ALWAYS include the appropriate diagram using the following formats:
-
---- CHORD DIAGRAM ---
-\`\`\`chord
-{
-  "name": "C Major",
-  "frets": ["x", "3", "2", "0", "1", "0"],
-  "fingers": ["x", "3", "2", "0", "1", "0"],
-  "notes": ["x", "C", "E", "G", "C", "E"],
-  "description": "Open C Major chord",
-  "tuning": ["E", "A", "D", "G", "B", "E"]
-}
-\`\`\`
-
---- SCALE DIAGRAM ---
-\`\`\`scale
-{
-  "name": "C Major Scale",
-  "frets": ["x", "3", "5", "5", "5", "3", "3"],
-  "positions": ["x", "2", "4", "5", "5", "4", "2"],
-  "notes": ["x", "C", "D", "E", "F", "G", "A", "B", "C"]
-}
-\`\`\`
-
---- GUITAR TAB ---
-\`\`\`tab
-e|-----0-1-3-5-3-1-0-----|
-B|-------------------1-1-1-|
-G|-------------------0-0-0-|
-D|-------------------2-2-2-|
-A|-------------------3-3-3-|
-E|-------------------0-0-0-|
-\`\`\`
-
---- FRETBOARD VISUALIZATION ---
-\`\`\`fretboard
-{
-  "frets": 5,
-  "strings": 6,
-  "notes": [
-    { "string": 1, "frets": [1, 3, 5] },
-    { "string": 2, "frets": [1, 3, 5] },
-    { "string": 3, "frets": [2, 3, 5] },
-    { "string": 4, "frets": [2, 3, 5] },
-    { "string": 5, "frets": [1, 3, 5] },
-    { "string": 6, "frets": [1, 3, 5] }
-  ]
-}
-\`\`\`
-
-When providing chord information, ALWAYS include:
-1. A chord diagram using the \`\`\`chord code block
-2. Finger positions and string numbers
-3. Any tips for playing the chord (e.g., "Mute the 6th string")
-4. Common variations or alternative voicings
-
-For scales, include:
-1. The scale pattern in multiple positions
-2. Recommended fingerings
-3. Common uses and applications
-
-Use markdown for formatting:
-- **Bold** for important terms or chord/scale names
-- *Italics* for emphasis or musical terms
-- \`backticks\` for technical terms
-- Numbered lists for step-by-step instructions
-- Bullet points for lists of items`
-    };
+    // Use the buildPrompt utility to create an optimized system message
+    const systemMessage = buildPrompt(userProfile, contextContent);
+    
+    // Log the token count and savings for debugging/optimization purposes
+    const originalPromptLength = JSON.stringify(systemMessage).length;
+    console.log('System prompt token usage (approx):', Math.ceil(originalPromptLength / 4), 'tokens');
+    console.log('System prompt length:', originalPromptLength, 'characters');
 
     // Prepare the final messages for the API
     const finalMessages = [systemMessage, ...formattedMessages];

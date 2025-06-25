@@ -24,11 +24,11 @@ const MessageBubble = ({ children, isAi, isTyping, timestamp }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.2 }}
         className={clsx(
-          'inline-block px-4 py-3 rounded-2xl text-sm leading-relaxed relative',
+          'inline-block px-4 py-3 text-sm leading-relaxed relative',
           isAi 
-            ? 'bg-card-hover/70 text-text-primary rounded-tl-none' 
-            : 'bg-primary/15 text-text-primary rounded-tr-none',
-          isTyping ? 'min-w-[100px]' : 'max-w-[90%] md:max-w-[80%]',
+            ? 'bg-card-hover/70 text-text-primary rounded-2xl rounded-tl-none' 
+            : 'bg-primary/15 text-text-primary rounded-2xl rounded-tr-none',
+          isTyping ? 'min-w-[100px]' : '',
           'shadow-sm hover:shadow transition-shadow duration-200'
         )}
       >
@@ -44,14 +44,6 @@ const MessageBubble = ({ children, isAi, isTyping, timestamp }) => {
         ) : (
           <>
             {children}
-            {formattedTime && (
-              <div className={clsx(
-                'text-[10px] mt-1 opacity-0 group-hover:opacity-70 transition-opacity duration-200',
-                isAi ? 'text-left' : 'text-right'
-              )}>
-                {formattedTime}
-              </div>
-            )}
           </>
         )}
       </motion.div>
@@ -645,38 +637,34 @@ export default function MessageRenderer({ message, isTyping = false }) {
   return (
     <div className={clsx(
       'mb-4 last:mb-0 group',
-      isAi ? 'pr-4' : 'pl-4',
       isTyping && 'opacity-90'
     )}>
       <div className={clsx(
-        'flex gap-2',
-        isAi ? 'flex-row' : 'flex-row-reverse'
+        'flex',
+        isAi ? 'justify-start' : 'justify-end'
       )}>
-        <div className="flex-shrink-0 w-8 h-8 rounded-full bg-card-hover/30 flex items-center justify-center mt-1">
-          {isAi ? (
-            <FiMessageSquare className="text-primary" size={16} />
-          ) : (
-            <span className="text-sm font-medium text-text-primary">You</span>
-          )}
-        </div>
+        {isAi && (
+          <div className="flex items-center self-start mt-1 mr-2">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+              <FiMessageSquare className="text-white" size={18} />
+            </div>
+          </div>
+        )}
         
-        <div className="flex-1 min-w-0">
-          <div className={clsx(
-            'flex items-center mb-1',
-            isAi ? 'justify-start' : 'justify-end'
-          )}>
-            {isAi && (
-              <span className="text-xs font-medium text-text-secondary">
+        <div className="flex-1 max-w-[90%] md:max-w-[75%]">
+          {isAi && (
+            <div className="flex items-center mb-1">
+              <span className="text-xs font-semibold text-text-primary">
                 Guitar Coach AI
               </span>
-            )}
-            <span className="text-xs text-text-tertiary ml-2">
-              {new Date(message.timestamp || new Date()).toLocaleTimeString([], {
-                hour: '2-digit',
-                minute: '2-digit'
-              })}
-            </span>
-          </div>
+              <span className="text-xs text-text-tertiary ml-2">
+                {new Date(message.timestamp || new Date()).toLocaleTimeString([], {
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}
+              </span>
+            </div>
+          )}
           
           <MessageBubble 
             isAi={isAi} 
@@ -686,6 +674,14 @@ export default function MessageRenderer({ message, isTyping = false }) {
             <RenderedContent content={parsedContent} />
           </MessageBubble>
         </div>
+        
+        {!isAi && (
+          <div className="flex items-center self-start mt-1 ml-2">
+            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-card-hover/70 flex items-center justify-center">
+              <span className="text-sm font-medium text-text-primary">You</span>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

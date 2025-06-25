@@ -1,6 +1,6 @@
 'use client';
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect } from 'react';
 import { getUserProfile, updateUserProfile as updateProfile } from '@/lib/db';
 
 export const UserContext = createContext({
@@ -39,7 +39,13 @@ export const UserProvider = ({ children }) => {
   };
 
   useEffect(() => {
-    loadUserProfile();
+    // Only run on client side
+    if (typeof window !== 'undefined') {
+      loadUserProfile();
+    } else {
+      // On server side, set loading to false immediately
+      setIsLoading(false);
+    }
   }, []);
 
   return (
@@ -59,3 +65,5 @@ export const UserProvider = ({ children }) => {
 export const useUser = () => {
   return useContext(UserContext);
 };
+
+export default UserProvider;
