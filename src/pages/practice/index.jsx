@@ -6,6 +6,7 @@ import Layout from '@/components/ui/Layout';
 import { FiCheck, FiPlay } from 'react-icons/fi';
 import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
 import { chordVoicings, normalizeChordName } from '@/lib/musicTheory';
+import { getAllPracticeSessions, addPracticeSession, removePracticeSession } from '@/lib/practicedb';
 // Routine creation form for Practice Page
 import RoutineForm from '@/components/practice/RoutineForm';
 // Ear Training tool for Practice Page

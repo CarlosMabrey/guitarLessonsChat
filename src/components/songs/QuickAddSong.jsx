@@ -16,7 +16,7 @@ import {
   FiExternalLink
 } from 'react-icons/fi';
 import { discoverSong, getSongLearningResources } from '@/lib/musicDiscoveryApi';
-import { addSong } from '@/lib/db';
+import { addSong } from '@/lib/songdb';
 
 /**
  * One-click song discovery and addition component

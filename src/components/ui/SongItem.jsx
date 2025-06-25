@@ -4,7 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiPlay, FiPause, FiMoreVertical, FiCheck, FiEdit, FiTrash2, FiClock, FiMusic, FiBook, FiAward, FiChevronDown, FiChevronUp, FiChevronRight } from 'react-icons/fi';
-import { removeSong, updateSong } from '@/lib/db';
+import { removeSong, updateSong } from '@/lib/songdb';
 import SongDetail from '@/components/songs/SongDetail';
 
 export default function SongItem({ 

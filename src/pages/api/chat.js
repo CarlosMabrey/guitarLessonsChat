@@ -1,14 +1,25 @@
 import { OpenAI } from 'openai';
 import { getOrCreateEmbeddings, findSimilarItems } from '../../lib/rag/embeddings';
-import { getUserProfile } from '../../lib/db'; // Import the user profile functions
+import { getUserProfile } from '../../lib/profiledb';
 import { buildPrompt } from '../../lib/utils/promptBuilder'; // Import the prompt builder utility
+
+import formidable, { IncomingForm } from 'formidable';
+import fs from 'fs';
+import getRawBody from 'raw-body';
+import contentType from 'content-type';
+
+export const config = {
+  api: {
+    bodyParser: false, // Required for formidable
+  },
+};
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     console.log('Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
   }
-  
+
   // Debug: Log environment variables (don't log full key in production)
   console.log('Environment variables:', {
     hasOpenAIKey: !!process.env.OPENAI_API_KEY,
@@ -16,29 +27,173 @@ export default async function handler(req, res) {
   });
 
   console.log('Received chat request');
-  
+
+  // Helper to parse form with formidable
+  const parseForm = (req) => {
+    return new Promise((resolve, reject) => {
+      const form = new IncomingForm();
+      form.parse(req, (err, fields, files) => {
+        if (err) reject(err);
+        else resolve({ fields, files });
+      });
+    });
+  };
+
+  let messages = null;
+  let apiKey = null;
+  let uploadedFileContent = null;
+  let uploadedFileName = null;
+  let fileType = null;
+
+  // Try to parse as multipart/form-data for file upload
+  if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {
+    try {
+      const { fields, files } = await parseForm(req);
+      console.log('Formidable parsed fields:', fields);
+      console.log('Formidable parsed files:', files);
+      apiKey = fields.apiKey || process.env.OPENAI_API_KEY;
+      messages = fields.messages ? JSON.parse(fields.messages) : [];
+      if (!files.file) {
+        console.error('No file uploaded or incorrect field name. Expected field: "file". Received fields:', Object.keys(files));
+        return res.status(400).json({ error: 'No file uploaded. Please upload an image file using the field name "file".' });
+      }
+      const uploadedFile = files.file;
+      console.log('Uploaded file object:', uploadedFile);
+      uploadedFileName = uploadedFile.originalFilename || uploadedFile.newFilename || uploadedFile.name || 'unknown';
+      fileType = uploadedFile.mimetype || uploadedFile.type || 'application/octet-stream';
+// If mimetype is application/octet-stream, try to infer from extension
+if (fileType === 'application/octet-stream' && uploadedFileName) {
+  const ext = uploadedFileName.split('.').pop().toLowerCase();
+  const extToMime = {
+    png: 'image/png',
+    jpg: 'image/jpeg',
+    jpeg: 'image/jpeg',
+    gif: 'image/gif',
+    webp: 'image/webp',
+  };
+  if (extToMime[ext]) {
+    fileType = extToMime[ext];
+    console.warn('Inferred mimetype from extension:', fileType);
+  }
+}
+// Check for valid image mimetype
+if (!fileType.startsWith('image/')) {
+  console.error('Uploaded file is not an image. Received type:', fileType, 'Extension:', uploadedFileName);
+  return res.status(400).json({ error: `Uploaded file is not an image. Received type: ${fileType}. Please upload a valid image file (png, jpg, jpeg, gif, webp).` });
+}
+      if (!uploadedFile.filepath || !fs.existsSync(uploadedFile.filepath)) {
+        console.error('Uploaded file path is invalid or file does not exist:', uploadedFile.filepath);
+        return res.status(400).json({ error: 'Failed to parse uploaded file. File path is invalid or missing.' });
+      }
+      const uploadsDir = './public/uploads';
+      if (!fs.existsSync(uploadsDir)) {
+        console.log('Uploads directory does not exist, creating:', uploadsDir);
+        fs.mkdirSync(uploadsDir, { recursive: true });
+      }
+      // Save the file with a unique name
+      const safeName = `${Date.now()}_${uploadedFileName.replace(/[^a-zA-Z0-9._-]/g, '')}`;
+      const destPath = uploadsDir + '/' + safeName;
+      try {
+        console.log('Saving uploaded file to:', destPath);
+        fs.copyFileSync(uploadedFile.filepath, destPath);
+      } catch (err) {
+        console.error('Error saving uploaded file:', err);
+        return res.status(400).json({ error: 'Failed to save uploaded file.' });
+      }
+      const imageUrl = `/uploads/${safeName}`;
+      // Debug logging for image upload
+      console.log('Image upload detected:', {
+        uploadedFileName,
+        fileType,
+        destPath,
+        imageUrl,
+        apiKeyProvided: !!apiKey
+      });
+        // Call OpenAI with a system prompt for image-to-tab conversion using buildPrompt
+        try {
+          const openai = new OpenAI({ apiKey: apiKey || process.env.OPENAI_API_KEY });
+          // Compose a context for the buildPrompt utility
+          const imageContext = `The user has uploaded an image of guitar sheet music or tablature. The image is available at: ${imageUrl}\n\nYour job is to analyze the image and return the corresponding guitar tab notation in plain text, using the same formatting as your usual tab output.`;
+          // Use a blank user profile for now, or load if needed
+          let userProfile = null;
+          try {
+            userProfile = await getUserProfile();
+            console.log('Image upload: User profile loaded:', JSON.stringify(userProfile, null, 2));
+          } catch (error) {
+            console.error('Image upload: Error loading user profile:', error);
+          }
+          const systemPrompt = buildPrompt(userProfile, imageContext);
+          console.log('Image upload: System prompt for image-to-tab:', systemPrompt);
+          const userPrompt = {
+            role: 'user',
+            content: `Image URL: ${imageUrl}`
+          };
+          console.log('Image upload: Calling OpenAI with messages:', [systemPrompt, userPrompt]);
+          const completion = await openai.chat.completions.create({
+            model: 'gpt-4.1-mini',
+            messages: [systemPrompt, userPrompt],
+            temperature: 0.2,
+            max_tokens: 1200
+          });
+          console.log('Image upload: OpenAI completion response:', JSON.stringify(completion, null, 2));
+          const tabResult = completion.choices?.[0]?.message?.content || 'Could not transcribe image.';
+          return res.status(200).json({
+            message: tabResult,
+            imageUrl,
+            debug: {
+              uploadedFileName,
+              fileType,
+              destPath,
+              imageUrl,
+              systemPrompt,
+              tabResult
+            }
+          });
+        } catch (err) {
+          console.error('OpenAI image-to-tab error:', err);
+          return res.status(500).json({ error: 'Failed to convert image to tab.', details: err.message });
+        }
+      // Only read .txt files as text for now; others can be handled later
+      if (uploadedFileName && uploadedFileName.endsWith('.txt')) {
+        uploadedFileContent = fs.readFileSync(uploadedFile.filepath, 'utf8');
+      } else {
+        uploadedFileContent = '[Tab file uploaded: ' + uploadedFileName + ']';
+      }
+      // Add file content as user message
+      messages = messages || [];
+      messages.push({ sender: 'user', content: uploadedFileContent, fileName: uploadedFileName, fileType });
+    } catch (err) {
+      console.error('Error parsing form data:', err);
+      return res.status(400).json({ error: 'Failed to parse uploaded file.' });
+    }
+  } else {
+    // Fallback: parse as JSON for normal chat
+    try {
+      const raw = await getRawBody(req);
+      const charset = contentType.parse(req).parameters.charset || 'utf-8';
+      const body = JSON.parse(raw.toString(charset));
+      messages = body.messages;
+      apiKey = body.apiKey || process.env.OPENAI_API_KEY;
+    } catch (err) {
+      return res.status(400).json({ error: 'Invalid request body.' });
+    }
+  }
+
   try {
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
-    const { messages, apiKey: clientApiKey } = req.body;
-    
     // Use client API key if provided, otherwise fall back to environment variable
-    const apiKey = clientApiKey || process.env.OPENAI_API_KEY;
-    
     if (!apiKey) {
       console.error('No API key provided in request or environment variable');
       return res.status(400).json({ 
         error: 'API key is required. Please set it in the settings or in your .env file as OPENAI_API_KEY' 
       });
     }
-    
     console.log('Using API key:', apiKey ? '***' + apiKey.slice(-4) : 'none');
 
-        // Get the last user message
+    // Get the last user message
     console.log('All messages:', JSON.stringify(messages, null, 2));
-    
     const lastUserMessage = [...messages].reverse().find(msg => msg.sender === 'user');
     const userQuery = lastUserMessage?.content || '';
-    
+
     // Get user profile for context
     let userProfile = null;
     try {
@@ -48,20 +203,13 @@ export default async function handler(req, res) {
       console.error('Error loading user profile:', error);
       // Continue without profile if there's an error
     }
-    
+
     console.log('Last user message:', lastUserMessage);
     console.log('User query:', userQuery);
 
     // Initialize OpenAI client with better error handling
     console.log('Initializing OpenAI client with key:', apiKey ? '***' + apiKey.slice(-4) : 'No key provided');
-    
-    if (!apiKey) {
-      console.error('No API key provided in request or environment variables');
-      return res.status(400).json({ 
-        error: 'No API key provided. Please set it in the settings or in your .env.local file as OPENAI_API_KEY'
-      });
-    }
-    
+
     let openai;
     try {
       openai = new OpenAI({
@@ -78,10 +226,10 @@ export default async function handler(req, res) {
 
     // Get or create embeddings for the knowledge base
     const knowledgeItems = await getOrCreateEmbeddings(apiKey);
-    
+
     // Find relevant knowledge base items
     const relevantItems = await findSimilarItems(userQuery, knowledgeItems, apiKey, 3);
-    
+
     // Format messages for OpenAI API
     const chatMessages = messages
       .filter(msg => msg.sender === 'user' || msg.sender === 'ai')
@@ -89,11 +237,10 @@ export default async function handler(req, res) {
         role: msg.sender === 'user' ? 'user' : 'assistant',
         content: msg.content,
       }));
-    
+
     // Ensure we don't have consecutive messages from the same role
     const formattedMessages = [];
     let lastRole = null;
-    
     for (const msg of chatMessages) {
       if (msg.role !== lastRole) {
         formattedMessages.push(msg);
@@ -102,7 +249,7 @@ export default async function handler(req, res) {
     }
 
     // Note: userProfile is already loaded above, no need to get it again
-    
+
     // Create context from relevant knowledge base items
     let contextContent = '';
     if (relevantItems.length > 0) {

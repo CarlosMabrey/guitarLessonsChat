@@ -14,7 +14,7 @@ import {
   FiShare2,
   FiActivity
 } from 'react-icons/fi';
-import { getSongById } from '@/lib/db';
+import { getSongById } from '@/lib/songdb';
 import Layout from '@/components/ui/Layout';
 import SongTabViewer from '@/components/songs/SongTabViewer';
 import SongVideoResources from '@/components/songs/SongVideoResources';

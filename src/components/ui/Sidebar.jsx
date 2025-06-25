@@ -18,6 +18,8 @@ import {
 import { TbProgress } from 'react-icons/tb';
 import { clsx } from 'clsx';
 import ThemeSwitcher from './ThemeSwitcher';
+import SettingsPanel from './SettingsPanel';
+import AmbientPlayer from './AmbientPlayer';
 
 const NavigationItem = ({ item, isActive, collapsed, onNavigate }) => {
   const linkRef = useRef(null);
@@ -77,9 +79,18 @@ const NavigationItem = ({ item, isActive, collapsed, onNavigate }) => {
 };
 
 export default function Sidebar({ isMobile = false, onToggle }) {
+  const [showSettings, setShowSettings] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
+  // Start collapsed by default, but persist user's choice
+  const [collapsed, setCollapsed] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const saved = localStorage.getItem('sidebarCollapsed');
+      if (saved === null) return true; // Default: collapsed
+      return saved === 'true';
+    }
+    return true;
+  });
   const [mounted, setMounted] = useState(false);
   const collapseButtonRef = useRef(null);
 
@@ -89,12 +100,13 @@ export default function Sidebar({ isMobile = false, onToggle }) {
     { name: 'Practice', href: '/practice', icon: FiClock },
     { name: 'Progress', href: '/progress', icon: TbProgress },
     { name: 'Theory', href: '/theory', icon: FiGrid },
-    { name: 'Chat', href: '/chat', icon: FiMessageSquare },
+    { name: 'Resources', href: '/resources', icon: FiFileText },  
+    { name: 'Chat', href: '/chat', icon: FiMessageSquare }
   ];
 
   const bottomNav = [
     { name: 'My Profile', href: '/profile', icon: FiUser },
-    { name: 'Settings', href: '/settings', icon: FiSettings },
+    // Removed old Settings link; settings now managed via modal
   ];
 
   const allNavItems = [...navigation, ...bottomNav];
@@ -215,11 +227,42 @@ export default function Sidebar({ isMobile = false, onToggle }) {
             </li>
           ))}
         </ul>
-        
+        {/* Settings Wheel (always visible at bottom) */}
+        <div className="flex justify-center mt-3">
+          <button
+            onClick={() => setShowSettings(true)}
+            className="p-2 rounded-full bg-[#232a3a] hover:bg-[#2a3343] text-gray-400 hover:text-white transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500"
+            aria-label="Open settings"
+          >
+            <FiSettings size={22} />
+          </button>
+        </div>
+        {/* Ambient Player */}
+        {!collapsed && (
+          <div className="border-t border-[#2a3343]">
+            <AmbientPlayer collapsed={collapsed} />
+          </div>
+        )}
         {/* Theme Switcher */}
         <div className="p-2 border-t border-[#2a3343] flex justify-center">
           <ThemeSwitcher compact={collapsed} />
         </div>
+        {/* Settings Modal */}
+        {showSettings && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+            <div className="bg-[#232a3a] rounded-xl shadow-2xl p-6 w-full max-w-md relative">
+              <button
+                onClick={() => setShowSettings(false)}
+                className="absolute top-3 right-3 p-2 text-gray-400 hover:text-white focus:outline-none"
+                aria-label="Close settings"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h2 className="text-xl font-bold text-gray-100 mb-6">Settings</h2>
+              <SettingsPanel />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -650,10 +650,70 @@ const RenderedContent = ({ content }) => {
 
 export default function MessageRenderer({ message, isTyping = false }) {
   try {
-    // Parse the message content
+    // Special case: render image messages
+    if (message.type === 'image') {
+      const isUploading = message.status === 'uploading';
+      const isError = message.status === 'error' || message.isError;
+      // Use tempUrl as a fallback if url/previewUrl are missing
+      const imageUrl = message.url || message.previewUrl || message.tempUrl;
+      return (
+        <div className={clsx(
+          'mb-4 last:mb-0 group',
+          isTyping && 'opacity-90',
+          isError && 'opacity-70'
+        )}>
+          <div className={clsx(
+            'relative flex flex-col items-start',
+            isUploading && 'opacity-60 pointer-events-none',
+            isError && 'border border-red-400 bg-red-50'
+          )}>
+            {imageUrl ? (
+              <img
+                src={imageUrl}
+                alt="Uploaded preview"
+                className="rounded-lg max-w-xs max-h-60 shadow"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.src = '';
+                  e.target.style.display = 'none';
+                  const fallback = e.target.nextSibling;
+                  if (fallback) fallback.style.display = 'block';
+                }}
+              />
+            ) : null}
+            {/* Show placeholder if no imageUrl or if image fails to load */}
+            {(!imageUrl || isError) && (
+              <div
+                style={{
+                  display: imageUrl ? 'none' : 'block',
+                  width: '220px',
+                  height: '160px',
+                  background: 'repeating-linear-gradient(45deg,#eee,#eee 10px,#ddd 10px,#ddd 20px)',
+                  borderRadius: '0.75rem',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#c00',
+                  fontWeight: 600,
+                  fontSize: '1rem',
+                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  marginBottom: '0.5rem',
+                }}
+              >
+                <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#c00" style={{marginBottom:'0.5rem'}}>
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+                </svg>
+                <span>Image not available</span>
+              </div>
+            )}
+          </div>
+        </div>
+      );
+    }
+
     const parsedContent = parseMessageContent(message.content);
     const isAi = message.sender === 'ai';
-    
     return (
       <div className={clsx(
         'mb-4 last:mb-0 group',

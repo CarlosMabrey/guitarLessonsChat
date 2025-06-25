@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { FiSearch, FiLoader, FiMusic, FiCheck, FiX, FiExternalLink, FiAlertCircle, FiYoutube } from 'react-icons/fi';
 import { FaSpotify } from 'react-icons/fa';
 import Card, { CardHeader, CardTitle, CardContent } from '@/components/ui/Card';
-import { addSong, saveSongAnalysis } from '@/lib/db';
+import { addSong } from '@/lib/songdb';
 import { analyzeSong } from '@/lib/ai/songAnalysisService';
 import { searchSongsterr } from '@/lib/songsterrApi';
 import { getEnhancedSongData, getSongByArtistAndTitle } from '@/lib/multiSongApi';

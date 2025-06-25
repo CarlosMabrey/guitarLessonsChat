@@ -9,7 +9,8 @@ const KEYS = {
   USER_PROFILE: 'guitarCoach_user_profile',
   CHAT_HISTORY: 'guitarCoach_chat',
   CHORD_DATA: 'guitarCoach_chords',
-  SONG_ANALYSIS: 'guitarCoach_song_analysis'
+  SONG_ANALYSIS: 'guitarCoach_song_analysis',
+  RESOURCES: 'guitarCoach_resources'
 };
 
 // Default user profile
@@ -87,6 +88,54 @@ export const initializeDatabase = () => {
   
   if (!localStorage.getItem(KEYS.SONG_ANALYSIS)) {
     localStorage.setItem(KEYS.SONG_ANALYSIS, JSON.stringify({}));
+  }
+  
+  // Initialize resources if not present
+  if (!localStorage.getItem(KEYS.RESOURCES)) {
+    localStorage.setItem(KEYS.RESOURCES, JSON.stringify([]));
+  }
+};
+
+// Resource operations
+export const getAllResources = () => {
+  if (typeof window === 'undefined') return [];
+  try {
+    const resources = localStorage.getItem(KEYS.RESOURCES);
+    return resources ? JSON.parse(resources) : [];
+  } catch (error) {
+    console.error('Error retrieving resources:', error);
+    return [];
+  }
+};
+
+export const addResource = (resource) => {
+  if (typeof window === 'undefined') return false;
+  try {
+    const resources = getAllResources();
+    const newResource = {
+      ...resource,
+      id: resource.id || `resource-${Date.now()}`,
+      dateAdded: resource.dateAdded || new Date().toISOString(),
+    };
+    resources.push(newResource);
+    localStorage.setItem(KEYS.RESOURCES, JSON.stringify(resources));
+    return true;
+  } catch (error) {
+    console.error('Error adding resource:', error);
+    return false;
+  }
+};
+
+export const removeResource = (id) => {
+  if (typeof window === 'undefined') return false;
+  try {
+    const resources = getAllResources();
+    const updated = resources.filter(r => r.id !== id);
+    localStorage.setItem(KEYS.RESOURCES, JSON.stringify(updated));
+    return true;
+  } catch (error) {
+    console.error('Error removing resource:', error);
+    return false;
   }
 };
 

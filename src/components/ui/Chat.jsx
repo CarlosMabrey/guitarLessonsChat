@@ -1,10 +1,12 @@
 'use client';
 
 import { useState, useRef, useEffect, useCallback } from 'react';
+import ReactDOM from 'react-dom';
 import { FiSend, FiMessageSquare, FiMic, FiPaperclip } from 'react-icons/fi';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import MessageRenderer from '@/components/chat/MessageRenderer';
+
 
 const Chat = ({
   messages = [],
@@ -20,19 +22,177 @@ const Chat = ({
   const [isFocused, setIsFocused] = useState(false);
   const [showSuggestions, setShowSuggestions] = useState(true);
 
+  // Image upload state
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [tempImgUrl, setTempImgUrl] = useState(null); // persistent temp image url
+  const imageInputRef = useRef(null);
+
+  // Chat bar ref and rect for portal positioning
+  const chatBarRef = useRef(null);
+  const [chatBarRect, setChatBarRect] = useState(null);
+  useEffect(() => {
+    function updateRect() {
+      if (chatBarRef.current) {
+        setChatBarRect(chatBarRef.current.getBoundingClientRect());
+      }
+    }
+    updateRect();
+    window.addEventListener('resize', updateRect);
+    window.addEventListener('scroll', updateRect, true);
+    return () => {
+      window.removeEventListener('resize', updateRect);
+      window.removeEventListener('scroll', updateRect, true);
+    };
+  }, []);
+
+  // Handle image file selection
+  // Handle image file selection with feedback for non-image
+// Handle image file selection with upload to tempImg for persistence
+const handleImageChange = async (e) => {
+  const file = e.target.files && e.target.files[0];
+  if (!file) return;
+  if (!file.type.startsWith('image/')) {
+    alert('Please select a valid image file (png, jpg, jpeg, gif, webp).');
+    if (imageInputRef.current) imageInputRef.current.value = '';
+    return;
+  }
+  setImageFile(file);
+  const previewUrl = URL.createObjectURL(file);
+  setImagePreview(previewUrl);
+
+  // Upload to /api/tempImg for persistence
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    const resp = await fetch('/api/tempImg', {
+      method: 'POST',
+      body: formData,
+    });
+    const data = await resp.json();
+    if (data.tempUrl) {
+      setTempImgUrl(data.tempUrl);
+    } else {
+      setTempImgUrl(null);
+    }
+  } catch (err) {
+    setTempImgUrl(null);
+  }
+};
+
+  // Handle clipboard paste for images
+  const handlePaste = (e) => {
+    if (e.clipboardData && e.clipboardData.items) {
+      const item = Array.from(e.clipboardData.items).find(i => i.type.startsWith('image/'));
+      if (item) {
+        const file = item.getAsFile();
+        setImageFile(file);
+        setImagePreview(URL.createObjectURL(file));
+        e.preventDefault();
+      }
+    }
+  };
+
+  // Clear image preview
+  const clearImagePreview = () => {
+  setImageFile(null);
+  setImagePreview(null);
+  setTempImgUrl(null);
+  if (imageInputRef.current) imageInputRef.current.value = '';
+};
+
+  // Send image to backend as FormData (now handled by main send button)
+  // Send image to backend as FormData, update chat with server URL, and handle fallback
+const handleSendImage = async () => {
+  if (!imageFile) return;
+  try {
+    const formData = new FormData();
+    formData.append('file', imageFile);
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      body: formData,
+    });
+    const responseData = await response.json().catch(() => ({}));
+    // Always update the image message in chat with the server URL and status
+    if (onSendMessage) {
+      // Use the server URL if available, otherwise keep the previewUrl as fallback
+      onSendMessage({
+        type: 'image',
+        content: responseData.imageUrl || '', // always a string
+        fileName: imageFile.name,
+        fileType: imageFile.type,
+        url: responseData.imageUrl || '',
+        previewUrl: imagePreview, // fallback for broken server URL
+        tempUrl: tempImgUrl, // persistent temp url for chat history
+        sender: 'user',
+        timestamp: new Date().toISOString(),
+        status: response.ok ? 'uploaded' : 'error',
+      });
+      // Add the AI response as a separate message
+      if (response.ok) {
+        onSendMessage({
+          content: responseData.message || '[Image processed by AI]',
+          sender: 'ai',
+          timestamp: new Date().toISOString(),
+        });
+      } else {
+        onSendMessage({
+          content: `Sorry, there was an error: ${responseData.message || responseData.error || 'Image upload failed'}`,
+          sender: 'ai',
+          isError: true,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  } catch (err) {
+    if (onSendMessage) {
+      onSendMessage({
+        content: `Sorry, there was an error: ${err.message || 'Image upload failed'}`,
+        sender: 'ai',
+        isError: true,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } finally {
+    clearImagePreview();
+  }
+};
+
+
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth', block: 'end' });
     }
   }, [messages, isLoading]);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (!input.trim() || isLoading) return;
-    onSendMessage(input);
-    setInput('');
-    setShowSuggestions(false);
-  };
+  const handleSubmit = async (e) => {
+  e.preventDefault();
+  if (isLoading) return;
+  // If an image is selected, add to chat and upload
+  if (imageFile && imagePreview) {
+    // Add image message to chat history (placeholder, status uploading)
+    if (onSendMessage) {
+  onSendMessage({
+    type: 'image',
+    content: '', // always a string; will be replaced after upload
+    fileName: imageFile.name,
+    fileType: imageFile.type,
+    previewUrl: imagePreview,
+    tempUrl: tempImgUrl, // persistent temp url for chat history
+    sender: 'user',
+    timestamp: new Date().toISOString(),
+    status: 'uploading',
+  });
+}
+await handleSendImage();
+return;
+  }
+  // Otherwise, send text message
+  if (!input.trim()) return;
+  onSendMessage(input);
+  setInput('');
+  setShowSuggestions(false);
+};
 
   const handleSuggestionClick = (suggestion) => {
     onSendMessage(suggestion);
@@ -128,12 +288,26 @@ const Chat = ({
           <form
             ref={formRef}
             onSubmit={handleSubmit}
-            className={clsx(
-              'relative border bg-gray-900 rounded-full shadow-md overflow-hidden',
-              isFocused ? 'border-blue-500/50 ring-1 ring-blue-500/20' : 'border-gray-700'
-            )}
+            className="relative flex flex-col w-full"
           >
-            <div className="relative">
+            {/* Floating image preview above chat input */}
+            {imagePreview && (
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-4 z-20 flex justify-center w-full pointer-events-none">
+                <div className="w-80 bg-gray-800 p-2 rounded shadow-lg flex flex-col items-center border border-blue-700 pointer-events-auto">
+                  <img src={imagePreview} alt="Preview" className="max-h-32 max-w-full rounded mb-2" />
+                  <div className="flex w-full space-x-2">
+                    <button
+                      className="flex-1 px-3 py-1 rounded bg-gray-600 text-white text-xs hover:bg-gray-700"
+                      onClick={clearImagePreview}
+                      disabled={isLoading}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            <div className="relative w-full">
               <textarea
                 ref={inputRef}
                 value={input}
@@ -142,16 +316,36 @@ const Chat = ({
                 onFocus={() => setIsFocused(true)}
                 onBlur={() => setIsFocused(false)}
                 placeholder="Message Guitar Coach AI"
-                className="w-full py-3 pl-5 pr-14 bg-transparent text-white placeholder-gray-400 focus:outline-none resize-none min-h-[50px] max-h-[200px] scrollbar-thin"
+                className="w-full py-3 pl-5 pr-20 bg-transparent text-white placeholder-gray-400 focus:outline-none resize-none min-h-[50px] max-h-[200px] scrollbar-thin"
                 rows={1}
+                disabled={isLoading}
+                onPaste={handlePaste}
+              />
+              {/* Image upload icon/button */}
+              <input
+                type="file"
+                accept="image/png,image/jpeg,image/jpg,image/gif,image/webp"
+                style={{ display: 'none' }}
+                ref={imageInputRef}
+                onChange={handleImageChange}
                 disabled={isLoading}
               />
               <button
+                type="button"
+                title="Upload Image"
+                className="absolute right-12 bottom-2 w-8 h-8 rounded-full flex items-center justify-center bg-gray-700 text-gray-300 hover:bg-blue-600 hover:text-white transition-colors"
+                onClick={() => !isLoading && imageInputRef.current && imageInputRef.current.click()}
+                disabled={isLoading}
+                tabIndex={0}
+              >
+                <FiPaperclip size={18} />
+              </button>
+              <button
                 type="submit"
-                disabled={!input.trim() || isLoading}
+                disabled={(!input.trim() && !imageFile) || isLoading}
                 className={clsx(
                   'absolute right-2 bottom-2 w-8 h-8 rounded-full flex items-center justify-center',
-                  input.trim() && !isLoading
+                  (input.trim() || imageFile) && !isLoading
                     ? 'bg-blue-600 text-white hover:bg-blue-700'
                     : 'bg-gray-700 text-gray-400'
                 )}

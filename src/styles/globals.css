@@ -21,10 +21,22 @@
     @apply scroll-smooth;
   }
 
+  html, body, *, *::before, *::after {
+    cursor: none !important;
+  }
+
   body {
     @apply antialiased;
     color: rgb(var(--foreground-rgb));
     background: rgb(var(--background-rgb));
+    overflow-x: hidden;
+  }
+
+  /* Hide custom cursor on mobile */
+  @media (pointer: coarse) {
+    html, body, * {
+      cursor: auto !important;
+    }
   }
 }
 
@@ -46,7 +58,12 @@
   }
 
   .btn {
-    @apply px-4 py-2 rounded-md font-medium transition-colors;
+    @apply px-4 py-2 rounded-md font-medium transition-colors cursor-none;
+  }
+
+  /* Interactive elements that should show hover state */
+  a, button, input, textarea, [role="button"], [tabindex="0"] {
+    @apply cursor-none;
   }
 
   .btn-primary {
@@ -105,8 +122,83 @@
   }
 
   .bg-app {
-    background: var(--bg);
-  }
+  background: var(--bg);
+  background-size: 200% 200%;
+  animation: gradient-move 18s ease-in-out infinite;
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+}
+
+@keyframes gradient-move {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* --- Background Effects --- */
+.bg-effect-blur {
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.bg-effect-brightness {
+  animation: brightnessPulse 12s ease-in-out infinite;
+}
+@keyframes brightnessPulse {
+  0%, 100% { filter: brightness(1) contrast(1); }
+  50% { filter: brightness(1.07) contrast(1.03); }
+}
+
+.bg-effect-hue {
+  animation: hueShift 24s linear infinite;
+}
+@keyframes hueShift {
+  0% { filter: hue-rotate(0deg); }
+  100% { filter: hue-rotate(20deg); }
+}
+
+.bg-effect-noise::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" fill="none"><filter id="noiseFilter"><feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="4" stitchTiles="stitch"/></filter><rect width="200" height="200" filter="url(%23noiseFilter)"/></svg>');
+  opacity: 0.08;
+  mix-blend-mode: overlay;
+}
+
+.bg-effect-vignette::before {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  background: radial-gradient(ellipse at center, transparent 60%, rgba(0,0,0,0.18) 100%);
+}
+
+.bg-effect-glow {
+  box-shadow: 0 0 80px 10px rgba(100, 180, 255, 0.08) inset;
+}
+
+.bg-effect-pattern::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  background-image: repeating-linear-gradient(135deg, rgba(255,255,255,0.03) 0px, rgba(255,255,255,0.03) 2px, transparent 2px, transparent 20px);
+  opacity: 0.6;
+  mix-blend-mode: lighten;
+}
+
+.bg-effect-noise, .bg-effect-vignette, .bg-effect-pattern {
+  position: relative;
+  z-index: 0;
+}
+
   .bg-sidebar {
     background: var(--sidebar);
   }

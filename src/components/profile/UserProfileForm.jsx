@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getUserProfile, saveUserProfile, defaultUserProfile } from '@/lib/storage/userProfile';
+import { getUserProfile, saveUserProfile, defaultUserProfile } from '@/lib/profiledb';
 
 /**
  * UserProfileForm - Edit and save user profile (localStorage for now)

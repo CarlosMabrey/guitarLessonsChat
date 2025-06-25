@@ -88,6 +88,38 @@ It is designed for clarity and ease of use, with a focus on musical context.
 ## 2. Chat API & Backend
 
 ### `/src/pages/api/chat.js`
+
+---
+
+## 3. File Uploads in Chat
+
+You can now upload tab files directly in the chat interface to share and analyze guitar tablature with the AI assistant.
+
+### How to Use
+- In the chat page, use the "Upload Tab File" section below the chat input.
+- Click "Choose File" and select a supported file (e.g., `.txt`, `.gp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`, `.pdf`).
+- Click "Send File" to upload the file to the chat.
+- The file name will appear in the chat, and the AI will process the content (for `.txt` files, the tab content will be included directly in the conversation).
+
+### Supported File Types
+- Plain text tablature (`.txt`)
+- Guitar Pro files (`.gp`, `.gp3`, `.gp4`, `.gp5`, `.gpx`)
+- PDF files (`.pdf`)
+
+Other formats may be acknowledged but not parsed in detail.
+
+### Backend Processing
+- The backend uses `formidable` to handle file uploads via `multipart/form-data`.
+- For `.txt` files, the file content is read and sent as a user message to the AI.
+- For other file types, the filename is included as a placeholder message.
+- The AI can analyze, summarize, or visualize the uploaded tab where possible.
+
+### Troubleshooting
+- If file uploads fail, check your network connection and ensure the file type is supported.
+- Only one file may be uploaded per message.
+- Large files or unsupported formats may not be processed.
+
+---
 - **Purpose:** Handles chat POST requests, processes messages, and returns AI responses.
 - **How it works:**
   - Receives message array and (optionally) API key.
@@ -232,10 +264,48 @@ Fdim7 is a tense, diminished chord useful for adding dramatic tension to progres
 ---
 
 ## 8. Extending the Chat Feature
-- To add new music notation types, update both the parser and renderer.
-- For persistent chat history, connect `/src/lib/db/index.js` to a backend database.
-- To support additional AI models, update `/src/pages/api/chat.js` with new provider logic.
+
+This document describes the chat functionality for guitar lessons, including the chat UI, backend API, and integration with other features.
+
+## Image Upload & Tab Generation
+
+### Overview
+The chat interface allows users to upload images of guitar sheet music or tablature. When an image is uploaded or pasted into the chat, the backend processes the image and uses AI to transcribe the tab into plain text notation.
+
+### User Workflow
+- The user can upload an image of a guitar tab by either:
+  - Clicking the upload button and selecting a file, or
+  - Pasting an image from the clipboard directly into the chat input area.
+- The image is previewed above the chat input before sending.
+- When sent, the image is uploaded to the backend API.
+- The backend saves the image and calls the AI with a specialized prompt to transcribe the tab.
+- The AI's transcription is returned as a chat message and can be stored for later use.
+
+### Backend Processing
+- The `/api/chat` endpoint detects image uploads via multipart form data.
+- Uploaded images are saved to `/public/uploads` with a unique filename.
+- The backend generates a **special system prompt** for the AI, instructing it to analyze the uploaded image and return the corresponding guitar tab notation in plain text.
+- The AI's response is returned to the frontend and displayed as a chat message.
+
+### Prompting Guidelines
+- **Default Prompt:** Used for normal chat messages and guitar questions.
+- **Image Upload Prompt:** When an image is uploaded, the system prompt is replaced with instructions to transcribe the tab. Example:
+  > The user has uploaded an image of guitar sheet music or tablature. The image is available at: [image URL]
+  > Your job is to analyze the image and return the corresponding guitar tab notation in plain text, using the same formatting as your usual tab output.
+- This ensures the AI focuses on transcription rather than general chat.
+
+### Future Integration
+- **Tab Storage:** Transcribed tabs will be stored in the user's account or site database for future access.
+- **Component Integration:** Tabs can be loaded into other components (e.g., the fretboard visualizer) so users can get interactive help learning the song.
+- **Editing & Practice:** Users will be able to edit, annotate, and practice tabs directly within the app.
+
+### Error Handling
+- If the image cannot be parsed or transcribed, the user receives a helpful error message and can try again.
 
 ---
 
-*For further questions, see the code comments in each file or contact the maintainers.*
+**See also:**
+- [Fretboard Visualizer Feature](./FRETBOARD_FEATURE.md)
+- [Practice Page Wireframe](./PRACTICE_PAGE_WIREFRAME.md)
+- **Purpose:** Handles chat POST requests, processes messages, and returns AI responses.
+- **How it works:**

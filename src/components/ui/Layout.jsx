@@ -3,6 +3,12 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import dynamic from 'next/dynamic';
+
+// Dynamically import CustomCursor with no SSR to avoid hydration issues
+const CustomCursor = dynamic(() => import('./CustomCursor'), {
+  ssr: false,
+});
 
 import { 
   FiMenu, 
@@ -54,7 +60,9 @@ export default function Layout({ title, version, children }) {
   ];
   
   return (
-    <div className="flex h-screen bg-app text-text-primary overflow-hidden">
+    <>
+      <CustomCursor />
+      <div className="flex h-screen bg-app text-text-primary overflow-hidden">
       {/* Mobile backdrop */}
       {isMobileSidebarOpen && (
         <div 
@@ -113,5 +121,6 @@ export default function Layout({ title, version, children }) {
         </main>
       </div>
     </div>
+    </>
   );
 } 

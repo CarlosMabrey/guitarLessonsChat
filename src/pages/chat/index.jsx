@@ -1,6 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { useSettings } from '@/context/SettingsContext';
+import SettingsPanel from '@/components/ui/SettingsPanel';
 import dynamic from 'next/dynamic';
 import { FiMenu, FiX, FiSettings, FiMessageSquare, FiPlus, FiHome, FiTrash2, FiGrid, FiMusic, FiClock, FiZap, FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 import { TbProgress } from 'react-icons/tb';
@@ -11,6 +13,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { clsx } from 'clsx';
 import Link from 'next/link';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
+import AmbientPlayerChatSidebar from './AmbientPlayerChatSidebar';
 
 // Dynamically import the Chat component with no SSR to avoid hydration issues
 const Chat = dynamic(() => import('@/components/ui/Chat'), {
@@ -193,6 +196,8 @@ const Sidebar = ({
             {!isCollapsed && <span>Settings</span>}
           </button>
         </div>
+        {/* Ambient Player for chat sidebar */}
+        {!isCollapsed && <AmbientPlayerChatSidebar />}
       </div>
       
       <div className="p-2 border-t border-[#2a3343] flex justify-center">
@@ -327,12 +332,23 @@ const SUGGESTED_PROMPTS = [
 ];
 
 export default function ChatPage() {
+  const { apiKey } = useSettings();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const closeSidebar = () => setSidebarOpen(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const toggleCollapse = () => setIsCollapsed(!isCollapsed);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [apiKey, setApiKey] = useState('');
+
+  // Close settings modal on Escape key
+  useEffect(() => {
+    if (!isSettingsOpen) return;
+    const handleKeyDown = (e) => {
+      if (e.key === 'Escape') setIsSettingsOpen(false);
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSettingsOpen]);
+  const { settings } = useSettings();
   const [chatId, setChatId] = useState(null);
   const [messages, setMessages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -341,14 +357,13 @@ export default function ChatPage() {
   const chatRef = useRef(null);
   const inputRef = useRef(null);
 
+  // File upload state
+  const [selectedFile, setSelectedFile] = useState(null);
+
   // Load chats and API key from localStorage on mount
   const [chats, setChats] = useState([]);
 
   useEffect(() => {
-    // Load API key
-    const savedApiKey = localStorage.getItem('openai_api_key') || '';
-    setApiKey(savedApiKey);
-    
     // Load chat history
     const savedChats = JSON.parse(localStorage.getItem('chat_history') || '[]');
     setChats(savedChats);
@@ -389,13 +404,28 @@ export default function ChatPage() {
   useEffect(() => {
     if (chatId) {
       // Save the chat
+      const firstContent = messages[0]?.content;
+      const title =
+        typeof firstContent === 'string'
+          ? firstContent.substring(0, 30)
+          : messages[0]?.fileName
+            ? `[Image] ${messages[0].fileName}`
+            : 'New Chat';
+      const lastMsg = messages[messages.length - 1];
+      const lastMessage =
+        typeof lastMsg?.content === 'string'
+          ? lastMsg.content
+          : lastMsg?.fileName
+            ? `[Image] ${lastMsg.fileName}`
+            : '';
       const chatData = {
         id: chatId,
-        title: messages[0]?.content?.substring(0, 30) || 'New Chat',
-        lastMessage: messages[messages.length - 1]?.content || '',
+        title,
+        lastMessage,
         updatedAt: new Date().toISOString(),
         messages: messages
       };
+
       
       // Save chat data
       localStorage.setItem(`chat_${chatId}`, JSON.stringify(chatData));
@@ -432,66 +462,122 @@ export default function ChatPage() {
     }
   }, [messages, chatId]);
 
+  // Handle file selection
+  const handleFileChange = (e) => {
+    if (e.target.files && e.target.files[0]) {
+      setSelectedFile(e.target.files[0]);
+    }
+  };
+
+  // Handle sending a file as a chat message
+  const handleSendFile = async () => {
+    if (!selectedFile) return;
+    setIsLoading(true);
+    try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+      formData.append('chatId', chatId || '');
+      formData.append('apiKey', apiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY || '');
+      // Optionally, add a message if you want to send a text with the file
+      // formData.append('message', optionalMessage);
+
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        body: formData,
+      });
+      const responseData = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        console.error('API Error Response:', responseData);
+        throw new Error(
+          responseData.message || 
+          responseData.error?.message || 
+          'Unknown error uploading file.'
+        );
+      }
+      // Add the file as a message in the chat UI
+      const userMessage = {
+        id: `msg_${Date.now()}`,
+        content: `Uploaded file: ${selectedFile.name}`,
+        sender: 'user',
+        timestamp: new Date().toISOString(),
+        fileName: selectedFile.name,
+      };
+      setMessages((prev) => [...prev, userMessage, { id: `msg_${Date.now()}_resp`, content: responseData.message, sender: 'ai', timestamp: new Date().toISOString() }]);
+      setSelectedFile(null);
+    } catch (error) {
+      alert(error.message || 'File upload failed.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   const handleSendMessage = async (message) => {
-    if (!message.trim()) return;
-    
+    // Handle image messages
+    if (typeof message === 'object' && message.type === 'image') {
+      // Add the image message immediately (with previewUrl if present)
+      const imageMsg = {
+        id: `img_${Date.now()}`,
+        ...message,
+        timestamp: message.timestamp || new Date().toISOString(),
+      };
+      setMessages((prev) => [...prev, imageMsg]);
+      return;
+    }
+
+    // Handle text messages as before
+    if (typeof message === 'string' && !message.trim()) return;
+
     const userMessage = {
       id: `msg_${Date.now()}`,
       content: message,
       sender: 'user',
       timestamp: new Date().toISOString()
     };
-    
+
     // Update local state
     const updatedMessages = [...messages, userMessage];
     setMessages(updatedMessages);
-    
+
     // If this is a new chat, update the URL with the chat ID
     if (isNewChat && chatId) {
       router.push(`/chat?id=${chatId}`, undefined, { shallow: true });
       setIsNewChat(false);
     }
-    
+
     // Get AI response
     setIsLoading(true);
     try {
+      // Only send messages with valid content to the backend
+      const validMessages = updatedMessages.filter(
+        m =>
+          (typeof m.content === 'string' && m.content.length > 0) ||
+          (Array.isArray(m.content))
+      );
       const response = await fetch('/api/chat', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
         body: JSON.stringify({
-          messages: updatedMessages,
-          apiKey: apiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY
+          messages: validMessages,
+          chatId,
+          apiKey: apiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY || ''
         }),
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      
-      const responseData = await response.json().catch(() => ({}));
-      
-      if (!response.ok) {
-        console.error('API Error Response:', responseData);
-        throw new Error(
-          responseData.message || 
-          responseData.error?.message || 
-          `Error: ${response.status} ${response.statusText}`
-        );
-      }
-      
-      // Extract the response message
-      const responseMessage = responseData.message || '';
-      
+      const responseData = await response.json();
+      const responseMessage = responseData.message;
       const aiMessage = {
-        id: `msg_${Date.now()}`,
+        id: `msg_${Date.now()}_ai`,
         content: responseMessage,
         sender: 'ai',
         timestamp: new Date().toISOString(),
         metadata: responseData.metadata || {}
       };
-      
+
       setMessages(prev => [...prev, aiMessage]);
     } catch (error) {
       console.error('Error getting AI response:', error);
-      
+
       const errorMessage = {
         id: `err_${Date.now()}`,
         content: `Sorry, there was an error: ${error.message || 'Please try again'}`,
@@ -499,7 +585,7 @@ export default function ChatPage() {
         isError: true,
         timestamp: new Date().toISOString()
       };
-      
+
       setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
@@ -549,7 +635,11 @@ export default function ChatPage() {
   };
 
   return (
-    <div className="flex h-screen bg-app text-primary overflow-hidden">
+    <div className={clsx(
+      'flex h-screen bg-app text-primary overflow-hidden',
+      settings.backgroundEffect && settings.backgroundEffect !== 'none' ? `bg-effect-${settings.backgroundEffect}` : ''
+    )}>
+
       <Head>
         <title>Guitar Practice Assistant</title>
         <meta name="description" content="Your AI guitar practice assistant" />
@@ -618,16 +708,63 @@ export default function ChatPage() {
             suggestedPrompts={SUGGESTED_PROMPTS}
             inputRef={inputRef}
           />
+          {/* File upload UI */}
+          <div className="flex flex-col mt-2">
+            <label className="block text-sm font-medium text-gray-200 mb-1">Upload Tab File (.txt, .gp, .pdf)</label>
+            <div className="flex items-center space-x-2">
+              <input
+                type="file"
+                accept=".txt,.gp,.gp3,.gp4,.gp5,.gpx,.pdf"
+                onChange={handleFileChange}
+                disabled={isLoading}
+                className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+              />
+              <button
+                onClick={handleSendFile}
+                disabled={isLoading || !selectedFile}
+                className={`px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50`}
+              >
+                {isLoading ? 'Uploading...' : 'Send File'}
+              </button>
+            </div>
+            {selectedFile && (
+              <div className="text-xs text-gray-300 mt-1">Selected: {selectedFile.name}</div>
+            )}
+          </div>
         </div>
       </div>
 
       {/* Settings Modal */}
-      <SettingsModal
-        isOpen={isSettingsOpen}
-        onClose={() => setIsSettingsOpen(false)}
-        apiKey={apiKey}
-        setApiKey={setApiKey}
-      />
+      <AnimatePresence>
+        {isSettingsOpen && (
+          <motion.div
+            key="settings-modal"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.18 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+          >
+            <motion.div
+              initial={{ y: 40, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 40, opacity: 0 }}
+              transition={{ type: 'spring', stiffness: 320, damping: 28, duration: 0.22 }}
+              className="bg-[#232a3a] rounded-2xl shadow-2xl p-6 w-full max-w-lg relative"
+            >
+              <button
+                onClick={() => setIsSettingsOpen(false)}
+                className="absolute top-3 right-3 p-2 text-gray-400 hover:text-white focus:outline-none"
+                aria-label="Close settings"
+              >
+                <span aria-hidden="true">&times;</span>
+              </button>
+              <h2 className="text-2xl font-bold text-gray-100 mb-8">Settings</h2>
+              <SettingsPanel />
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

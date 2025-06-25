@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { FiSearch, FiZap, FiPlus, FiMusic } from 'react-icons/fi';
-import { getAllSongs } from '@/lib/db';
+import { getAllSongs } from '@/lib/songdb';
 import Layout from '@/components/ui/Layout';
 import SongItem from '@/components/songs/SongItem';
 import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
