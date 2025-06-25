@@ -129,7 +129,7 @@ export default async function handler(req, res) {
     let completion;
     try {
       completion = await openai.chat.completions.create({
-        model: 'gpt-4-turbo',
+        model: 'gpt-4.1-mini',
         messages: finalMessages,
         temperature: 0.7,
         max_tokens: 2000,

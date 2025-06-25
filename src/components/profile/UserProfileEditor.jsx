@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { FiUser, FiGuitar, FiMusic, FiAward, FiTarget, FiClock, FiX, FiPlus, FiTrash2 } from 'react-icons/fi';
+import { FiUser, FiMusic, FiAward, FiTarget, FiClock, FiX, FiPlus, FiTrash2 } from 'react-icons/fi';
 
 export default function UserProfileEditor({ onSave, onCancel, initialData = {} }) {
   const [formData, setFormData] = useState({
@@ -132,7 +132,7 @@ export default function UserProfileEditor({ onSave, onCancel, initialData = {} }
         <div className="bg-white dark:bg-gray-800 shadow sm:rounded-md p-6">
           <div className="flex items-center mb-6">
             <div className="p-2 rounded-full bg-indigo-100 dark:bg-indigo-900 mr-3">
-              <FiUser className="h-6 w-6 text-indigo-600 dark:text-indigo-300" />
+              <FiMusic className="h-6 w-6 text-indigo-600 dark:text-indigo-300" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">Basic Information</h3>
           </div>
@@ -178,7 +178,7 @@ export default function UserProfileEditor({ onSave, onCancel, initialData = {} }
         <div className="bg-white dark:bg-gray-800 shadow sm:rounded-md p-6">
           <div className="flex items-center mb-6">
             <div className="p-2 rounded-full bg-green-100 dark:bg-green-900 mr-3">
-              <FiGuitar className="h-6 w-6 text-green-600 dark:text-green-300" />
+              <FiMusic className="h-5 w-5 text-green-600 dark:text-green-400" />
             </div>
             <h3 className="text-lg font-medium text-gray-900 dark:text-white">Guitar Details</h3>
           </div>

@@ -88,6 +88,77 @@ Unit tests are available in `src/lib/utils/promptBuilder.test.js` to ensure:
 - Token efficiency is maintained
 - All required teaching elements are present
 
+## 🚀 Upcoming Features
+
+We're excited to announce several new features coming soon to enhance your guitar learning experience:
+
+### 🎵 Ambient Mode
+**Technical Implementation:**
+- **Audio Engine**: Web Audio API for low-latency, high-quality audio playback
+- **Audio Worklet**: For background processing without blocking the main thread
+- **Audio Files**: Pre-loaded, royalty-free ambient loops (30-60s each) in various categories:
+  - Nature sounds (rain, ocean, forest)
+  - White/brown noise variations
+  - Light instrumental backing tracks in different keys
+- **State Management**:
+  - Redux slice for ambient mode settings
+  - Volume normalization across different audio sources
+  - Crossfade between different ambient tracks
+- **Performance**:
+  - Lazy loading of audio files
+  - Web Workers for audio processing
+  - AudioContext management for mobile compatibility
+
+### 🎨 Custom Themes
+**Technical Implementation:**
+- **Theme System**:
+  - CSS Custom Properties for dynamic theming
+  - Theme provider using React Context API
+  - LocalStorage persistence for user themes
+- **Theme Editor**:
+  - Color picker with accessibility contrast checking
+  - Preview mode for theme customization
+  - Import/export theme configurations (JSON)
+- **Server Components**:
+  - Theme sharing API endpoints
+  - Community theme gallery with search/filter
+  - Theme validation and sanitization
+- **Performance**:
+  - CSS-in-JS solution for dynamic theming (Emotion/Styled Components)
+  - Critical CSS extraction for initial load
+  - Theme switching without page reload
+
+### 🎮 Gamification & Progress Tracking
+**Technical Implementation:**
+- **Streak System**:
+  - Serverless function to track daily logins
+  - IndexedDB for offline streak protection
+  - Push notifications for streak reminders
+- **Progress Visualization**:
+  - SVG-based treble clef with dynamic note placement
+  - D3.js for animated progress rings
+  - Web Animations API for smooth transitions
+- **Achievement System**:
+  - Event-driven architecture for achievement unlocking
+  - Achievement definitions in JSON schema
+  - Real-time updates via WebSockets
+- **Data Storage**:
+  - User progress in Firebase Realtime Database
+  - Daily snapshots for backup
+  - Analytics for tracking feature usage
+
+**Dependencies:**
+- `tone.js` for audio processing
+- `framer-motion` for animations
+- `dexie` for IndexedDB operations
+- `next-themes` for theme management
+- `recharts` for data visualization
+
+**API Requirements:**
+- New endpoints for user progress tracking
+- WebSocket server for real-time updates
+- Storage solution for user-uploaded themes
+
 ## 📋 Overview
 
 Guitar Learning App is a Next.js application designed to help guitarists of all skill levels learn and practice songs more effectively. The app combines AI-powered song analysis, interactive guitar tabs, chord diagrams, and practice tools to provide a comprehensive learning experience.
@@ -387,6 +458,63 @@ To properly load specific tabs on a page:
   - [ ] Implement virtualized scrolling for long tabs
   - [ ] Add tab caching and offline support
 
+## 🎯 Practice System
+
+The Practice System is a core feature of the Guitar Learning App, designed to provide users with structured, engaging, and effective practice routines.
+
+### Key Components
+
+1. **Practice Page**
+   - Central hub for all practice activities
+   - Modern, intuitive interface with dark theme and responsive design
+   - Visual progress tracking and achievement indicators
+
+2. **Practice Routines**
+   - AI-generated practice plans tailored to user skill level and goals
+   - Comprehensive routines covering technique, theory, and repertoire
+   - Customizable duration and difficulty settings
+   - Save and share functionality for favorite routines
+
+3. **Ear Training Tools**
+   - Interactive exercises for developing musical ear
+   - Progressive difficulty levels from beginner to advanced
+   - Real-time feedback on performance
+   - Focus areas: chord recognition, intervals, scales, and relative pitch
+
+4. **Progress Analytics**
+   - Automated tracking of practice time and activities
+   - Visual representations of skill development
+   - Identification of strengths and areas for improvement
+   - Personalized recommendations based on practice patterns
+
+5. **Integration Points**
+   - Connects with Songs library for repertoire practice
+   - Links to Chord and Scale libraries for theoretical context
+   - Interfaces with the Chat system for personalized guidance
+
+### Technical Implementation
+
+- **State Management**: React hooks for UI state and practice session data
+- **Data Persistence**: Local storage and database integration for practice history
+- **Audio Processing**: Web Audio API for ear training exercises
+- **Visualization**: Dynamic SVG rendering for progress charts and diagrams
+
+### User Experience Flow
+
+1. User selects or receives a recommended practice routine
+2. System guides user through sequential practice activities
+3. Real-time feedback provided during exercises
+4. Progress automatically recorded and visualized
+5. Achievements unlocked based on consistent practice
+
+### Development Priorities
+
+1. Core chord practice functionality with interactive diagrams
+2. Basic practice routine structure and navigation
+3. Ear training module with fundamental exercises
+4. Progress tracking system with data visualization
+5. Advanced AI-generated personalized practice plans
+
 ## 🕸️ Tonnetz Chord Visualizer (Planned)
 - Interactive Tonnetz navigation
 - Chord/scale relationships visualized on a Tonnetz grid
@@ -451,6 +579,28 @@ The chat system uses a combination of:
 - Your API key is stored only in your browser's local storage
 - Chat history is stored locally and not sent to any server
 - No personal data is collected
+
+## Guitar Tab & Visualization Features
+- **Interactive Tab Viewer:**
+  - Cleanly renders guitar tabs with syntax highlighting for fret numbers and techniques (no colored background bars)
+  - Supports playback controls, position indicator, and fretboard visualization toggle
+  - Robust error handling to prevent the chat from getting stuck on loading
+- **Chord, Scale, and Fretboard Diagrams:**
+  - Accurate and visually appealing chord diagrams, scale diagrams, and fretboard visualizations
+  - Consistent styling for open/muted strings, finger positions, and nut placement
+  - String labels are displayed in a dedicated column, and fret 0 notes match the rest of the fretboard
+- **Improved Code Organization:**
+  - All core diagram components (`ChordDiagram`, `ScaleDiagram`, `FretboardDiagram`, `MessageBubble`) are modular and easy to extend
+  - Defensive error boundaries in chat rendering for better reliability
+
+## Practice Page Features
+- **Practice Hub:**
+  - Daily plan and quick stats
+  - Chord practice section with cycling and interactive voicing display
+  - Play-along mode, progress tracking, and analytics placeholders
+  - Practice routines with steps, progress bar, and completion tracking
+  - Routine generator and management
+  - Ear training and AI coach sections (placeholders for future expansion)
 
 ## AI Functionality
 - AI-powered song analysis

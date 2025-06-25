@@ -1,7 +1,32 @@
-# Guitar Coach AI - Chat Feature Documentation
+# Guitar Coach AI – Chat Feature Documentation
+
+> **Last updated:** June 25, 2025
+
+---
+
+## Table of Contents
+1. [Overview](#overview)
+2. [Key Components](#key-components)
+3. [Chat API & Backend](#chat-api--backend)
+4. [Chat History & Storage](#chat-history--storage)
+5. [How the Chat Works (Flow)](#how-the-chat-works-flow)
+6. [Response Formatting & UX/UI Guidelines](#response-formatting--uxui-guidelines)
+7. [Configuration & Customization](#configuration--customization)
+8. [Troubleshooting](#troubleshooting)
+9. [Extending the Chat Feature](#extending-the-chat-feature)
+10. [Additional Notes](#additional-notes)
+
+---
 
 ## Overview
-The chat feature in Guitar Coach AI enables interactive conversations with an AI guitar coach, supporting text, chord diagrams, tablature, and more.
+The chat feature in Guitar Coach AI enables interactive conversations with an AI guitar coach, supporting:
+- Text
+- Chord diagrams
+- Tablature
+- Fretboard visualizations
+- Music theory explanations
+
+It is designed for clarity and ease of use, with a focus on musical context.
 
 ---
 
@@ -100,7 +125,65 @@ The chat feature in Guitar Coach AI enables interactive conversations with an AI
 
 ---
 
-## 5. Configuration & Customization
+## 6. Response Formatting & UX/UI Guidelines
+
+### Goals
+- Improve readability and visual hierarchy of AI responses
+- Make musical content (chords, tabs, theory) easy to scan and use
+- Ensure consistency across different types of messages
+
+### Formatting Rules
+- **Always use headers** to introduce topics (e.g., chord names, sections like "Playing Tips", "Summary")
+- **Use bullet points** for lists, tips, or steps
+- **Highlight important terms** (e.g., chord names, string names) using bold or code formatting
+- **Separate sections** with horizontal rules (`---`) for clarity
+- **Present diagrams/tabs in code blocks** for alignment
+- **Group related info** (e.g., notes, fingerings, theory) under clear subheaders
+- **Use callout emojis** (🎸, 💡, ⚠️, etc.) for tips or warnings
+
+### Example: Improved Chord Response
+
+```
+## Fdim7 Chord (F diminished 7th)
+
+---
+
+### Chord Diagram
+<chord-diagram-rendered-here>
+
+**Notes:** F, Ab, B, D
+
+---
+
+### How to Play
+- Index finger: 1st fret, 6th string (F)
+- Middle finger: 2nd fret, 4th string (D)
+- Ring finger: 2nd fret, 2nd string (B)
+- Pinky: 2nd fret, 3rd string (Ab)
+- Mute 5th string (A) and play 1st & 3rd strings open
+
+---
+
+### Playing Tips 🎸
+- Mute the 5th string for a clean sound
+- Practice finger placement to avoid buzzing
+- Play slowly for accuracy
+
+---
+
+### Summary
+Fdim7 is a tense, diminished chord useful for adding dramatic tension to progressions.
+```
+
+### UI/UX Notes
+- **Headers** (`##`, `###`) are always used for: chord names, sections, and summaries
+- **Consistent spacing** between sections
+- **String labels and fretboard notes** are styled for clarity (see FretboardGrid component)
+- **Markdown rendering** is handled by `MessageRenderer.jsx` using `ReactMarkdown`
+
+---
+
+## 7. Configuration & Customization
 - **Change the AI model:** Edit the `model` field in `/src/pages/api/chat.js` (e.g., `model: "gpt-4"`).
 - **API keys:**
   - Set `OPENAI_API_KEY` in `.env` for global use.

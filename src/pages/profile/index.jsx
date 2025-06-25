@@ -20,8 +20,9 @@ import dynamic from 'next/dynamic';
 import Layout from '@/components/ui/Layout';
 import { useUser } from '@/contexts/UserContext';
 
-// Import UserProfileEditor directly
+// Import both profile editors
 import UserProfileEditor from '@/components/profile/UserProfileEditor';
+import UserProfileForm from '@/components/profile/UserProfileForm';
 
 // Helper function to get skill level display text
 const getSkillLevelDisplay = (level) => {
@@ -48,6 +49,7 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [lastUpdated, setLastUpdated] = useState(null);
+  const [useLegacyForm, setUseLegacyForm] = useState(false); // Toggle between editors
 
   // Initialize local profile state when userProfile changes
   useEffect(() => {
@@ -144,11 +146,28 @@ export default function ProfilePage() {
             <div className="p-6">Loading profile...</div>
           ) : showEditor ? (
             <div className="p-6">
-              <UserProfileEditor 
-                initialData={localProfile}
-                onSave={handleSave} 
-                onCancel={toggleEditMode}
-              />
+              <div className="flex justify-end mb-4">
+                <button
+                  className="px-3 py-1 rounded bg-slate-200 dark:bg-slate-700 text-xs text-slate-700 dark:text-slate-200 mr-2 border border-slate-300 dark:border-slate-600"
+                  onClick={() => setUseLegacyForm((prev) => !prev)}
+                >
+                  Switch to {useLegacyForm ? 'New Editor' : 'Legacy Form'}
+                </button>
+              </div>
+              {useLegacyForm ? (
+                <UserProfileForm
+                  onChange={async (updatedProfile) => {
+                    await handleSave(updatedProfile);
+                    setShowEditor(false);
+                  }}
+                />
+              ) : (
+                <UserProfileEditor
+                  initialData={localProfile}
+                  onSave={handleSave}
+                  onCancel={toggleEditMode}
+                />
+              )}
             </div>
           ) : (
             <div className="p-6">

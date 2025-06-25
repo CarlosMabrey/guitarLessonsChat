@@ -44,12 +44,25 @@ const parseTabBlock = (content) => {
   const lines = content.split('\n').filter(line => line.trim());
   if (lines.length === 0) return null;
   
-  // Basic validation - check if it looks like tablature
-  const isLikelyTab = lines.every(line => 
-    /^[A-Za-z]\|[-0-9hpsl/\\()]+\|?$/.test(line.trim())
-  );
+  // More permissive validation - check if it looks like tablature
+  // Look for common patterns in guitar tabs
+  const tabPatterns = [
+    /^[A-Za-z]\|[-0-9hpsl\/\\b()\s]+\|?$/, // Standard tab format with letter + pipe
+    /^[eEBbGgDdAaEe][-|][-0-9hpsl\/\\b()\s]+\|?$/, // Guitar string notation
+    /^[eEBbGgDdAaEe]\|[-0-9hpsl\/\\b()\s]+\|?$/ // Common guitar tab format
+  ];
   
-  if (!isLikelyTab) return null;
+  // Check if any lines match any of the tab patterns
+  const isLikelyTab = lines.some(line => {
+    const trimmedLine = line.trim();
+    return tabPatterns.some(pattern => pattern.test(trimmedLine));
+  });
+  
+  // Additional check: if we have 4-6 lines with pipe characters, it's likely a guitar tab
+  const linesWithPipes = lines.filter(line => line.includes('|')).length;
+  const isTabByStructure = (linesWithPipes >= 4 && linesWithPipes <= 7);
+  
+  if (!isLikelyTab && !isTabByStructure) return null;
   
   return {
     type: 'tab',

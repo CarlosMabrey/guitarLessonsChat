@@ -379,7 +379,9 @@ const FretboardGrid = ({
                         const isHighlighted = isNoteHighlighted(note);
                         const isSelected = isNoteSelected(note);
                         const isInVoicing = singleVoicingMode ? isNoteInVoicing(note) : true;
-                        const interval = isNoteHighlighted(note) ? findIntervalForNote(note) : null;
+                        const normalized = normalizeNote(note); // already defined in the component
+                        const interval = isNoteHighlighted(note) ? findIntervalForNote(normalized) : null;
+                        
                         
                         return (
                           <NoteCell

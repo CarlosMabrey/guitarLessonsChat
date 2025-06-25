@@ -2,54 +2,22 @@
 
 import { FiMessageSquare, FiCopy, FiCheck } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
-import { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import rehypeHighlight from 'rehype-highlight';
 import remarkGfm from 'remark-gfm';
 import 'highlight.js/styles/github-dark.css';
 import { parseMessageContent } from '@/lib/chat/messageParser';
 import clsx from 'clsx';
+import { FretboardDiagram } from './FretboardDiagram';
+import { ChordDiagram } from './ChordDiagram';
+import { ScaleDiagram } from './ScaleDiagram';
+import MessageBubble from './MessageBubble';
+import { Disclosure, Transition } from '@headlessui/react';
+import { ChevronDownIcon } from '@heroicons/react/24/outline';
+import TabFretboardVisualizer from './TabFretboardVisualizer';
 
-const MessageBubble = ({ children, isAi, isTyping, timestamp }) => {
-  // Format the timestamp if provided
-  const formattedTime = timestamp ? new Date(timestamp).toLocaleTimeString([], { 
-    hour: '2-digit', 
-    minute: '2-digit' 
-  }) : null;
 
-  return (
-    <div className="relative group">
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.2 }}
-        className={clsx(
-          'inline-block px-4 py-3 text-sm leading-relaxed relative',
-          isAi 
-            ? 'bg-card-hover/70 text-text-primary rounded-2xl rounded-tl-none' 
-            : 'bg-primary/15 text-text-primary rounded-2xl rounded-tr-none',
-          isTyping ? 'min-w-[100px]' : '',
-          'shadow-sm hover:shadow transition-shadow duration-200'
-        )}
-      >
-        {isTyping ? (
-          <div className="flex items-center space-x-2">
-            <div className="flex space-x-1">
-              <div className="w-2 h-2 rounded-full bg-primary/80 animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-2 h-2 rounded-full bg-primary/80 animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-2 h-2 rounded-full bg-primary/80 animate-bounce" style={{ animationDelay: '300ms' }} />
-            </div>
-            <span className="text-xs text-text-secondary">Typing...</span>
-          </div>
-        ) : (
-          <>
-            {children}
-          </>
-        )}
-      </motion.div>
-    </div>
-  );
-};
 
 const MarkdownContent = ({ content }) => {
   const [copied, setCopied] = useState(false);
@@ -110,336 +78,191 @@ const MarkdownContent = ({ content }) => {
   );
 };
 
-// Component to render chord diagrams
-const ChordDiagram = ({ chord }) => {
-  if (!chord) return null;
 
-  // Default to standard tuning if not specified
-  const tuning = chord.tuning || ['E', 'A', 'D', 'G', 'B', 'E'];
-  const strings = tuning.length;
-  const frets = chord.frets || [];
-  const fingers = chord.fingers || [];
-  const barres = chord.barres || [];
-  const notes = chord.notes || [];
-
-  // Calculate the number of frets to display
-  const maxFret = Math.max(...frets.filter(f => f !== 0), 4) + 1;
-  const minFret = Math.min(...frets.filter(f => f > 0), 1);
-  const showNut = minFret === 1;
-
-  return (
-    <div className="my-4 p-4 bg-card-hover/20 rounded-xl border border-card-hover/30">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="font-bold text-text-primary">{chord.name || 'Chord'}</h4>
-          {chord.description && (
-            <p className="text-sm text-text-secondary mt-1">{chord.description}</p>
-          )}
-        </div>
-        {chord.quality && (
-          <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
-            {chord.quality}
-          </span>
-        )}
-      </div>
-      
-      <div className="mt-3 flex items-start">
-        {/* Fretboard */}
-        <div className="relative">
-          {/* Nut or position marker */}
-          {showNut ? (
-            <div className="h-1 bg-gray-300 mb-1 w-full"></div>
-          ) : (
-            <div className="h-6 flex items-center justify-center mb-1">
-              <span className="text-xs font-mono text-text-tertiary">{minFret}fr</span>
-            </div>
-          )}
-          
-          {/* Strings */}
-          <div className="flex">
-            {Array.from({ length: strings }).map((_, stringIndex) => {
-              const fret = frets[stringIndex] || 0;
-              const finger = fingers[stringIndex] || '';
-              const isOpen = fret === 0;
-              const isMuted = fret === -1;
-              const isBarre = barres.some(b => b.fromString <= stringIndex && b.toString >= stringIndex);
-              
-              return (
-                <div key={stringIndex} className="flex flex-col items-center">
-                  {/* String */}
-                  <div className="w-8 h-6 flex items-center justify-center">
-                    {isMuted ? (
-                      <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center">
-                        <div className="w-3 h-0.5 bg-red-500 rotate-45"></div>
-                      </div>
-                    ) : isOpen ? (
-                      <div className="w-4 h-4 rounded-full border-2 border-primary flex items-center justify-center">
-                        <span className="text-[10px] font-bold text-primary">O</span>
-                      </div>
-                    ) : (
-                      <div className={clsx(
-                        'w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold',
-                        isBarre ? 'bg-primary/90 text-white' : 'bg-primary/80 text-white',
-                        'shadow-md'
-                      )}>
-                        {finger}
-                      </div>
-                    )}
-                  </div>
-                  
-                  {/* Fret markers */}
-                  <div className="w-8 h-6 border border-card-hover/30 flex items-center justify-center">
-                    {fret > 0 && !isMuted && (
-                      <span className="text-xs text-text-secondary">{fret}</span>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          
-          {/* Fret numbers */}
-          <div className="flex justify-between mt-1">
-            {Array.from({ length: strings }).map((_, i) => (
-              <div key={i} className="w-8 text-center">
-                <span className="text-[10px] text-text-tertiary">{tuning[i]}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-        
-        {/* Chord details */}
-        <div className="ml-6 text-sm">
-          {fingers.some(f => f) && (
-            <div className="mb-2">
-              <div className="font-medium text-text-secondary">Fingers:</div>
-              <div className="grid grid-cols-2 gap-1 mt-1">
-                {fingers.map((f, i) => (
-                  f && (
-                    <div key={i} className="flex items-center">
-                      <span className="w-5 h-5 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium mr-2">
-                        {f}
-                      </span>
-                      <span>String {strings - i}</span>
-                    </div>
-                  )
-                ))}
-              </div>
-            </div>
-          )}
-          
-          {notes.length > 0 && (
-            <div>
-              <div className="font-medium text-text-secondary">Notes:</div>
-              <div className="flex flex-wrap gap-1 mt-1">
-                {notes.map((note, i) => (
-                  <span key={i} className="px-2 py-0.5 rounded bg-card-hover/30 text-xs">
-                    {note}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-      
-      {chord.diagram && (
-        <div className="mt-3 p-3 bg-card-hover/10 rounded-lg text-xs font-mono whitespace-pre-wrap">
-          {chord.diagram}
-        </div>
-      )}
-    </div>
-  );
-};
-
-// Component to render scale diagrams
-const ScaleDiagram = ({ scale }) => {
-  if (!scale) return null;
-
-  const tuning = scale.tuning || ['E', 'A', 'D', 'G', 'B', 'E'];
-  const strings = tuning.length;
-  const positions = scale.positions || [];
-  const notes = scale.notes || [];
-  const intervals = scale.intervals || [];
-
-  // Calculate frets to display
-  const allFrets = positions.flatMap(pos => Object.values(pos.notes || {}));
-  const minFret = Math.min(...allFrets.filter(f => f > 0), 1);
-  const maxFret = Math.max(...allFrets, 5) + 1;
-  const showNut = minFret === 1;
-
-  return (
-    <div className="my-4 p-4 bg-card-hover/10 rounded-xl border border-card-hover/30">
-      <div className="flex justify-between items-start">
-        <div>
-          <h4 className="font-bold text-text-primary">{scale.name || 'Scale'}</h4>
-          {scale.description && (
-            <p className="text-sm text-text-secondary mt-1">{scale.description}</p>
-          )}
-        </div>
-        {scale.type && (
-          <span className="px-2 py-1 text-xs rounded-full bg-primary/10 text-primary">
-            {scale.type}
-          </span>
-        )}
-      </div>
-
-      {/* Scale notes */}
-      {notes.length > 0 && (
-        <div className="mt-3">
-          <div className="flex items-center flex-wrap gap-2">
-            {notes.map((note, i) => (
-              <div key={i} className="relative group">
-                <div className="w-8 h-8 flex items-center justify-center rounded-full bg-primary/10 text-primary font-medium">
-                  {note}
-                </div>
-                {intervals[i] && (
-                  <div className="absolute -top-1 -right-1 w-4 h-4 bg-primary text-white text-[10px] rounded-full flex items-center justify-center">
-                    {intervals[i]}
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Fretboard visualization */}
-      <div className="mt-4">
-        <div className="text-xs font-medium text-text-secondary mb-2">Positions:</div>
-        <div className="space-y-4">
-          {positions.map((pos, posIdx) => (
-            <div key={posIdx} className="bg-card/30 p-3 rounded-lg">
-              <div className="font-medium text-sm text-text-secondary mb-2">
-                Position {pos.position}
-                {pos.fret && ` (Fret ${pos.fret})`}
-              </div>
-              
-              <div className="flex items-start">
-                {/* Fretboard */}
-                <div className="relative">
-                  {/* Nut or position marker */}
-                  {showNut ? (
-                    <div className="h-1 bg-gray-300 mb-1 w-full"></div>
-                  ) : (
-                    <div className="h-6 flex items-center justify-center mb-1">
-                      <span className="text-xs font-mono text-text-tertiary">{minFret}fr</span>
-                    </div>
-                  )}
-                  
-                  {/* Strings */}
-                  <div className="flex">
-                    {Array.from({ length: strings }).map((_, stringIdx) => {
-                      const fret = pos.notes?.[stringIdx] || 0;
-                      const isRoot = pos.rootString === stringIdx;
-                      const isMuted = fret === -1;
-                      
-                      return (
-                        <div key={stringIdx} className="flex flex-col items-center">
-                          {/* String */}
-                          <div className="w-8 h-6 flex items-center justify-center">
-                            {isMuted ? (
-                              <div className="w-5 h-5 rounded-full bg-red-500/20 flex items-center justify-center">
-                                <div className="w-3 h-0.5 bg-red-500 rotate-45"></div>
-                              </div>
-                            ) : fret > 0 ? (
-                              <div className={clsx(
-                                'w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold',
-                                isRoot 
-                                  ? 'bg-primary text-white ring-2 ring-primary/30' 
-                                  : 'bg-card-hover/80 text-text-primary',
-                                'shadow-md'
-                              )}>
-                                {fret}
-                              </div>
-                            ) : null}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                  
-                  {/* Fret numbers */}
-                  <div className="flex justify-between mt-1">
-                    {Array.from({ length: strings }).map((_, i) => (
-                      <div key={i} className="w-8 text-center">
-                        <span className="text-[10px] text-text-tertiary">{tuning[i]}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                
-                {/* Position notes */}
-                <div className="ml-6 flex-1">
-                  <div className="text-sm">
-                    <div className="font-medium text-text-secondary mb-1">Notes:</div>
-                    <div className="flex flex-wrap gap-1">
-                      {pos.notesArray?.map((note, i) => (
-                        <span 
-                          key={i} 
-                          className={clsx(
-                            'px-2 py-0.5 rounded text-xs',
-                            pos.rootNote === note 
-                              ? 'bg-primary/10 text-primary font-medium' 
-                              : 'bg-card-hover/30 text-text-secondary'
-                          )}
-                        >
-                          {note}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-      
-      {/* Additional scale information */}
-      <div className="mt-4 pt-3 border-t border-card-hover/20">
-        <div className="grid grid-cols-2 gap-4">
-          {scale.formula && (
-            <div>
-              <div className="text-xs font-medium text-text-secondary mb-1">Formula:</div>
-              <div className="text-sm">{scale.formula}</div>
-            </div>
-          )}
-          {scale.chords && scale.chords.length > 0 && (
-            <div>
-              <div className="text-xs font-medium text-text-secondary mb-1">Chords in this scale:</div>
-              <div className="flex flex-wrap gap-1">
-                {scale.chords.map((chord, i) => (
-                  <span key={i} className="px-2 py-0.5 bg-card-hover/30 text-xs rounded">
-                    {chord}
-                  </span>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
 const TabViewer = ({ tab }) => {
   if (!tab) return null;
   
-  // Parse tab content into lines
-  const lines = tab.content?.split('\n') || [];
+  // State for player functionality
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentPosition, setCurrentPosition] = useState(0);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [isLooping, setIsLooping] = useState(false);
+  const [selectionStart, setSelectionStart] = useState(null);
+  const [selectionEnd, setSelectionEnd] = useState(null);
+  const [showFretboard, setShowFretboard] = useState(false);
+  
+  // Reference for animation frame
+  const animationRef = React.useRef(null);
+  const tabContainerRef = React.useRef(null);
+  
+  // Parse tab content into lines - handle different possible formats
+  let lines = [];
+  
+  if (Array.isArray(tab.content)) {
+    lines = tab.content;
+  } else if (typeof tab.content === 'string') {
+    lines = tab.content.split('\n');
+  } else if (typeof tab === 'string') {
+    lines = tab.split('\n');
+  } else {
+    console.log('Tab data format:', tab);
+    return <div className="text-red-500">Error: Invalid tab format</div>;
+  }
+  
+  // Filter out empty lines and trim whitespace
+  lines = lines.map(line => line?.trim()).filter(Boolean);
   const hasMultipleLines = lines.length > 1;
   
-  // Check if this is standard guitar tab (6 strings)
-  const isGuitarTab = lines.length >= 4 && lines.length <= 7; // 6 strings + optional caption
+  // Check if this is standard guitar tab (typically 4-6 strings)
+  const isGuitarTab = lines.length >= 4 && lines.length <= 7; // 4-6 strings + optional caption
   
-  // Highlight the active note/string being played
-  const highlightActiveNote = (line, index) => {
-    if (!isGuitarTab) return line;
+  // Get the maximum line length for position calculation
+  const maxLineLength = Math.max(...lines.map(line => line.length), 0);
+  
+  // Clean tab line - remove any markdown artifacts
+  const cleanTabLine = (line) => {
+    if (!line) return '';
+    return line.replace(/^```(?:tab)?\s*|```$/g, '').trim();
+  };
+  
+  // Function to toggle play/pause
+  const togglePlay = () => {
+    setIsPlaying(prev => !prev);
+  };
+  
+  // Function to toggle loop
+  const toggleLoop = () => {
+    setIsLooping(prev => !prev);
+  };
+  
+  // Function to handle speed change
+  const handleSpeedChange = (e) => {
+    setPlaybackSpeed(parseFloat(e.target.value));
+  };
+  
+  // Animation function for playback
+  React.useEffect(() => {
+    let lastTime = 0;
+    const fps = 60;
+    const frameDuration = 1000 / fps;
     
-    // Simple highlighting - in a real app, you'd track the current position
-    return line.replace(/(\d+)/g, (match) => {
-      return `<span class="text-primary font-bold">${match}</span>`;
-    });
+    // Find the notes in the tab to determine playback speed
+    const noteCount = lines.reduce((count, line) => {
+      const matches = line.match(/\d+/g);
+      return count + (matches ? matches.length : 0);
+    }, 0);
+    
+    // Adjust speed based on note density
+    const baseSpeed = 0.05;
+    const speedMultiplier = Math.max(1, Math.min(2, noteCount / 20)); // More notes = faster playback
+    const adjustedSpeed = baseSpeed * speedMultiplier;
+    
+    const animate = (time) => {
+      if (!lastTime) lastTime = time;
+      const elapsed = time - lastTime;
+      
+      if (elapsed > frameDuration) {
+        lastTime = time;
+        
+        // Move position based on speed
+        setCurrentPosition(prevPos => {
+          const newPos = prevPos + (adjustedSpeed * playbackSpeed);
+          
+          // Handle looping or stopping at the end
+          if (newPos >= maxLineLength) {
+            if (isLooping) {
+              return 0; // Loop back to start
+            } else {
+              setIsPlaying(false); // Stop playing
+              return 0; // Reset to start
+            }
+          }
+          
+          return newPos;
+        });
+      }
+      
+      if (isPlaying) {
+        animationRef.current = requestAnimationFrame(animate);
+      }
+    };
+    
+    if (isPlaying) {
+      animationRef.current = requestAnimationFrame(animate);
+    } else if (animationRef.current) {
+      cancelAnimationFrame(animationRef.current);
+    }
+    
+    return () => {
+      if (animationRef.current) {
+        cancelAnimationFrame(animationRef.current);
+      }
+    };
+  }, [isPlaying, playbackSpeed, isLooping, maxLineLength]);
+  
+  // Enhanced highlighting with different colors for techniques and current position
+  const enhancedHighlighting = (line) => {
+    if (!line) return line;
+    
+    // Create React elements for highlighting instead of HTML strings
+    const parts = [];
+    let lastIndex = 0;
+    let key = 0;
+    
+    // Helper function to add text with optional styling
+    const addPart = (text, className = null) => {
+      if (text) {
+        if (className) {
+          parts.push(<span key={key++} className={className}>{text}</span>);
+        } else {
+          parts.push(text);
+        }
+      }
+    };
+    
+    // Process fret numbers
+    const fretRegex = /(\d+)/g;
+    let match;
+    
+    // Reset regex lastIndex
+    fretRegex.lastIndex = 0;
+    
+    while ((match = fretRegex.exec(line)) !== null) {
+      // Add text before the match
+      addPart(line.substring(lastIndex, match.index));
+      // Add the matched fret number with styling
+      addPart(match[1], "text-primary font-bold");
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add any remaining text
+    let remainingText = line.substring(lastIndex);
+    
+    // Process techniques in the remaining text
+    const techRegex = /([hpbr\/\\^~])/g;
+    lastIndex = 0;
+    
+    // Create a new array for the processed remaining text
+    const processedRemaining = [];
+    
+    // Reset regex lastIndex
+    techRegex.lastIndex = 0;
+    
+    while ((match = techRegex.exec(remainingText)) !== null) {
+      // Add text before the match
+      processedRemaining.push(remainingText.substring(lastIndex, match.index));
+      // Add the matched technique with styling
+      processedRemaining.push(<span key={key++} className="text-amber-500 font-semibold">{match[1]}</span>);
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add any final remaining text
+    processedRemaining.push(remainingText.substring(lastIndex));
+    
+    // Add the processed remaining text to parts
+    parts.push(...processedRemaining);
+    
+    return <>{parts}</>;
   };
 
   return (
@@ -474,57 +297,181 @@ const TabViewer = ({ tab }) => {
       </div>
       
       {/* Tab content */}
-      <div className={clsx(
-        'p-4 font-mono text-sm whitespace-pre select-text',
-        'overflow-x-auto scrollbar-thin scrollbar-thumb-card-hover/30 scrollbar-track-transparent',
-        isGuitarTab ? 'leading-7' : 'leading-relaxed'
-      )}>
+      <div 
+        ref={tabContainerRef}
+        className={clsx(
+          'p-4 font-mono text-sm whitespace-pre select-text',
+          'overflow-x-auto scrollbar-thin scrollbar-thumb-card-hover/30 scrollbar-track-transparent',
+          'relative', // For position indicator
+          isGuitarTab ? 'leading-7' : 'leading-relaxed'
+        )}
+      >
+        {/* Position indicator - vertical line that moves across the tab */}
+        {isPlaying && (
+          <div 
+            className="absolute top-0 bottom-0 w-0.5 bg-primary/50 pointer-events-none z-10"
+            style={{
+              left: `calc(${Math.min(currentPosition / maxLineLength * 100, 100)}% + 1rem)`,
+              transition: 'left 0.1s linear'
+            }}
+          />
+        )}
+        {/* String labels legend */}
+        <div className="mb-2 flex justify-between text-xs text-text-secondary">
+          <div>Standard Tuning: E A D G B e</div>
+          <div className="flex space-x-2">
+            <span className="flex items-center">
+              <span className="inline-block w-3 h-3 rounded-full bg-primary/20 mr-1"></span>
+              Notes
+            </span>
+            <span className="flex items-center">
+              <span className="inline-block w-3 h-3 rounded-full bg-amber-500/20 mr-1"></span>
+              Techniques
+            </span>
+          </div>
+        </div>
+        
         {lines.map((line, i) => {
-          // Only process tab lines (skip empty lines or section headers)
-          if (line.trim() === '' || line.trim().startsWith('|') || line.trim().startsWith('e|') || line.trim().startsWith('B|') || line.trim().startsWith('G|') || line.trim().startsWith('D|') || line.trim().startsWith('A|') || line.trim().startsWith('E|')) {
-            return (
-              <div 
-                key={i} 
-                className={clsx(
-                  'font-mono whitespace-pre',
-                  isGuitarTab ? 'text-xs tracking-wider' : 'text-sm',
-                  'text-text-primary/90',
-                  hasMultipleLines && i < lines.length - 1 ? 'mb-0.5' : ''
-                )}
-                dangerouslySetInnerHTML={{ __html: line }}
-              />
-            );
+          // Clean the line first
+          const cleanedLine = cleanTabLine(line);
+          if (!cleanedLine) return null;
+          
+          // Check if this is a string line (e|, B|, G|, etc.) or any line with a pipe character
+          // More permissive regex to match various tab formats
+          const isTabLine = /^[A-Za-z0-9]+\|/.test(cleanedLine) || 
+                          /^[eEBbGgDdAaEe][-|]/.test(cleanedLine);
+          
+          // Determine which string this is (e, B, G, D, A, E) for styling
+          let stringColor = '';
+          if (isTabLine) {
+            const stringMatch = cleanedLine.match(/^([eEBbGgDdAaEe])/)?.[1]?.toLowerCase();
+            switch(stringMatch) {
+              case 'e': stringColor = ''; break;
+              case 'b': stringColor = ''; break;
+              case 'g': stringColor = ''; break;
+              case 'd': stringColor = ''; break;
+              case 'a': stringColor = ''; break;
+              default: stringColor = '';
+            }
           }
           
-          // Process tab lines with note highlighting
+          // Use the enhancedHighlighting function defined earlier
+          
           return (
             <div 
               key={i}
               className={clsx(
-                'font-mono whitespace-pre',
+                'font-mono whitespace-pre rounded px-1',
                 isGuitarTab ? 'text-xs tracking-wider' : 'text-sm',
                 'text-text-primary/90',
-                hasMultipleLines && i < lines.length - 1 ? 'mb-0.5' : ''
+                hasMultipleLines && i < lines.length - 1 ? 'mb-0.5' : '',
+                stringColor
               )}
-              dangerouslySetInnerHTML={{ __html: highlightActiveNote(line, i) }}
-            />
+            >
+              {isTabLine ? enhancedHighlighting(cleanedLine) : cleanedLine}
+            </div>
           );
         })}
       </div>
       
-      {/* Tab footer */}
-      {(tab.bpm || tab.caption) && (
-        <div className="px-4 py-2 text-xs text-text-secondary border-t border-card-hover/20 bg-card-hover/5">
-          <div className="flex items-center justify-between">
+      {/* Interactive controls */}
+      <div className="px-4 py-3 border-t border-card-hover/20 bg-card-hover/5">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center space-x-3">
+            {/* Play/Pause button */}
+            <button 
+              onClick={togglePlay}
+              className={clsx(
+                'p-1.5 rounded-full transition-colors',
+                isPlaying 
+                  ? 'bg-primary/20 hover:bg-primary/30 text-primary' 
+                  : 'bg-primary/10 hover:bg-primary/20 text-primary'
+              )}
+            >
+              {isPlaying ? (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              ) : (
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              )}
+            </button>
+            
+            {/* Loop button */}
+            <button 
+              onClick={toggleLoop}
+              className={clsx(
+                'p-1.5 rounded-full transition-colors',
+                isLooping 
+                  ? 'bg-primary/20 hover:bg-primary/30 text-primary' 
+                  : 'bg-card-hover/10 hover:bg-card-hover/20 text-text-secondary hover:text-text-primary'
+              )}
+            >
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+            </button>
+            
+            {/* Speed control */}
+            <div className="flex items-center space-x-2">
+              <span className="text-xs text-text-secondary">Speed:</span>
+              <select 
+                value={playbackSpeed}
+                onChange={handleSpeedChange}
+                className="bg-card-hover/10 text-text-primary text-xs rounded px-1 py-0.5 border border-card-hover/20"
+              >
+                <option value="0.5">0.5x</option>
+                <option value="0.75">0.75x</option>
+                <option value="1">1x</option>
+                <option value="1.25">1.25x</option>
+                <option value="1.5">1.5x</option>
+              </select>
+            </div>
+          </div>
+          
+          <div className="flex items-center space-x-3">
+            {/* Show on fretboard button */}
+            <button 
+              onClick={() => setShowFretboard(prev => !prev)}
+              className={clsx(
+                "flex items-center space-x-1 text-xs transition-colors",
+                showFretboard ? "text-primary" : "text-text-secondary hover:text-primary"
+              )}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <span>{showFretboard ? "Hide fretboard" : "Show on fretboard"}</span>
+            </button>
+            
+            {/* BPM display if available */}
             {tab.bpm && (
-              <div className="flex items-center">
+              <div className="flex items-center text-xs text-text-secondary">
                 <svg className="w-3 h-3 mr-1 text-text-tertiary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>{tab.bpm} BPM</span>
               </div>
             )}
-            {tab.caption && <div className="text-right">{tab.caption}</div>}
+            
+            {/* Caption if available */}
+            {tab.caption && <div className="text-xs text-text-secondary">{tab.caption}</div>}
+          </div>
+        </div>
+      </div>
+      
+      {/* Fretboard visualization */}
+      {showFretboard && (
+        <div className="border-t border-card-hover/20">
+          <div className="p-4">
+            <h4 className="text-sm font-medium text-text-primary mb-2">Fretboard Visualization</h4>
+            <TabFretboardVisualizer 
+              tabContent={lines} 
+              currentPosition={currentPosition / maxLineLength}
+            />
           </div>
         </div>
       )}
@@ -613,7 +560,7 @@ const RenderedContent = ({ content }) => {
             case 'scale':
               return <ScaleDiagram key={index} scale={block} />;
             case 'tab':
-              return <TabViewer key={index} tab={block.content || block} />;
+              return <TabViewer key={index} tab={block} />;
             case 'fretboard':
               return <FretboardViewer key={index} fretboard={block} />;
             case 'text':
@@ -630,59 +577,69 @@ const RenderedContent = ({ content }) => {
 };
 
 export default function MessageRenderer({ message, isTyping = false }) {
-  // Parse the message content
-  const parsedContent = parseMessageContent(message.content);
-  const isAi = message.sender === 'ai';
-  
-  return (
-    <div className={clsx(
-      'mb-4 last:mb-0 group',
-      isTyping && 'opacity-90'
-    )}>
+  try {
+    // Parse the message content
+    const parsedContent = parseMessageContent(message.content);
+    const isAi = message.sender === 'ai';
+    
+    return (
       <div className={clsx(
-        'flex',
-        isAi ? 'justify-start' : 'justify-end'
+        'mb-4 last:mb-0 group',
+        isTyping && 'opacity-90'
       )}>
-        {isAi && (
-          <div className="flex items-center self-start mt-1 mr-2">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
-              <FiMessageSquare className="text-white" size={18} />
-            </div>
-          </div>
-        )}
-        
-        <div className="flex-1 max-w-[90%] md:max-w-[75%]">
+        <div className={clsx(
+          'flex',
+          isAi ? 'justify-start' : 'justify-end'
+        )}>
           {isAi && (
-            <div className="flex items-center mb-1">
-              <span className="text-xs font-semibold text-text-primary">
-                Guitar Coach AI
-              </span>
-              <span className="text-xs text-text-tertiary ml-2">
-                {new Date(message.timestamp || new Date()).toLocaleTimeString([], {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
-              </span>
+            <div className="flex items-center self-start mt-1 mr-2">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                <FiMessageSquare className="text-white" size={18} />
+              </div>
             </div>
           )}
           
-          <MessageBubble 
-            isAi={isAi} 
-            isTyping={isTyping && isAi}
-            timestamp={message.timestamp}
-          >
-            <RenderedContent content={parsedContent} />
-          </MessageBubble>
-        </div>
-        
-        {!isAi && (
-          <div className="flex items-center self-start mt-1 ml-2">
-            <div className="flex-shrink-0 w-8 h-8 rounded-full bg-card-hover/70 flex items-center justify-center">
-              <span className="text-sm font-medium text-text-primary">You</span>
-            </div>
+          <div className="flex-1 max-w-[90%] md:max-w-[75%]">
+            {isAi && (
+              <div className="flex items-center mb-1">
+                <span className="text-xs font-semibold text-text-primary">
+                  Guitar Coach AI
+                </span>
+                <span className="text-xs text-text-tertiary ml-2">
+                  {new Date(message.timestamp || new Date()).toLocaleTimeString([], {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}
+                </span>
+              </div>
+            )}
+            
+            <MessageBubble 
+              isAi={isAi} 
+              isTyping={isTyping && isAi}
+              timestamp={message.timestamp}
+            >
+              <RenderedContent content={parsedContent} />
+            </MessageBubble>
           </div>
-        )}
+          
+          {!isAi && (
+            <div className="flex items-center self-start mt-1 ml-2">
+              <div className="flex-shrink-0 w-8 h-8 rounded-full bg-card-hover/70 flex items-center justify-center">
+                <span className="text-sm font-medium text-text-primary">You</span>
+              </div>
+            </div>
+          )}
+        </div>
       </div>
-    </div>
-  );
+    );
+  } catch (err) {
+    console.error('MessageRenderer error:', err);
+    return (
+      <div className="p-4 bg-red-100 text-red-700 rounded">
+        <strong>MessageRenderer Error:</strong> {String(err)}
+      </div>
+    );
+  }
 }
+
