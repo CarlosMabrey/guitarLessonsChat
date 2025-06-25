@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import { formatChordName } from '@/lib/formatChordName';
 import * as Tonal from 'tonal';
 import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
 import { chordVoicings, normalizeChordName } from '@/lib/musicTheory';
@@ -40,12 +41,17 @@ const ChordDiagram = ({
   const [selectedVoicings, setSelectedVoicings] = useState([]);
   const [normalizedChordName, setNormalizedChordName] = useState('');
 
-  // Parse the chord name and get voicings when chordName changes
+  // Parse the chord name and get voicings when chordName or voicingObject changes
   useEffect(() => {
     if (voicingObject) {
       // If a voicing object is provided directly, use it
       setSelectedVoicings([voicingObject]);
       setCurrentVoicingIndex(0);
+      
+      // Ensure we have a valid chordName from the voicing object if not provided
+      if (!chordName && voicingObject.chordName) {
+        setNormalizedChordName(voicingObject.chordName);
+      }
       return;
     }
 
@@ -115,13 +121,25 @@ const ChordDiagram = ({
   const voicingToDisplay = voicingObject || 
     (selectedVoicings.length > 0 ? selectedVoicings[currentVoicingIndex] : null);
 
-  // If no voicing is available, render nothing or a placeholder
-  if (!voicingToDisplay && !chordName) {
+  // If no voicing is available, render a placeholder or the chord name
+  if (!voicingToDisplay) {
+    if (chordName) {
+      return (
+        <div className={`chord-diagram empty flex flex-col items-center justify-center p-4 bg-gray-50 dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 ${className}`}>
+          <span className="text-lg font-bold text-gray-700 dark:text-gray-200">
+            {chordName}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-gray-400 mt-1">
+            No diagram available
+          </span>
+        </div>
+      );
+    }
     return <div className={`chord-diagram empty ${className}`} />;
   }
 
   // Display name to show (either the provided chordName or the normalized one)
-  const displayName = chordName || normalizedChordName;
+  const displayName = formatChordName(chordName || normalizedChordName || '');
 
   return (
     <div 

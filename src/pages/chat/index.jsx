@@ -387,7 +387,7 @@ export default function ChatPage() {
 
   // Save messages to localStorage whenever they change
   useEffect(() => {
-    if (messages.length > 0 && chatId) {
+    if (chatId) {
       // Save the chat
       const chatData = {
         id: chatId,
@@ -413,8 +413,8 @@ export default function ChatPage() {
             lastMessage: chatData.lastMessage,
             updatedAt: chatData.updatedAt
           };
-        } else {
-          // Add new chat
+        } else if (messages.length > 0) {
+          // Only add to chat list if there are messages
           newChats.unshift({
             id: chatId,
             title: chatData.title,
@@ -424,7 +424,9 @@ export default function ChatPage() {
         }
         
         // Save updated chat list
-        localStorage.setItem('chat_history', JSON.stringify(newChats));
+        if (messages.length > 0) {
+          localStorage.setItem('chat_history', JSON.stringify(newChats));
+        }
         return newChats;
       });
     }
@@ -475,14 +477,15 @@ export default function ChatPage() {
         );
       }
       
-      const data = responseData;
+      // Extract the response message
+      const responseMessage = responseData.message || '';
       
       const aiMessage = {
         id: `msg_${Date.now()}`,
-        content: data.message,
+        content: responseMessage,
         sender: 'ai',
         timestamp: new Date().toISOString(),
-        metadata: data.metadata || {}
+        metadata: responseData.metadata || {}
       };
       
       setMessages(prev => [...prev, aiMessage]);
@@ -506,9 +509,28 @@ export default function ChatPage() {
   // Start a new chat
   const handleNewChat = () => {
     const newChatId = `chat_${uuidv4()}`;
+    const newChat = {
+      id: newChatId,
+      title: 'New Chat',
+      lastMessage: '',
+      updatedAt: new Date().toISOString()
+    };
+    
+    // Update chats list
+    setChats(prevChats => [newChat, ...prevChats]);
+    
+    // Update local storage
+    localStorage.setItem(`chat_${newChatId}`, JSON.stringify({
+      ...newChat,
+      messages: []
+    }));
+    
+    // Update state
     setChatId(newChatId);
     setMessages([]);
     setIsNewChat(true);
+    
+    // Update URL and close sidebar
     router.push(`/chat?id=${newChatId}`, undefined, { shallow: true });
     setSidebarOpen(false);
   };
