@@ -6,7 +6,6 @@ import Link from 'next/link';
 import { 
   FiArrowLeft, 
   FiUser, 
-  FiGuitar, 
   FiMusic, 
   FiAward, 
   FiTarget, 
@@ -200,7 +199,7 @@ export default function ProfilePage() {
                   <div className="bg-gray-50 dark:bg-gray-700/30 p-6 rounded-lg">
                     <div className="flex items-center mb-4">
                       <div className="p-2 rounded-full bg-green-100 dark:bg-green-900/50 mr-3">
-                        <FiGuitar className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <FiMusic className="h-5 w-5 text-green-600 dark:text-green-400" />
                       </div>
                       <h2 className="text-xl font-semibold text-gray-800 dark:text-white">Guitar Details</h2>
                     </div>

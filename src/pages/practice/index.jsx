@@ -6,6 +6,10 @@ import Layout from '@/components/ui/Layout';
 import { FiCheck, FiPlay } from 'react-icons/fi';
 import VoicingDisplay from '@/components/fretboard/VoicingDisplay';
 import { chordVoicings, normalizeChordName } from '@/lib/musicTheory';
+// Routine creation form for Practice Page
+import RoutineForm from '@/components/practice/RoutineForm';
+// Ear Training tool for Practice Page
+import EarTrainingTool from '@/components/theory/EarTrainingTool';
 
 
 
@@ -315,13 +319,12 @@ export default function PracticePage() {
         </div>
 
         {/* Ear Training Tool Section */}
-        <div className="mt-8 p-6 bg-navy-900 rounded-xl shadow-lg">
-          <h2 className="text-2xl font-bold mb-4 text-white">Ear Training Tool</h2>
-          {/* TODO: Implement interval recognition, chord ID, melodic dictation games */}
-          <div className="w-full h-24 bg-navy-800 rounded-lg flex items-center justify-center text-gray-400">
-            [Ear Training Games Placeholder]
-          </div>
-        </div>
+        {/* Ear Training Tool Section */}
+<div className="mt-8 p-6 bg-navy-900 rounded-xl shadow-lg">
+  <h2 className="text-2xl font-bold mb-4 text-white">Ear Training Tool</h2>
+  {/* Integrated Ear Training Tool component */}
+  <EarTrainingTool />
+</div>
 
         {/* Customization & AI Coach Section */}
         <div className="mt-8 p-6 bg-navy-900 rounded-xl shadow-lg">

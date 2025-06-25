@@ -101,26 +101,75 @@ export const parseMessageContent = (content) => {
 
   // Parse tab blocks (```tab ... ```)
   const tabMatches = [...content.matchAll(/```tab\n([\s\S]*?)\n```/g)];
-  
   // Parse chord blocks (```chord ... ```)
   const chordBlockMatches = [...content.matchAll(/```chord\n([\s\S]*?)\n```/g)];
-  
   // Parse fretboard blocks (```fretboard ... ```)
   const fretboardMatches = [...content.matchAll(/```fretboard\n([\s\S]*?)\n```/g)];
-  
   // Parse inline chord notations ([C], [Am7], etc.)
   const inlineChordMatches = [...content.matchAll(/\[([A-Ga-g][#b]?[^\s\]]*)\]/g)];
 
   // Process all matches
   const blocks = [];
   let lastIndex = 0;
-  
+
   // Helper to add text blocks
   const addTextBlock = (start, end) => {
     if (start >= end) return;
     const text = content.slice(start, end).trim();
-    if (text) {
-      blocks.push({ type: 'text', content: text });
+    if (!text) return;
+
+    // Split by lines for further parsing
+    const lines = text.split(/\r?\n/).map(l => l.trimEnd());
+    let section = null;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      // Header (## or ###)
+      const headerMatch = line.match(/^(#{2,6})\s+(.*)$/);
+      if (headerMatch) {
+        if (section) {
+          blocks.push(section);
+          section = null;
+        }
+        blocks.push({ type: 'header', level: headerMatch[1].length, content: headerMatch[2] });
+        continue;
+      }
+      // Horizontal rule
+      if (/^---+$/.test(line)) {
+        if (section) {
+          blocks.push(section);
+          section = null;
+        }
+        blocks.push({ type: 'hr' });
+        continue;
+      }
+      // Tip/callout (starts with emoji and space)
+      if (/^([\u2600-\u26FF\u2700-\u27BF\u1F300-\u1F6FF\u1F900-\u1F9FF\u1FA70-\u1FAFF\u1F680-\u1F6FF])\s+/.test(line)) {
+        if (section) {
+          blocks.push(section);
+          section = null;
+        }
+        blocks.push({ type: 'tip', content: line });
+        continue;
+      }
+      // Section start (e.g., How to Play, Playing Tips, Summary)
+      const sectionHeader = line.match(/^(How to Play|Playing Tips|Summary)[:\s]*$/i);
+      if (sectionHeader) {
+        if (section) {
+          blocks.push(section);
+        }
+        section = { type: 'section', title: sectionHeader[1], lines: [] };
+        continue;
+      }
+      // If inside a section, collect lines
+      if (section) {
+        section.lines.push(line);
+      } else {
+        // Otherwise, treat as plain text
+        blocks.push({ type: 'text', content: line });
+      }
+    }
+    if (section) {
+      blocks.push(section);
     }
   };
 
@@ -132,15 +181,12 @@ export const parseMessageContent = (content) => {
     ...inlineChordMatches.map(m => ({ type: 'inlineChord', match: m }))
   ].sort((a, b) => a.match.index - b.match.index);
 
-  // Process each match
   for (const { type, match } of allMatches) {
     const [fullMatch, content] = match;
     const matchStart = match.index;
     const matchEnd = matchStart + fullMatch.length;
-    
     // Add text before this match
     addTextBlock(lastIndex, matchStart);
-    
     // Process the match
     switch (type) {
       case 'tab': {
@@ -170,16 +216,14 @@ export const parseMessageContent = (content) => {
         break;
       }
     }
-    
     lastIndex = matchEnd;
   }
-  
   // Add any remaining text
   addTextBlock(lastIndex, content.length);
-  
+
   return {
     text: content,
-    blocks: blocks.filter(Boolean) // Remove any null/undefined blocks
+    blocks: blocks.filter(Boolean)
   };
 };
 

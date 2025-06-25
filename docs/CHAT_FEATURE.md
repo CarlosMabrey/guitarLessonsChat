@@ -55,6 +55,28 @@ It is designed for clarity and ease of use, with a focus on musical context.
   - Calculates fret range and highlights notes.
   - Visualizes finger positions and note labels.
 
+### `/src/components/chat/TabFretboardVisualizer.jsx` (Animated Fretboard Playback)
+- **Purpose:** Animates fretboard diagrams in sync with tab playback or cursor position.
+- **How it works:**
+  - Parses tab lines and extracts each note’s string, fret, and column (character index in the tab line).
+  - Receives `currentPosition` from the tab player (either stepped manually or played back automatically).
+  - Only highlights notes whose column matches the current tab cursor/position.
+  - As the tab is played or stepped through, the fretboard updates in real time to show only the notes being played at each moment.
+- **Styling:**
+  - Modern dark theme, rounded corners, nut marker between 0 and 1st fret, tuning labels, and consistent note markers (see FretboardGrid for details).
+
+#### Example User Flow:
+1. User opens a tab in chat and clicks “Show Fretboard.”
+2. As they play or step through the tab, the fretboard diagram highlights only the currently played notes, matching the tab’s cursor.
+3. This provides a synchronized, animated learning experience.
+
+#### Next Steps / Further Refinement:
+- **Smoother animation:** Highlight a range of columns for wide notes or add transitions.
+- **Technique highlighting:** Support for slides, bends, hammer-ons, etc., with unique visual markers.
+- **Custom playback speed:** Allow the user to adjust the animation speed or step interval.
+- **Manual/auto mode:** Enable both automatic playback and manual stepping for practice.
+- **Accessibility:** Add ARIA labels and keyboard navigation for the fretboard grid.
+
 ### `/src/lib/chat/messageParser.js`
 - **Purpose:** Parses message strings into structured blocks (text, chord, tab, etc.).
 - **How it works:**

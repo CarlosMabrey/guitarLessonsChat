@@ -57,7 +57,16 @@ const ChatFretboard = ({
   }, [fretRange]);
 
   return (
-    <div style={{ width, maxWidth }} className="my-4 p-2 bg-gray-50 rounded-lg border border-gray-200">
+    <div style={{ width, maxWidth }} className="my-4 p-6 bg-[#0e1a2b] rounded-xl border border-[#1a2b45] shadow-lg w-fit">
+  {/* Nut marker if minFret is 1 */}
+  {fretRange.minFret === 1 && (
+    <div className="relative w-full h-2 mb-1">
+      <div className="absolute top-0 left-0 w-full h-1 bg-white rounded-sm"></div>
+    </div>
+  )}
+  <div className="flex justify-center">
+    <div className="flex flex-col items-center">
+      {/* Fretboard grid */}
       <FretboardGrid 
         strings={tuning}
         frets={frets}
@@ -71,25 +80,30 @@ const ChatFretboard = ({
         }}
         className="w-full"
       />
-      
+      {/* Tuning labels */}
+      <div className="flex space-x-2 mt-3">
+        {tuning.map((note, idx) => (
+          <div key={idx} className="text-xs text-slate-300 w-8 text-center">{note.replace(/\d+$/, '')}</div>
+        ))}
+      </div>
+      {/* Optional note legend */}
       {notes.some(n => n.label) && (
-        <div className="mt-2 flex flex-wrap gap-2">
-          {notes.filter(n => n.label).map((note, i) => (
-            <span 
-              key={i} 
-              className="text-xs px-2 py-1 rounded"
-              style={{ 
-                backgroundColor: `${note.color || '#3b82f6'}20`,
-                color: note.color || '#3b82f6',
-                border: `1px solid ${note.color || '#3b82f6'}`
-              }}
-            >
-              {note.label}: {note.note}
-            </span>
-          ))}
+        <div className="mt-4">
+          <div className="flex flex-wrap gap-2">
+            {notes.filter(n => n.label).map((note, i) => (
+              <span
+                key={i}
+                className="px-2 py-0.5 rounded-full bg-blue-900 text-blue-200 text-xs"
+              >
+                {note.label}: {note.note}
+              </span>
+            ))}
+          </div>
         </div>
       )}
     </div>
+  </div>
+</div>
   );
 };
 

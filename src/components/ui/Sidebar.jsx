@@ -89,7 +89,7 @@ export default function Sidebar({ isMobile = false, onToggle }) {
     { name: 'Practice', href: '/practice', icon: FiClock },
     { name: 'Progress', href: '/progress', icon: TbProgress },
     { name: 'Theory', href: '/theory', icon: FiGrid },
-    { name: 'AI Coach', href: '/chat', icon: FiMessageSquare },
+    { name: 'Chat', href: '/chat', icon: FiMessageSquare },
   ];
 
   const bottomNav = [

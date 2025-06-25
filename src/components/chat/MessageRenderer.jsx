@@ -545,18 +545,90 @@ const RenderedContent = ({ content }) => {
     return <MarkdownContent content={content} />;
   }
 
+  // Helper to group consecutive chord blocks
+  function groupBlocks(blocks) {
+    const grouped = [];
+    let i = 0;
+    while (i < blocks.length) {
+      if (blocks[i]?.type === 'chord') {
+        // Start a group of chords
+        const chordGroup = [];
+        while (i < blocks.length && blocks[i]?.type === 'chord') {
+          chordGroup.push(blocks[i]);
+          i++;
+        }
+        grouped.push({ type: 'chordGroup', chords: chordGroup });
+      } else {
+        grouped.push(blocks[i]);
+        i++;
+      }
+    }
+    return grouped;
+  }
+
   // If content is an object with both text and blocks
   if (content.text || content.blocks) {
+    const groupedBlocks = groupBlocks(content.blocks || []);
     return (
-      <div className="space-y-4">
+      <div className="space-y-5">
         {/* Only render text if it’s not repeated in a block */}
-        {content.blocks?.length === 0 && content.text && (
+        {groupedBlocks.length === 0 && content.text && (
           <MarkdownContent content={content.text} />
         )}
-        {content.blocks?.map((block, index) => {
+        {groupedBlocks.map((block, index) => {
+          if (block?.type === 'chordGroup') {
+            return (
+              <div key={index} className="flex flex-wrap gap-6 justify-start items-start overflow-x-auto pb-2 -mx-2">
+                {block.chords.map((chord, idx) => (
+                  <div key={idx} className="min-w-[180px] max-w-[220px] flex-shrink-0">
+                    <ChordDiagram chord={chord} />
+                  </div>
+                ))}
+              </div>
+            );
+          }
           switch (block?.type) {
+            case 'header':
+              if (block.level === 2) {
+                return (
+                  <h2 key={index} className="text-xl font-bold mt-6 mb-2 text-primary">
+                    {block.content}
+                  </h2>
+                );
+              }
+              if (block.level === 3) {
+                return (
+                  <h3 key={index} className="text-lg font-semibold mt-5 mb-1 text-primary/90">
+                    {block.content}
+                  </h3>
+                );
+              }
+              return (
+                <div key={index} className="font-semibold mt-4 mb-1 text-primary/80">
+                  {block.content}
+                </div>
+              );
+            case 'hr':
+              return <hr key={index} className="my-4 border-t border-primary/20" />;
+            case 'section':
+              return (
+                <section key={index} className="bg-card/60 rounded-lg p-4 border border-primary/10 mb-2">
+                  <div className="font-semibold text-primary mb-2">
+                    {block.title}
+                  </div>
+                  <MarkdownContent content={block.lines.join('\n')} />
+                </section>
+              );
+            case 'tip':
+              return (
+                <div key={index} className="flex items-start gap-2 bg-yellow-50 dark:bg-yellow-900/20 rounded px-3 py-2 border-l-4 border-yellow-400 mb-2">
+                  <span className="text-xl select-none">{block.content[0]}</span>
+                  <span className="text-sm"><MarkdownContent content={block.content.slice(2)} /></span>
+                </div>
+              );
             case 'chord':
-              return <ChordDiagram key={index} chord={block} />;
+              // Should not be reached, as chords are grouped
+              return null;
             case 'scale':
               return <ScaleDiagram key={index} scale={block} />;
             case 'tab':
