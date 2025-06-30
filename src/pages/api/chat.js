@@ -57,7 +57,9 @@ export default async function handler(req, res) {
         console.error('No file uploaded or incorrect field name. Expected field: "file". Received fields:', Object.keys(files));
         return res.status(400).json({ error: 'No file uploaded. Please upload an image file using the field name "file".' });
       }
-      const uploadedFile = files.file;
+      const fileEntry = files.file;
+      const uploadedFile = Array.isArray(fileEntry) ? fileEntry[0] : fileEntry;
+      
       console.log('Uploaded file object:', uploadedFile);
       uploadedFileName = uploadedFile.originalFilename || uploadedFile.newFilename || uploadedFile.name || 'unknown';
       fileType = uploadedFile.mimetype || uploadedFile.type || 'application/octet-stream';
@@ -124,16 +126,39 @@ if (!fileType.startsWith('image/')) {
           }
           const systemPrompt = buildPrompt(userProfile, imageContext);
           console.log('Image upload: System prompt for image-to-tab:', systemPrompt);
+          
+          // Read the image file and convert to base64 for the vision model
+          const imageBuffer = fs.readFileSync(destPath);
+          const base64Image = imageBuffer.toString('base64');
+          
           const userPrompt = {
             role: 'user',
-            content: `Image URL: ${imageUrl}`
+            content: [
+              {
+                type: 'text',
+                text: 'Please analyze this image of guitar sheet music/tablature and extract the tab notation accurately.'
+              },
+              {
+                type: 'image_url',
+                image_url: {
+                  url: `data:${fileType};base64,${base64Image}`
+                }
+              }
+            ]
           };
-          console.log('Image upload: Calling OpenAI with messages:', [systemPrompt, userPrompt]);
+          
+          console.log('Image upload: Calling OpenAI vision model');
           const completion = await openai.chat.completions.create({
-            model: 'gpt-4.1-mini',
-            messages: [systemPrompt, userPrompt],
+            model: 'gpt-4-vision-preview',
+            messages: [
+              {
+                role: 'system',
+                content: 'You are a guitar tab expert that can accurately extract tab notation from images. Always format the output as a code block with proper tab spacing. Preserve all notations in the tab such as h (hammer-on), p (pull-off), b (bend), / (slide up), \ (slide down), etc.'
+              },
+              userPrompt
+            ],
             temperature: 0.2,
-            max_tokens: 1200
+            max_tokens: 1500
           });
           console.log('Image upload: OpenAI completion response:', JSON.stringify(completion, null, 2));
           const tabResult = completion.choices?.[0]?.message?.content || 'Could not transcribe image.';

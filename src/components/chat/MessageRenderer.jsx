@@ -652,61 +652,83 @@ export default function MessageRenderer({ message, isTyping = false }) {
   try {
     // Special case: render image messages
     if (message.type === 'image') {
-      const isUploading = message.status === 'uploading';
-      const isError = message.status === 'error' || message.isError;
-      // Use tempUrl as a fallback if url/previewUrl are missing
-      const imageUrl = message.url || message.previewUrl || message.tempUrl;
+      const { url, previewUrl, tempUrl, fileName, fileType, status } = message;
+      const imageUrl = url || tempUrl || previewUrl;
+      const isError = status === 'error';
+      const isAi = message.sender === 'ai';
+      
       return (
         <div className={clsx(
           'mb-4 last:mb-0 group',
-          isTyping && 'opacity-90',
-          isError && 'opacity-70'
+          isTyping && 'opacity-90'
         )}>
           <div className={clsx(
-            'relative flex flex-col items-start',
-            isUploading && 'opacity-60 pointer-events-none',
-            isError && 'border border-red-400 bg-red-50'
+            'flex',
+            isAi ? 'justify-start' : 'justify-end'
           )}>
-            {imageUrl ? (
-              <img
-                src={imageUrl}
-                alt="Uploaded preview"
-                className="rounded-lg max-w-xs max-h-60 shadow"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.src = '';
-                  e.target.style.display = 'none';
-                  const fallback = e.target.nextSibling;
-                  if (fallback) fallback.style.display = 'block';
-                }}
-              />
-            ) : null}
-            {/* Show placeholder if no imageUrl or if image fails to load */}
-            {(!imageUrl || isError) && (
-              <div
-                style={{
-                  display: imageUrl ? 'none' : 'block',
-                  width: '220px',
-                  height: '160px',
-                  background: 'repeating-linear-gradient(45deg,#eee,#eee 10px,#ddd 10px,#ddd 20px)',
-                  borderRadius: '0.75rem',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#c00',
-                  fontWeight: 600,
-                  fontSize: '1rem',
-                  textAlign: 'center',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  marginBottom: '0.5rem',
-                }}
-              >
-                <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="#c00" style={{marginBottom:'0.5rem'}}>
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
-                </svg>
-                <span>Image not available</span>
+            {!isAi && (
+              <div className="flex items-center self-start mt-1 ml-2">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-card-hover/70 flex items-center justify-center">
+                  <span className="text-sm font-medium text-text-primary">You</span>
+                </div>
               </div>
             )}
+            
+            <div className="flex-1 max-w-[90%] md:max-w-[75%]">
+              {!isAi && (
+                <div className="flex items-center justify-end mb-1">
+                  <span className="text-xs text-text-tertiary mr-2">
+                    {new Date(message.timestamp || new Date()).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                  <span className="text-xs font-semibold text-text-primary">
+                    You
+                  </span>
+                </div>
+              )}
+              
+              <MessageBubble isAi={isAi} timestamp={message.timestamp}>
+                <div className={clsx(
+                  'rounded-lg overflow-hidden',
+                  isError && 'border border-red-400'
+                )}>
+                  {imageUrl ? (
+                    <img
+                      src={imageUrl}
+                      alt="Uploaded guitar tab image"
+                      className="w-full max-w-xs max-h-80 object-contain"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.src = '';
+                        e.target.style.display = 'none';
+                        const fallback = e.target.nextSibling;
+                        if (fallback) fallback.style.display = 'block';
+                      }}
+                    />
+                  ) : null}
+                  
+                  {/* Show placeholder if no imageUrl or if image fails to load */}
+                  {(!imageUrl || isError) && (
+                    <div className="w-full h-48 bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg flex items-center justify-center text-white">
+                      <div className="flex flex-col items-center">
+                        <svg width="36" height="36" fill="none" viewBox="0 0 24 24" stroke="currentColor" className="mb-2">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 9.75l4.5 4.5m0-4.5l-4.5 4.5M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z" />
+                        </svg>
+                        <span>Image not available</span>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {fileName && (
+                    <div className="mt-1 text-xs text-text-tertiary">
+                      {fileName}
+                    </div>
+                  )}
+                </div>
+              </MessageBubble>
+            </div>
           </div>
         </div>
       );
