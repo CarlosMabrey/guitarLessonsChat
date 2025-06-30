@@ -514,6 +514,21 @@ export default function ChatPage() {
   const handleSendMessage = async (message) => {
     // Handle image messages
     if (typeof message === 'object' && message.type === 'image') {
+      // If message has a clientId, update the existing message in state
+      if (message.clientId) {
+        setMessages((prev) => {
+          const idx = prev.findIndex(m => m.clientId === message.clientId);
+          if (idx !== -1) {
+            // Update the existing message
+            const updated = [...prev];
+            updated[idx] = { ...prev[idx], ...message };
+            return updated;
+          }
+          // If not found, append as fallback
+          return [...prev, { id: `img_${Date.now()}`, ...message, timestamp: message.timestamp || new Date().toISOString() }];
+        });
+        return;
+      }
       // Add the image message immediately (with previewUrl if present)
       const imageMsg = {
         id: `img_${Date.now()}`,

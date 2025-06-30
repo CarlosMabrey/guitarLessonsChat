@@ -116,6 +116,19 @@ const handleSendImage = async () => {
     // Always update the image message in chat with the server URL and status
     if (onSendMessage) {
       // Use the server URL if available, otherwise keep the previewUrl as fallback
+      const clientId = `img_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+      onSendMessage({
+        type: 'image',
+        content: '', // always a string; will be replaced after upload
+        fileName: imageFile.name,
+        fileType: imageFile.type,
+        previewUrl: imagePreview,
+        tempUrl: tempImgUrl, // persistent temp url for chat history
+        sender: 'user',
+        timestamp: new Date().toISOString(),
+        status: 'uploading',
+        clientId,
+      });
       onSendMessage({
         type: 'image',
         content: responseData.imageUrl || '', // always a string
@@ -127,6 +140,7 @@ const handleSendImage = async () => {
         sender: 'user',
         timestamp: new Date().toISOString(),
         status: response.ok ? 'uploaded' : 'error',
+        clientId,
       });
       // Add the AI response as a separate message
       if (response.ok) {
@@ -172,20 +186,22 @@ const handleSendImage = async () => {
   if (imageFile && imagePreview) {
     // Add image message to chat history (placeholder, status uploading)
     if (onSendMessage) {
-  onSendMessage({
-    type: 'image',
-    content: '', // always a string; will be replaced after upload
-    fileName: imageFile.name,
-    fileType: imageFile.type,
-    previewUrl: imagePreview,
-    tempUrl: tempImgUrl, // persistent temp url for chat history
-    sender: 'user',
-    timestamp: new Date().toISOString(),
-    status: 'uploading',
-  });
-}
-await handleSendImage();
-return;
+      const clientId = `img_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+      onSendMessage({
+        type: 'image',
+        content: '', // always a string; will be replaced after upload
+        fileName: imageFile.name,
+        fileType: imageFile.type,
+        previewUrl: imagePreview,
+        tempUrl: tempImgUrl, // persistent temp url for chat history
+        sender: 'user',
+        timestamp: new Date().toISOString(),
+        status: 'uploading',
+        clientId,
+      });
+    }
+    await handleSendImage();
+    return;
   }
   // Otherwise, send text message
   if (!input.trim()) return;
