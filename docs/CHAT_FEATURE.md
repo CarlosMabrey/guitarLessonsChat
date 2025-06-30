@@ -71,7 +71,7 @@ It is designed for clarity and ease of use, with a focus on musical context.
 3. This provides a synchronized, animated learning experience.
 
 #### Next Steps / Further Refinement:
-- **Smoother animation:** Highlight a range of columns for wide notes or add transitions.
+- **Smoother animation:** Highlight a range of columns for wide  notes or add transitions.
 - **Technique highlighting:** Support for slides, bends, hammer-ons, etc., with unique visual markers.
 - **Custom playback speed:** Allow the user to adjust the animation speed or step interval.
 - **Manual/auto mode:** Enable both automatic playback and manual stepping for practice.
