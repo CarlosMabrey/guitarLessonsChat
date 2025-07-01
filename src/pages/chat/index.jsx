@@ -14,6 +14,10 @@ import { clsx } from 'clsx';
 import Link from 'next/link';
 import ThemeSwitcher from '@/components/ui/ThemeSwitcher';
 import AmbientPlayerChatSidebar from './AmbientPlayerChatSidebar';
+import Sidebar from './Sidebar';
+import Overlay from './Overlay';
+import ChatHeader from './ChatHeader';
+import FileUpload from './FileUpload';
 
 // Dynamically import the Chat component with no SSR to avoid hydration issues
 const Chat = dynamic(() => import('@/components/ui/Chat'), {
@@ -46,177 +50,10 @@ const formatChatDate = (dateString) => {
   }
 };
 
-// Collapsible Sidebar component with improved styling
-const Sidebar = ({ 
-  isOpen, 
-  onClose, 
-  onNewChat, 
-  onClearChat, 
-  onChatSelect, 
-  onOpenSettings, 
-  isCollapsed, 
-  toggleCollapse, 
-  activeChat,
-  chats = []
-}) => {
-  const router = useRouter();
+
   
-  const navigation = [
-    { name: 'Dashboard', href: '/', icon: FiHome },
-    { name: 'Songs', href: '/songs', icon: FiMusic },
-    { name: 'Practice', href: '/practice', icon: FiClock },
-    { name: 'Progress', href: '/progress', icon: TbProgress },
-    { name: 'Theory', href: '/theory', icon: FiGrid },
-  ];
 
-  return (
-    <div className={clsx(
-      'fixed inset-y-0 left-0 z-40 flex flex-col bg-[#1e2536] border-r border-[#2a3343] transform transition-all duration-300 ease-in-out',
-      isCollapsed ? 'w-16' : 'w-64',
-      isOpen ? 'translate-x-0' : '-translate-x-full',
-      'md:relative md:translate-x-0'
-    )}>
-      <div className="h-16 flex items-center justify-between px-4 border-b border-[#2a3343]">
-        <Link href="/" className="flex items-center">
-          <span className="text-xl font-bold text-blue-400">🎸</span>
-          {!isCollapsed && <h1 className="text-xl font-bold ml-2 text-gray-100">GuitarCoach</h1>}
-        </Link>
-        <button 
-          onClick={toggleCollapse}
-          className="hidden md:flex items-center justify-center text-gray-400 hover:text-white p-1 rounded-lg"
-        >
-          {isCollapsed ? <FiChevronRight size={18} /> : <FiChevronLeft size={18} />}
-        </button>
-      </div>
-      
-      {/* App Navigation */}
-      <nav className="p-2 border-b border-[#2a3343]">
-        <ul className="space-y-1">
-          {navigation.map((item) => (
-            <li key={item.name}>
-              <Link
-                href={item.href}
-                className={`flex items-center px-3 py-2 rounded-md transition-colors ${
-                  router.pathname === item.href
-                    ? 'bg-blue-600 bg-opacity-40 text-blue-400'
-                    : 'text-gray-400 hover:bg-[#2a3343] hover:text-gray-200'
-                }`}
-              >
-                <item.icon className="w-5 h-5" />
-                {!isCollapsed && <span className="ml-3">{item.name}</span>}
-              </Link>
-            </li>
-          ))}
-          <li>
-            <Link 
-              href="/chat" 
-              className="flex items-center px-3 py-2 rounded-md transition-colors bg-blue-600 bg-opacity-40 text-blue-400"
-            >
-              <FiMessageSquare className="w-5 h-5" />
-              {!isCollapsed && <span className="ml-3">Chat</span>}
-            </Link>
-          </li>
-        </ul>
-      </nav>
 
-      {/* Chat-specific section */}
-      <div className="flex-1 flex flex-col">
-        <div className="p-2 border-b border-[#2a3343]">
-          <button
-            onClick={onNewChat}
-            className={clsx(
-              "w-full flex items-center justify-center bg-blue-600 hover:bg-blue-700 text-white rounded-lg py-2 transition-colors",
-              isCollapsed ? "px-2" : "px-4 space-x-2"
-            )}
-          >
-            <FiPlus size={18} />
-            {!isCollapsed && <span>New Chat</span>}
-          </button>
-        </div>
-        
-        {/* Chat history */}
-        <div className="flex-1 overflow-y-auto py-2">
-          {chats.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-gray-400 text-center">
-              No chats yet
-            </div>
-          ) : (
-            chats.map((chat) => (
-              <button
-                key={chat.id}
-                onClick={() => onChatSelect && onChatSelect(chat.id)}
-                className={clsx(
-                  'w-full flex items-center px-3 py-2 text-sm transition-colors rounded-md group',
-                  isCollapsed ? 'justify-center' : 'justify-between',
-                  activeChat === chat.id
-                    ? 'bg-blue-600 bg-opacity-40 text-blue-400'
-                    : 'text-gray-400 hover:bg-[#2a3343] hover:text-gray-200'
-                )}
-                title={chat.title}
-              >
-                <div className="flex items-center overflow-hidden">
-                  <FiMessageSquare className="w-5 h-5 flex-shrink-0" />
-                  {!isCollapsed && (
-                    <div className="ml-3 text-left truncate">
-                      <div className="truncate">{chat.title}</div>
-                      <div className="text-xs text-gray-500">
-                        {formatChatDate(chat.updatedAt || chat.createdAt || new Date().toISOString())}
-                      </div>
-                    </div>
-                  )}
-                </div>
-                {!isCollapsed && activeChat === chat.id && (
-                  <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 ml-2"></span>
-                )}
-              </button>
-            ))
-          )}
-        </div>
-        
-        {/* Footer controls */}
-        <div className="p-2 border-t border-[#2a3343]">
-          <button
-            onClick={onClearChat}
-            className={clsx(
-              "w-full flex items-center text-gray-400 hover:text-red-500 transition-colors p-2 rounded-md",
-              isCollapsed ? "justify-center" : "space-x-2"
-            )}
-          >
-            <FiTrash2 size={18} />
-            {!isCollapsed && <span>Clear Conversations</span>}
-          </button>
-          <button
-            onClick={onOpenSettings}
-            className={clsx(
-              "w-full flex items-center text-gray-400 hover:text-white transition-colors p-2 rounded-md mt-1",
-              isCollapsed ? "justify-center" : "space-x-2"
-            )}
-          >
-            <FiSettings size={18} />
-            {!isCollapsed && <span>Settings</span>}
-          </button>
-        </div>
-        {/* Ambient Player for chat sidebar */}
-        {!isCollapsed && <AmbientPlayerChatSidebar />}
-      </div>
-      
-      <div className="p-2 border-t border-[#2a3343] flex justify-center">
-        <ThemeSwitcher compact={isCollapsed} />
-      </div>
-    </div>
-  );
-};
-
-// Overlay for mobile when sidebar is open
-const Overlay = ({ isOpen, onClick }) => (
-  <div
-    className={clsx(
-      'fixed inset-0 bg-black/70 z-30 transition-opacity md:hidden',
-      isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
-    )}
-    onClick={onClick}
-  />
-);
 
 // Settings modal component
 const SettingsModal = ({ isOpen, onClose, apiKey, setApiKey, onSave }) => {
@@ -367,6 +204,34 @@ export default function ChatPage() {
     // Load chat history
     const savedChats = JSON.parse(localStorage.getItem('chat_history') || '[]');
     setChats(savedChats);
+
+    // Listen for chat list changes (e.g., chat deleted)
+    const handleChatListChanged = () => {
+      const updatedChats = JSON.parse(localStorage.getItem('chat_history') || '[]');
+      setChats(updatedChats);
+      // If the active chat was deleted, select the next available chat or clear
+      if (chatId && !updatedChats.some(c => c.id === chatId)) {
+        if (updatedChats.length > 0) {
+          const nextChat = updatedChats[0];
+          const chatData = localStorage.getItem(`chat_${nextChat.id}`);
+          if (chatData) {
+            const { messages: savedMessages } = JSON.parse(chatData);
+            setChatId(nextChat.id);
+            setMessages(savedMessages);
+            setIsNewChat(false);
+            router.push(`/chat?id=${nextChat.id}`, undefined, { shallow: true });
+          }
+        } else {
+          setChatId(null);
+          setMessages([]);
+          setIsNewChat(true);
+          router.push(`/chat`, undefined, { shallow: true });
+        }
+      }
+    };
+    window.addEventListener('chatListChanged', handleChatListChanged);
+    return () => window.removeEventListener('chatListChanged', handleChatListChanged);
+  
     
     // Check for chat ID in URL or create a new one
     const urlParams = new URLSearchParams(window.location.search);
@@ -478,8 +343,6 @@ export default function ChatPage() {
       formData.append('file', selectedFile);
       formData.append('chatId', chatId || '');
       formData.append('apiKey', apiKey || process.env.NEXT_PUBLIC_OPENAI_API_KEY || '');
-      // Optionally, add a message if you want to send a text with the file
-      // formData.append('message', optionalMessage);
 
       const response = await fetch('/api/chat', {
         method: 'POST',
@@ -494,15 +357,33 @@ export default function ChatPage() {
           'Unknown error uploading file.'
         );
       }
-      // Add the file as a message in the chat UI
+
+      // Use the file URL returned from the server, or fallback to a local preview
+      const fileUrl = responseData.fileUrl || URL.createObjectURL(selectedFile);
+
+      // Add the file as an image message in the chat UI
       const userMessage = {
         id: `msg_${Date.now()}`,
-        content: `Uploaded file: ${selectedFile.name}`,
+        type: 'image',
+        content: '', // No text content for images
         sender: 'user',
         timestamp: new Date().toISOString(),
         fileName: selectedFile.name,
+        fileType: selectedFile.type,
+        fileUrl,
+        previewUrl: fileUrl, // For consistency with Chat.jsx
+        status: 'uploaded',
       };
-      setMessages((prev) => [...prev, userMessage, { id: `msg_${Date.now()}_resp`, content: responseData.message, sender: 'ai', timestamp: new Date().toISOString() }]);
+      setMessages((prev) => [
+        ...prev, 
+        userMessage, 
+        { 
+          id: `msg_${Date.now()}_resp`, 
+          content: responseData.message, 
+          sender: 'ai', 
+          timestamp: new Date().toISOString() 
+        }
+      ]);
       setSelectedFile(null);
     } catch (error) {
       alert(error.message || 'File upload failed.');
@@ -662,18 +543,29 @@ export default function ChatPage() {
       </Head>
 
       {/* Sidebar */}
-      <Sidebar 
-        isOpen={sidebarOpen}
-        onClose={closeSidebar}
-        onNewChat={handleNewChat}
-        onChatSelect={handleChatSelect}
-        onClearChat={handleNewChat}
-        onOpenSettings={() => setIsSettingsOpen(true)}
-        isCollapsed={isCollapsed}
-        toggleCollapse={toggleCollapse}
-        chats={chats}
-        activeChat={chatId}
-      />
+      <Sidebar
+  isOpen={sidebarOpen}
+  onClose={closeSidebar}
+  onNewChat={handleNewChat}
+  onClearChat={() => {
+    // Clear all chats and localStorage
+    setChats([]);
+    setMessages([]);
+    setChatId(null);
+    localStorage.removeItem('chat_history');
+    // Remove all chat_* keys
+    Object.keys(localStorage).forEach(key => {
+      if (key.startsWith('chat_')) localStorage.removeItem(key);
+    });
+  }}
+  onChatSelect={handleChatSelect}
+  onOpenSettings={() => setIsSettingsOpen(true)}
+  isCollapsed={isCollapsed}
+  toggleCollapse={toggleCollapse}
+  chats={chats}
+  activeChat={chatId}
+/> 
+
       
       {/* Overlay for mobile */}
       <Overlay isOpen={sidebarOpen} onClick={closeSidebar} />
@@ -681,38 +573,12 @@ export default function ChatPage() {
       {/* Main Content */}
       <div className="flex-1 flex flex-col h-full overflow-hidden">
         {/* Header */}
-        <header className="px-4 py-3 flex items-center justify-between sticky top-0 z-20">
-          <div className="flex items-center">
-            <button 
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              className="p-2 rounded-full hover:bg-accent mr-3 lg:hidden transition-colors"
-              aria-label="Toggle sidebar"
-            >
-              {sidebarOpen ? <FiX size={24} /> : <FiMenu size={24} />}
-            </button>
-            <div className="flex items-center space-x-2">
-              <h1 className="text-lg font-bold">
-                Guitar Coach AI
-              </h1>
-            </div>
-          </div>
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={handleNewChat}
-              className="p-2 rounded-xl hover:bg-accent transition-colors text-muted hover:text-white"
-              title="New chat"
-            >
-              <FiPlus size={20} />
-            </button>
-            <button
-              onClick={() => setIsSettingsOpen(true)}
-              className="p-2 rounded-xl hover:bg-accent transition-colors text-muted hover:text-white"
-              title="Settings"
-            >
-              <FiSettings size={20} />
-            </button>
-          </div>
-        </header>
+        <ChatHeader
+          sidebarOpen={sidebarOpen}
+          setSidebarOpen={setSidebarOpen}
+          handleNewChat={handleNewChat}
+          setIsSettingsOpen={setIsSettingsOpen}
+        />
 
         {/* Chat Component */}
         <div className="flex-1 overflow-hidden relative px-4">
@@ -724,28 +590,12 @@ export default function ChatPage() {
             inputRef={inputRef}
           />
           {/* File upload UI */}
-          <div className="flex flex-col mt-2">
-            <label className="block text-sm font-medium text-gray-200 mb-1">Upload Tab File (.txt, .gp, .pdf)</label>
-            <div className="flex items-center space-x-2">
-              <input
-                type="file"
-                accept=".txt,.gp,.gp3,.gp4,.gp5,.gpx,.pdf"
-                onChange={handleFileChange}
-                disabled={isLoading}
-                className="block w-full text-sm text-gray-300 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-blue-600 file:text-white hover:file:bg-blue-700"
-              />
-              <button
-                onClick={handleSendFile}
-                disabled={isLoading || !selectedFile}
-                className={`px-4 py-2 rounded bg-blue-600 text-white font-semibold hover:bg-blue-700 disabled:opacity-50`}
-              >
-                {isLoading ? 'Uploading...' : 'Send File'}
-              </button>
-            </div>
-            {selectedFile && (
-              <div className="text-xs text-gray-300 mt-1">Selected: {selectedFile.name}</div>
-            )}
-          </div>
+          <FileUpload
+            handleFileChange={handleFileChange}
+            handleSendFile={handleSendFile}
+            isLoading={isLoading}
+            selectedFile={selectedFile}
+          />
         </div>
       </div>
 

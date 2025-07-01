@@ -2,23 +2,85 @@ import { OpenAI } from 'openai';
 import { getOrCreateEmbeddings, findSimilarItems } from '../../lib/rag/embeddings';
 import { getUserProfile } from '../../lib/profiledb';
 import { buildPrompt } from '../../lib/utils/promptBuilder'; // Import the prompt builder utility
-
-import formidable, { IncomingForm } from 'formidable';
+import formidable from 'formidable';
 import fs from 'fs';
+import path from 'path';
 import getRawBody from 'raw-body';
 import contentType from 'content-type';
 
 export const config = {
-  api: {
-    bodyParser: false, // Required for formidable
-  },
+  api: { bodyParser: false }
 };
+
+async function parseForm(req) {
+  const uploadDir = path.join(process.cwd(), '/public/uploads');
+  if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir, { recursive: true });
+
+  const form = new formidable.IncomingForm();
+  form.uploadDir = uploadDir;
+  form.keepExtensions = true;
+
+  return new Promise((resolve, reject) => {
+    form.parse(req, (err, fields, files) => {
+      if (err) reject(err);
+      else resolve({ fields, files });
+    });
+  });
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     console.log('Method not allowed:', req.method);
     return res.status(405).json({ error: 'Method not allowed' });
   }
+
+  let fields = {}, files = {}, uploadedFile = null, fileUrl = null;
+  let uploadedFileName = null, fileType = null;
+  let messages = null, apiKey = null;
+  const isMultipart = (req.headers['content-type'] || '').includes('multipart/form-data');
+
+  if (isMultipart) {
+    try {
+      ({ fields, files } = await parseForm(req));
+      uploadedFile = files.file;
+      if (uploadedFile) {
+        uploadedFileName = uploadedFile.originalFilename || uploadedFile.newFilename || uploadedFile.name || 'unknown';
+        fileType = uploadedFile.mimetype || uploadedFile.type || 'application/octet-stream';
+        // Save and validate image
+        if (!uploadedFile.filepath || !fs.existsSync(uploadedFile.filepath)) {
+          return res.status(400).json({ error: 'Failed to parse uploaded file. File path invalid or missing.' });
+        }
+        const uploadsDir = './public/uploads';
+        if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
+        const safeName = `${Date.now()}_${uploadedFileName.replace(/[^a-zA-Z0-9._-]/g, '')}`;
+        const destPath = uploadsDir + '/' + safeName;
+        fs.copyFileSync(uploadedFile.filepath, destPath);
+        fileUrl = `/uploads/${safeName}`;
+        // Only allow images
+        if (!fileType.startsWith('image/')) {
+          return res.status(400).json({ error: `Uploaded file is not an image. Received type: ${fileType}.` });
+        }
+      }
+      apiKey = fields.apiKey || process.env.OPENAI_API_KEY;
+      messages = fields.messages ? JSON.parse(fields.messages) : [];
+    } catch (err) {
+      return res.status(500).json({ error: 'File upload failed', details: err.message });
+    }
+  } else {
+    // fallback for JSON
+    try {
+      const raw = await getRawBody(req);
+      const charset = contentType.parse(req).parameters.charset || 'utf-8';
+      const body = JSON.parse(raw.toString(charset));
+      messages = body.messages;
+      apiKey = body.apiKey || process.env.OPENAI_API_KEY;
+    } catch (err) {
+      return res.status(400).json({ error: 'Invalid request body.' });
+    }
+  }
+
+  // Now handle both chat and file logic here
+  // If fileUrl exists, include it in the response
 
   // Debug: Log environment variables (don't log full key in production)
   console.log('Environment variables:', {
@@ -39,11 +101,7 @@ export default async function handler(req, res) {
     });
   };
 
-  let messages = null;
-  let apiKey = null;
   let uploadedFileContent = null;
-  let uploadedFileName = null;
-  let fileType = null;
 
   // Try to parse as multipart/form-data for file upload
   if (req.headers['content-type'] && req.headers['content-type'].includes('multipart/form-data')) {

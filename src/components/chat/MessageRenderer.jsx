@@ -651,7 +651,9 @@ const RenderedContent = ({ content }) => {
 export default function MessageRenderer({ message, isTyping = false }) {
   try {
     // Special case: render image messages
-    if (message.type === 'image') {
+    if (message.type === 'image' || (message.fileType && message.fileType.startsWith('image/'))) {
+      // Debug: log the message object for image messages
+      console.log('Rendering image message:', message);
       const { url, previewUrl, tempUrl, fileName, fileType, status } = message;
       const imageUrl = url || tempUrl || previewUrl;
       const isError = status === 'error';

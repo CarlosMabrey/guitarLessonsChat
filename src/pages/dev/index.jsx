@@ -16,20 +16,40 @@ function parseFeaturesMarkdown(md) {
     const priorityMatch = block.match(/^## Priority: (.+)$/m);
     // Implementation Steps extraction (robust and simple)
     let steps = [];
+    let issues = [];
     const lines = block.split(/\r?\n/);
     let inSteps = false;
+    let inIssues = false;
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       if (line === '## Implementation Steps:') {
         inSteps = true;
+        inIssues = false;
         continue;
       }
+      if (line === '## Issues:') {
+        inIssues = true;
+        inSteps = false;
+        continue;
+      }
+      if ((inSteps || inIssues) && (line.startsWith('##') || line.startsWith('#'))) {
+        inSteps = false;
+        inIssues = false;
+      }
       if (inSteps) {
-        // Stop at next header
-        if (line.startsWith('##') || line.startsWith('#')) break;
         const match = line.match(/^[-*] \[( |x|X)\] (.+)$/);
         if (match) {
           steps.push({ text: match[2], completed: match[1].toLowerCase() === 'x' });
+        }
+      }
+      if (inIssues) {
+        // Support both '- Issue' and '### Issue' formats
+        const listMatch = line.match(/^[-*] (.+)$/);
+        const headerMatch = line.match(/^### (.+)$/);
+        if (listMatch) {
+          issues.push(listMatch[1].trim());
+        } else if (headerMatch) {
+          issues.push(headerMatch[1].trim());
         }
       }
     }
@@ -49,6 +69,7 @@ function parseFeaturesMarkdown(md) {
       status: statusMatch ? statusMatch[1].trim() : '',
       priority: priorityMatch ? priorityMatch[1].trim() : '',
       steps,
+      issues,
       docs: docsMatch ? docsMatch[1].trim() : '',
       updateHistory,
       lastUpdated: updateHistory.length > 0 ? updateHistory[0].split(':')[0].replace(/\-/g, '-') : ''
@@ -64,6 +85,9 @@ function featuresToMarkdown(features) {
           s => `- [${s.completed ? 'x' : ' '}] ${s.text}`
         ).join('\n')
       : '';
+    const issues = f.issues && f.issues.length
+      ? '## Issues:\n' + f.issues.map(issue => `- ${issue}`).join('\n')
+      : '';
     const history = f.updateHistory && f.updateHistory.length
       ? '## Update History:\n' + f.updateHistory.map(h => `- ${h}`).join('\n')
       : '';
@@ -74,6 +98,7 @@ function featuresToMarkdown(features) {
       f.status ? `## Completion Status: ${f.status}` : '',
       f.priority ? `## Priority: ${f.priority}` : '',
       steps,
+      issues,
       f.docs ? `## Docs: ${f.docs}` : '',
       history
     ].filter(Boolean).join('\n');
@@ -188,6 +213,18 @@ const FeatureStatusCard = ({ feature, onClick }) => {
           ))}
         </ul>
       )}
+      {feature.issues && feature.issues.length > 0 && (
+        <div className="mb-2">
+          <div className="font-semibold text-xs text-red-300 mb-1 flex items-center gap-1">
+            <FiAlertTriangle className="inline" /> Issues
+          </div>
+          <ul className="list-disc list-inside text-red-200 text-xs">
+            {feature.issues.map((issue, idx) => (
+              <li key={idx}>{issue}</li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="text-xs text-gray-500">Last updated: {lastUpdated}</div>
     </button>
   );
@@ -198,6 +235,7 @@ function FeatureModal({ feature, onClose, onSave, onDelete }) {
   const [edit, setEdit] = React.useState({ ...feature });
   // For UI-only step editing
   const [steps, setSteps] = React.useState(feature.steps || []);
+  const [issues, setIssues] = React.useState(feature.issues || []);
   const [animatingOut, setAnimatingOut] = React.useState(false);
   const statusOptions = ['Completed', 'In Progress', 'Not Started'];
   const typeOptions = ['Feature', 'Bug', 'Improvement', 'Research'];

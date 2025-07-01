@@ -61,7 +61,7 @@ Here are five open chords for beginners:
 { "name": "E Minor", "frets": ["0","2","2","0","0","0"] }
 \`\`\`
 
-After the diagrams, provide playing tips or a summary.
+After the diagrams, provide a summary.
 
 ### Response Structure (per concept)
 - Name + brief theory
