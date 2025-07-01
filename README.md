@@ -458,6 +458,20 @@ To properly load specific tabs on a page:
   - [ ] Implement virtualized scrolling for long tabs
   - [ ] Add tab caching and offline support
 
+- [ ] **AI Features**
+  - [ ] Implement AI-powered chat interface for music/guitar-related questions and coaching.
+  - [ ] Persistent chat history and multi-chat support.
+  - [ ] Sidebar with navigation, chat management, and settings access.
+  - [ ] Suggested prompts for music analysis, theory, and practice.
+  - [ ] File upload support for tab files and PDFs.
+  - [ ] Settings modal for API keys and preferences.
+  - [ ] Responsive, modern UI with collapsible sidebar.
+  - [ ] Ability to update API keys and preferences.
+  - [ ] Ability to save and load chat history.
+
+- [ ] **Resources Features**
+  
+
 ## 🎯 Practice System
 
 The Practice System is a core feature of the Guitar Learning App, designed to provide users with structured, engaging, and effective practice routines.
@@ -561,6 +575,30 @@ The chat system uses a combination of:
    - API keys are stored securely locally
 
 ### Getting Started
+
+### Backend File API for FeatureStatus.md
+
+This project includes a simple Node.js/Express backend (`backend/file-api.js`) that allows the frontend to read and write the `public/FeatureStatus.md` file via HTTP endpoints. This enables true persistence for feature cards and implementation steps.
+
+#### Setup
+1. Ensure you have [Node.js](https://nodejs.org/) installed.
+2. In a new terminal, run:
+   ```sh
+   cd backend
+   npm install express cors
+   node file-api.js
+   ```
+   The server will start on `http://localhost:5001` by default.
+
+#### API Endpoints
+- **GET `/api/feature-status`**: Returns the contents of `public/FeatureStatus.md`.
+- **POST `/api/feature-status`**: Accepts `{ content: "..." }` JSON and writes it to `public/FeatureStatus.md`.
+
+#### Usage
+- The frontend will automatically use these endpoints to keep feature data in sync with the markdown file.
+- You can also use these endpoints for manual updates or integrations.
+
+---
 
 1. Click on "AI Coach" in the sidebar
 2. Enter your OpenAI API key in the settings (gear icon) if prompted
@@ -690,9 +728,19 @@ See [todo.md](./todo.md) for detailed roadmap and recent changes.
 
 This repository includes several documentation files to help you understand and contribute to the project:
 
+- [Code Structure and Dependencies](./docs/code-graph.md) - Visual representation of module relationships
 - [Technical Documentation](./TECHNICAL_DOCS.md) - Architecture, components, and implementation details
 - [API Documentation](./API_DOCUMENTATION.md) - Setup and usage of OpenAI, Spotify, YouTube, and Songsterr
 - [Development Roadmap](./ROADMAP.md) - MVP plan, completed features, and future enhancements
+- [Documentation Workflow](./docs/WORKFLOW.md) - How to maintain and update project documentation
+
+## 📚 Documentation
+
+- [Code Structure and Dependencies](./docs/code-graph.md) - Visual representation of module relationships
+- [Technical Documentation](./TECHNICAL_DOCS.md) - Architecture, components, and implementation details
+- [API Documentation](./API_DOCUMENTATION.md) - Setup and usage of OpenAI, Spotify, YouTube, and Songsterr
+- [Development Roadmap](./ROADMAP.md) - MVP plan, completed features, and future enhancements
+- [Documentation Workflow](./docs/WORKFLOW.md) - How to maintain and update project documentation
 
 ## 🛠️ Setup Instructions
 

@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "test": "jest"
+    "test": "jest",
+    "docs": "node scripts/generate-docs.js",
+    "docs:watch": "nodemon --watch src --exec 'npm run docs'"
   },
   "dependencies": {
     "@eslint/eslintrc": "^3.3.1",
@@ -22,6 +24,8 @@
     "cheerio": "^1.0.0",
     "clsx": "^2.1.1",
     "content-type": "^1.0.5",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
     "formidable": "^3.5.4",
     "framer-motion": "^10.18.0",
     "fs": "^0.0.1-security",
@@ -69,6 +73,8 @@
     "eslint": "^8.56.0",
     "eslint-config-next": "14.1.0",
     "jest": "^30.0.2",
+    "madge": "^8.0.0",
+    "nodemon": "^3.1.0",
     "postcss": "^8.5.3",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"

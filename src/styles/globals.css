@@ -25,6 +25,14 @@
     cursor: none !important;
   }
 
+  /* Allow system cursor for interactive elements */
+  input, textarea {
+    cursor: text !important;
+  }
+  button, a, [role="button"] {
+    cursor: pointer !important;
+  }
+
   body {
     @apply antialiased;
     color: rgb(var(--foreground-rgb));
