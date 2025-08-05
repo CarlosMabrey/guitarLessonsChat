@@ -21,16 +21,28 @@
     @apply scroll-smooth;
   }
 
-  html, body, *, *::before, *::after {
+  /* Hide default cursor on all elements */
+  html, body {
     cursor: none !important;
   }
-
-  /* Allow system cursor for interactive elements */
-  input, textarea {
-    cursor: text !important;
+  
+  /* Custom cursor styles */
+  .custom-cursor {
+    position: fixed;
+    width: 20px;
+    height: 20px;
+    background: #818cf8;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 999999;
+    transform: translate(-50%, -50%);
+    mix-blend-mode: difference;
+    transition: transform 0.2s ease, width 0.2s ease, height 0.2s ease;
   }
-  button, a, [role="button"] {
-    cursor: pointer !important;
+  
+  .custom-cursor.hover {
+    transform: translate(-50%, -50%) scale(1.5);
+    opacity: 0.8;
   }
 
   body {
@@ -40,9 +52,9 @@
     overflow-x: hidden;
   }
 
-  /* Hide custom cursor on mobile */
+  /* Show system cursor on mobile */
   @media (pointer: coarse) {
-    html, body, * {
+    * {
       cursor: auto !important;
     }
   }

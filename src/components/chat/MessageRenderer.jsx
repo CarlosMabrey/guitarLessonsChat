@@ -16,6 +16,7 @@ import MessageBubble from './MessageBubble';
 import { Disclosure, Transition } from '@headlessui/react';
 import { ChevronDownIcon } from '@heroicons/react/24/outline';
 import TabFretboardVisualizer from './TabFretboardVisualizer';
+import TabRenderer from '../ui/TabRenderer';
 
 
 
@@ -730,6 +731,65 @@ export default function MessageRenderer({ message, isTyping = false }) {
                   )}
                 </div>
               </MessageBubble>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // Debug: Log message properties to check tab detection
+    if (message.sender === 'ai') {
+      console.log('AI Message Debug:', {
+        isTabTranscription: message.isTabTranscription,
+        hasTabData: !!message.tabData,
+        tabData: message.tabData,
+        content: message.content?.substring(0, 100) + '...'
+      });
+    }
+
+    // Special case: render tab transcription messages with TabRenderer
+    // Temporary: Also check if content contains JSON-like tab data
+    const hasJsonContent = message.content && message.content.includes('"measures"');
+    if ((message.isTabTranscription && message.tabData) || (message.sender === 'ai' && hasJsonContent)) {
+      const isAi = message.sender === 'ai';
+      return (
+        <div className={clsx(
+          'mb-4 last:mb-0 group',
+          isTyping && 'opacity-90'
+        )}>
+          <div className={clsx(
+            'flex',
+            isAi ? 'justify-start' : 'justify-end'
+          )}>
+            {isAi && (
+              <div className="flex items-center self-start mt-1 mr-2">
+                <div className="flex-shrink-0 w-8 h-8 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center">
+                  <FiMessageSquare className="text-white" size={18} />
+                </div>
+              </div>
+            )}
+            
+            <div className="flex-1 max-w-[95%] md:max-w-[85%]">
+              {isAi && (
+                <div className="flex items-center mb-1">
+                  <span className="text-xs font-semibold text-text-primary">
+                    Guitar Coach AI
+                  </span>
+                  <span className="text-xs text-text-tertiary ml-2">
+                    {new Date(message.timestamp || new Date()).toLocaleTimeString([], {
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })}
+                  </span>
+                </div>
+              )}
+              
+              <div className="bg-card rounded-lg p-1">
+                <TabRenderer 
+                  tabData={message.tabData || (hasJsonContent ? message.content : null)} 
+                  className="w-full" 
+                />
+              </div>
             </div>
           </div>
         </div>

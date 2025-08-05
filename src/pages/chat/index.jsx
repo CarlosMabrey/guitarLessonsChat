@@ -420,6 +420,17 @@ export default function ChatPage() {
       return;
     }
 
+    // Handle AI messages (don't make API calls for these)
+    if (typeof message === 'object' && message.sender === 'ai') {
+      const aiMessage = {
+        id: `msg_${Date.now()}`,
+        ...message,
+        timestamp: message.timestamp || new Date().toISOString()
+      };
+      setMessages((prev) => [...prev, aiMessage]);
+      return;
+    }
+
     // Handle text messages as before
     if (typeof message === 'string' && !message.trim()) return;
 

@@ -6,7 +6,7 @@ import { FiSend, FiMessageSquare, FiMic, FiPaperclip } from 'react-icons/fi';
 import { clsx } from 'clsx';
 import { motion, AnimatePresence } from 'framer-motion';
 import MessageRenderer from '@/components/chat/MessageRenderer';
-
+import TabRenderer from './TabRenderer';
 
 const Chat = ({
   messages = [],
@@ -148,6 +148,73 @@ const handleSendImage = async () => {
           content: responseData.message || '[Image processed by AI]',
           sender: 'ai',
           timestamp: new Date().toISOString(),
+          tabData: responseData.tabData || null,
+          isTabTranscription: responseData.isTabTranscription || false,
+        });
+      } else {
+        onSendMessage({
+          content: `Sorry, there was an error: ${responseData.message || responseData.error || 'Image upload failed'}`,
+          sender: 'ai',
+          isError: true,
+          timestamp: new Date().toISOString(),
+        });
+      }
+    }
+  } catch (err) {
+    if (onSendMessage) {
+      onSendMessage({
+        content: `Sorry, there was an error: ${err.message || 'Image upload failed'}`,
+        sender: 'ai',
+        isError: true,
+        timestamp: new Date().toISOString(),
+      });
+    }
+  } finally {
+    clearImagePreview();
+  }
+};
+
+// Send image with accompanying text to backend as FormData
+const handleSendImageWithText = async (textMessage = '') => {
+  if (!imageFile) return;
+  try {
+    const formData = new FormData();
+    formData.append('file', imageFile);
+    
+    // Add text message if provided
+    if (textMessage.trim()) {
+      formData.append('message', textMessage.trim());
+    }
+    
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      body: formData,
+    });
+    const responseData = await response.json().catch(() => ({}));
+    
+    // Update the image message in chat with the server URL and status
+    if (onSendMessage) {
+      const clientId = `img_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+      onSendMessage({
+        type: 'image',
+        content: responseData.imageUrl || '', // always a string
+        fileName: imageFile.name,
+        fileType: imageFile.type,
+        url: responseData.imageUrl || '',
+        previewUrl: imagePreview, // fallback for broken server URL
+        tempUrl: tempImgUrl, // persistent temp url for chat history
+        sender: 'user',
+        timestamp: new Date().toISOString(),
+        status: response.ok ? 'uploaded' : 'error',
+        clientId,
+      });
+      
+      // Add the AI response as a separate message
+      if (response.ok) {
+        onSendMessage({
+          content: responseData.message || '[Image processed by AI]',
+          sender: 'ai',
+          timestamp: new Date().toISOString(),
         });
       } else {
         onSendMessage({
@@ -182,7 +249,8 @@ const handleSendImage = async () => {
   const handleSubmit = async (e) => {
   e.preventDefault();
   if (isLoading) return;
-  // If an image is selected, add to chat and upload
+  
+  // If an image is selected, send both text and image together
   if (imageFile && imagePreview) {
     // Add image message to chat history (placeholder, status uploading)
     if (onSendMessage) {
@@ -200,10 +268,15 @@ const handleSendImage = async () => {
         clientId,
       });
     }
-    await handleSendImage();
+    
+    // Send image with any accompanying text
+    await handleSendImageWithText(input.trim());
+    setInput('');
+    setShowSuggestions(false);
     return;
   }
-  // Otherwise, send text message
+  
+  // Otherwise, send text message only
   if (!input.trim()) return;
   onSendMessage(input);
   setInput('');

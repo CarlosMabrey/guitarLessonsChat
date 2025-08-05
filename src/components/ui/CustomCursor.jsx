@@ -53,40 +53,26 @@ export default function CustomCursor() {
   if (!isVisible || settings.customCursor === false) return null;
 
   return (
-    <motion.div
-      className="fixed top-0 left-0 pointer-events-none z-50 mix-blend-difference"
+    <motion.div 
+      className="fixed top-0 left-0 pointer-events-none z-[99999] mix-blend-difference"
       style={{
         width: size,
         height: size,
         x: cursorX,
         y: cursorY,
+        backgroundColor: '#818cf8',
+        borderRadius: '50%',
+        transform: 'translate(-50%, -50%)',
       }}
       animate={{
         scale: isHovering ? 1.5 : 1,
-        opacity: isHovering ? 0.8 : 0.6,
+        opacity: isHovering ? 0.8 : 1,
       }}
       transition={{
         type: 'spring',
         damping: 20,
         stiffness: 300,
       }}
-    >
-      <svg viewBox="0 0 100 100" className="w-full h-full">
-        <motion.circle
-          cx="50"
-          cy="50"
-          r={size / 2}
-          fill="#818cf8" // indigo-400
-          animate={{
-            r: isHovering ? size / 1.5 : size / 2,
-          }}
-          transition={{
-            type: 'spring',
-            damping: 20,
-            stiffness: 300,
-          }}
-        />
-      </svg>
-    </motion.div>
+    />
   );
 }
